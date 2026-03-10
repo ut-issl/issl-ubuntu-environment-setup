@@ -16,8 +16,6 @@ jobs:
     name: Determine changed files
     runs-on: ubuntu-latest
     outputs:
-      src: ${{ steps.changed-files.outputs.src_any_changed }}
-      test: ${{ steps.changed-files.outputs.test_any_changed }}
       workflow: ${{ steps.changed-files.outputs.workflow_any_changed }}
       workflow_ci: ${{ steps.changed-files.outputs.workflow_ci_any_changed }}
       renovate_config: ${{ steps.changed-files.outputs.renovate_config_any_changed }}
@@ -40,12 +38,6 @@ jobs:
         uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
         with:
           files_yaml: |
-            src:
-              - '**/src/**'
-              - '!**/src/**/*.md'
-            test:
-              - '**/tests/**'
-              - '!**/tests/**/*.md'
             workflow:
               - .github/workflows/**
             workflow_ci:
