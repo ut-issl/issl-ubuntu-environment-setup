@@ -19,6 +19,7 @@ jobs:
       workflow: ${{ steps.changed-files.outputs.workflow_any_changed }}
       workflow_ci: ${{ steps.changed-files.outputs.workflow_ci_any_changed }}
       renovate_config: ${{ steps.changed-files.outputs.renovate_config_any_changed }}
+      nix: ${{ steps.changed-files.outputs.nix_any_changed }}
       shell: ${{ steps.changed-files.outputs.shell_any_changed }}
       md: ${{ steps.changed-files.outputs.md_any_changed }}
       json5: ${{ steps.changed-files.outputs.json5_any_changed }}
@@ -44,6 +45,9 @@ jobs:
               - .github/workflows/ci.yaml
             renovate_config:
               - .github/renovate.json5
+            nix:
+              - '**/*.nix'
+              - flake.lock
             shell:
               - '**/*.sh'
               - '**/*.bash'
@@ -122,6 +126,39 @@ jobs:
         run: |
           npx --yes --package renovate@43.60.5 \
             renovate-config-validator .github/renovate.json5
+
+  lint-nix:
+    name: Lint Nix
+    needs: determine-changes
+    if: ${{ needs.determine-changes.outputs.nix == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@19effe9fe722874e6d46dd7182e4b8b7a43c4a99 # v31.10.0
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run statix
+        run: nix run nixpkgs#statix -- check .
+
+      - name: Run deadnix
+        run: nix run nixpkgs#deadnix -- --fail .
+
+      - name: Run flake check
+        run: |
+          if [ -f flake.nix ]; then
+            nix flake check --show-trace
+          else
+            echo "No flake.nix found. Skipping flake check."
+          fi
 
   lint-shell-scripts:
     name: Lint Shell Scripts
