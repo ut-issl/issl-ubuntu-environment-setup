@@ -151,6 +151,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y shellcheck
 
+      - name: Install shfmt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shfmt
+
+      - name: Run shfmt
+        shell: bash
+        run: |
+          readarray -d '' -t shell_files < <(find . -type f -name '*.sh' -not -path './.git/*' -print0)
+          if [ ${#shell_files[@]} -eq 0 ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+          shfmt --diff --simplify "${shell_files[@]}"
+
       - name: Run shellcheck
         if: github.event_name != 'pull_request'
         shell: bash
