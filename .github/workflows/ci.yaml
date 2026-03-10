@@ -164,14 +164,18 @@ jobs:
       - name: Run shfmt
         if: steps.shell-files.outputs.found == 'true'
         shell: bash
+        env:
+          SHELL_FILES: ${{ steps.shell-files.outputs.shell_files }}
         run: |
-          xargs -0 shfmt --diff --simplify < "${{ steps.shell-files.outputs.shell_files }}"
+          xargs -0 shfmt --diff --simplify < "${SHELL_FILES}"
 
       - name: Run shellcheck
         if: github.event_name != 'pull_request' && steps.shell-files.outputs.found == 'true'
         shell: bash
+        env:
+          SHELL_FILES: ${{ steps.shell-files.outputs.shell_files }}
         run: |
-          xargs -0 shellcheck --external-sources < "${{ steps.shell-files.outputs.shell_files }}"
+          xargs -0 shellcheck --external-sources < "${SHELL_FILES}"
 
       - name: Run shellcheck (reviewdog)
         if: github.event_name == 'pull_request'
