@@ -21,6 +21,7 @@ jobs:
       workflow: ${{ steps.changed-files.outputs.workflow_any_changed }}
       workflow_ci: ${{ steps.changed-files.outputs.workflow_ci_any_changed }}
       renovate_config: ${{ steps.changed-files.outputs.renovate_config_any_changed }}
+      shell: ${{ steps.changed-files.outputs.shell_any_changed }}
       md: ${{ steps.changed-files.outputs.md_any_changed }}
       json5: ${{ steps.changed-files.outputs.json5_any_changed }}
       json5_files: ${{ steps.changed-files.outputs.json5_all_changed_files }}
@@ -51,6 +52,8 @@ jobs:
               - .github/workflows/ci.yaml
             renovate_config:
               - .github/renovate.json5
+            shell:
+              - '**/*.sh'
             md:
               - '**/*.md'
               - .markdownlint-cli2.yaml
@@ -125,6 +128,47 @@ jobs:
         run: |
           npx --yes --package renovate@43.60.5 \
             renovate-config-validator .github/renovate.json5
+
+  lint-shell-scripts:
+    name: Lint Shell Scripts
+    needs: determine-changes
+    if: ${{ needs.determine-changes.outputs.shell == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install ShellCheck
+        if: github.event_name != 'pull_request'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+
+      - name: Run shellcheck
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          readarray -d '' -t shell_files < <(find . -type f -name '*.sh' -not -path './.git/*' -print0)
+          if [ ${#shell_files[@]} -eq 0 ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+          shellcheck --external-sources "${shell_files[@]}"
+
+      - name: Run shellcheck (reviewdog)
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-shellcheck@5ebd09ddbe2ebb471646ce234c6c8dd18663ca7c # v1.30.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail_level: error
 
   lint-markdown:
     name: Lint Markdown
