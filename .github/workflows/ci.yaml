@@ -145,37 +145,39 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install ShellCheck
-        if: github.event_name != 'pull_request'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y shellcheck
-
-      - name: Install shfmt
+      - name: Install shell tools
         run: |
           sudo apt-get update
           sudo apt-get install -y shfmt
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            sudo apt-get install -y shellcheck
+          fi
+
+      - name: Collect shell scripts
+        id: shell-files
+        shell: bash
+        run: |
+          shell_files_path="$(mktemp)"
+          find . -type f -name '*.sh' -not -path './.git/*' -print0 > "${shell_files_path}"
+          echo "shell_files=${shell_files_path}" >> "$GITHUB_OUTPUT"
+          if [ ! -s "${shell_files_path}" ]; then
+            echo "No shell scripts found."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Run shfmt
+        if: steps.shell-files.outputs.found == 'true'
         shell: bash
         run: |
-          readarray -d '' -t shell_files < <(find . -type f -name '*.sh' -not -path './.git/*' -print0)
-          if [ ${#shell_files[@]} -eq 0 ]; then
-            echo "No shell scripts found."
-            exit 0
-          fi
-          shfmt --diff --simplify "${shell_files[@]}"
+          xargs -0 shfmt --diff --simplify < "${{ steps.shell-files.outputs.shell_files }}"
 
       - name: Run shellcheck
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.shell-files.outputs.found == 'true'
         shell: bash
         run: |
-          readarray -d '' -t shell_files < <(find . -type f -name '*.sh' -not -path './.git/*' -print0)
-          if [ ${#shell_files[@]} -eq 0 ]; then
-            echo "No shell scripts found."
-            exit 0
-          fi
-          shellcheck --external-sources "${shell_files[@]}"
+          xargs -0 shellcheck --external-sources < "${{ steps.shell-files.outputs.shell_files }}"
 
       - name: Run shellcheck (reviewdog)
         if: github.event_name == 'pull_request'
