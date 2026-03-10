@@ -16,11 +16,10 @@ jobs:
     name: Determine changed files
     runs-on: ubuntu-latest
     outputs:
-      src: ${{ steps.changed-files.outputs.src_any_changed }}
-      test: ${{ steps.changed-files.outputs.test_any_changed }}
       workflow: ${{ steps.changed-files.outputs.workflow_any_changed }}
       workflow_ci: ${{ steps.changed-files.outputs.workflow_ci_any_changed }}
       renovate_config: ${{ steps.changed-files.outputs.renovate_config_any_changed }}
+      shell: ${{ steps.changed-files.outputs.shell_any_changed }}
       md: ${{ steps.changed-files.outputs.md_any_changed }}
       json5: ${{ steps.changed-files.outputs.json5_any_changed }}
       json5_files: ${{ steps.changed-files.outputs.json5_all_changed_files }}
@@ -39,18 +38,16 @@ jobs:
         uses: tj-actions/changed-files@22103cc46bda19c2b464ffe86db46df6922fd323 # v47.0.5
         with:
           files_yaml: |
-            src:
-              - '**/src/**'
-              - '!**/src/**/*.md'
-            test:
-              - '**/tests/**'
-              - '!**/tests/**/*.md'
             workflow:
               - .github/workflows/**
             workflow_ci:
               - .github/workflows/ci.yaml
             renovate_config:
               - .github/renovate.json5
+            shell:
+              - '**/*.sh'
+              - '**/*.bash'
+              - '**/*.zsh'
             md:
               - '**/*.md'
               - .markdownlint-cli2.yaml
@@ -125,6 +122,68 @@ jobs:
         run: |
           npx --yes --package renovate@43.60.5 \
             renovate-config-validator .github/renovate.json5
+
+  lint-shell-scripts:
+    name: Lint Shell Scripts
+    needs: determine-changes
+    if: ${{ needs.determine-changes.outputs.shell == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install shell tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shfmt
+          if [ "${{ github.event_name }}" != "pull_request" ]; then
+            sudo apt-get install -y shellcheck
+          fi
+
+      - name: Collect shell scripts
+        id: shell-files
+        shell: bash
+        run: |
+          shell_files_path="$(mktemp)"
+          find . -type f -name '*.sh' -not -path './.git/*' -print0 > "${shell_files_path}"
+          echo "shell_files=${shell_files_path}" >> "$GITHUB_OUTPUT"
+          if [ ! -s "${shell_files_path}" ]; then
+            echo "No shell scripts found."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run shfmt
+        if: steps.shell-files.outputs.found == 'true'
+        shell: bash
+        env:
+          SHELL_FILES: ${{ steps.shell-files.outputs.shell_files }}
+        run: |
+          xargs -0 shfmt --diff --simplify < "${SHELL_FILES}"
+
+      - name: Run shellcheck
+        if: github.event_name != 'pull_request' && steps.shell-files.outputs.found == 'true'
+        shell: bash
+        env:
+          SHELL_FILES: ${{ steps.shell-files.outputs.shell_files }}
+        run: |
+          xargs -0 shellcheck --external-sources < "${SHELL_FILES}"
+
+      - name: Run shellcheck (reviewdog)
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-shellcheck@5ebd09ddbe2ebb471646ce234c6c8dd18663ca7c # v1.30.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          fail_level: error
 
   lint-markdown:
     name: Lint Markdown
