@@ -26,11 +26,11 @@
         system:
         let
           pkgs = mkPkgs system;
-          issl-common = pkgs.symlinkJoin {
-            name = "issl-common";
-            paths = [
-              pkgs.git
-            ];
+          packageSets = {
+            common = import ./packages/common.nix { inherit pkgs; };
+          };
+          issl-common = import ./profiles/issl-common.nix {
+            inherit pkgs packageSets;
           };
         in
         {
