@@ -88,7 +88,7 @@ clone_repo() {
 }
 
 run_install() {
-	bash "${install_dir}/scripts/install.sh"
+	bash "${install_dir}/scripts/apply.sh"
 }
 
 cleanup_temporary_git() {

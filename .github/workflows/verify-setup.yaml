@@ -1,0 +1,123 @@
+name: Verify Setup
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/verify-setup.yaml
+      - assets/**
+      - flake.nix
+      - flake.lock
+      - home-modules/**
+      - packages/**
+      - profiles/**
+      - scripts/apply.sh
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - .github/workflows/verify-setup.yaml
+      - assets/**
+      - flake.nix
+      - flake.lock
+      - home-modules/**
+      - packages/**
+      - profiles/**
+      - scripts/apply.sh
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: Verify apply.sh
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@19effe9fe722874e6d46dd7182e4b8b7a43c4a99 # v31.10.0
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare test environment
+        id: test-env
+        shell: bash
+        run: |
+          tmpdir="$(mktemp -d)"
+          echo "profile_path=${tmpdir}/profile" >> "$GITHUB_OUTPUT"
+          echo "home_dir=${tmpdir}/home" >> "$GITHUB_OUTPUT"
+          echo "config_dir=${tmpdir}/home/.config" >> "$GITHUB_OUTPUT"
+          echo "data_dir=${tmpdir}/home/.local/share" >> "$GITHUB_OUTPUT"
+          echo "state_dir=${tmpdir}/home/.local/state" >> "$GITHUB_OUTPUT"
+
+      - name: Run apply.sh
+        shell: bash
+        env:
+          PROFILE_PATH: ${{ steps.test-env.outputs.profile_path }}
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+          DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
+          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
+        run: |
+          env \
+            HOME="${HOME_DIR}" \
+            USER="issl-test" \
+            XDG_CONFIG_HOME="${CONFIG_DIR}" \
+            XDG_DATA_HOME="${DATA_DIR}" \
+            XDG_STATE_HOME="${STATE_DIR}" \
+            NIX_PROFILE_PATH="${PROFILE_PATH}" \
+            GIT_USER_NAME="ISSL Test User" \
+            GIT_USER_EMAIL="issl-test@example.com" \
+            bash ./scripts/apply.sh
+
+      - name: Verify git installation
+        shell: bash
+        env:
+          PROFILE_PATH: ${{ steps.test-env.outputs.profile_path }}
+        run: |
+          test -x "${PROFILE_PATH}/bin/git"
+          PATH="${PROFILE_PATH}/bin:${PATH}" git --version
+
+      - name: Verify shared git config
+        shell: bash
+        env:
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+        run: |
+          cmp --silent assets/git/.gitconfig "${CONFIG_DIR}/issl/git/.gitconfig"
+
+      - name: Verify global git include
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+        run: |
+          include_path="$(
+            HOME="${HOME_DIR}" XDG_CONFIG_HOME="${CONFIG_DIR}" \
+              git config --global --get-all include.path
+          )"
+          test "${include_path}" = "${CONFIG_DIR}/issl/git/.gitconfig"
+
+      - name: Verify git identity
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+        run: |
+          user_name="$(
+            HOME="${HOME_DIR}" XDG_CONFIG_HOME="${CONFIG_DIR}" \
+              git config --global --get user.name
+          )"
+          test "${user_name}" = "ISSL Test User"
+
+          user_email="$(
+            HOME="${HOME_DIR}" XDG_CONFIG_HOME="${CONFIG_DIR}" \
+              git config --global --get user.email
+          )"
+          test "${user_email}" = "issl-test@example.com"
