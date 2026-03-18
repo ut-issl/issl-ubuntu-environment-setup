@@ -51,11 +51,13 @@ jobs:
         shell: bash
         run: |
           tmpdir="$(mktemp -d)"
-          echo "profile_path=${tmpdir}/profile" >> "$GITHUB_OUTPUT"
-          echo "home_dir=${tmpdir}/home" >> "$GITHUB_OUTPUT"
-          echo "config_dir=${tmpdir}/home/.config" >> "$GITHUB_OUTPUT"
-          echo "data_dir=${tmpdir}/home/.local/share" >> "$GITHUB_OUTPUT"
-          echo "state_dir=${tmpdir}/home/.local/state" >> "$GITHUB_OUTPUT"
+          {
+            echo "profile_path=${tmpdir}/profile"
+            echo "home_dir=${tmpdir}/home"
+            echo "config_dir=${tmpdir}/home/.config"
+            echo "data_dir=${tmpdir}/home/.local/share"
+            echo "state_dir=${tmpdir}/home/.local/state"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Run apply.sh
         shell: bash

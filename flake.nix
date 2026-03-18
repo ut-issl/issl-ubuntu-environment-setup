@@ -44,9 +44,10 @@
           modules = [
             ./home-modules/git.nix
             {
-              home.username = username;
-              home.homeDirectory = homeDirectory;
-              home.stateVersion = "25.05";
+              home = {
+                inherit username homeDirectory;
+                stateVersion = "25.05";
+              };
             }
           ];
         };
@@ -65,8 +66,8 @@
         in
         {
           default = issl-common;
-          home-manager = home-manager.packages.${system}.home-manager;
-          issl-common = issl-common;
+          inherit issl-common;
+          inherit (home-manager.packages.${system}) home-manager;
         }
       );
 
