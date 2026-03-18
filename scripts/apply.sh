@@ -61,21 +61,23 @@ else
 fi
 
 current_system="$(
-	nix --extra-experimental-features "nix-command flakes" \
+	nix --accept-flake-config --extra-experimental-features "nix-command flakes" \
 		eval --impure --raw --expr builtins.currentSystem
 )"
 home_configuration_name="issl-common-${current_system}"
 
 if [ -n "${nix_profile_path}" ]; then
-	nix profile install "${repo_root}#${profile_name}" \
+	nix profile add "${repo_root}#${profile_name}" \
+		--accept-flake-config \
 		--extra-experimental-features "nix-command flakes" \
 		--profile "${nix_profile_path}"
 else
-	nix profile install "${repo_root}#${profile_name}" \
+	nix profile add "${repo_root}#${profile_name}" \
+		--accept-flake-config \
 		--extra-experimental-features "nix-command flakes"
 fi
 
-nix --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
+nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
 	switch --flake "${repo_root}#${home_configuration_name}" --impure
 
 ensure_git_include
