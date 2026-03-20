@@ -1,11 +1,11 @@
-name: Verify Setup
+name: Test
 
 on:
   push:
     branches:
       - main
     paths:
-      - .github/workflows/verify-setup.yaml
+      - .github/workflows/test.yaml
       - assets/**
       - flake.nix
       - flake.lock
@@ -13,10 +13,11 @@ on:
       - packages/**
       - profiles/**
       - scripts/apply.sh
+      - tests/**
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - .github/workflows/verify-setup.yaml
+      - .github/workflows/test.yaml
       - assets/**
       - flake.nix
       - flake.lock
@@ -24,13 +25,14 @@ on:
       - packages/**
       - profiles/**
       - scripts/apply.sh
+      - tests/**
 
 permissions:
   contents: read
 
 jobs:
   install:
-    name: Verify apply.sh
+    name: Test apply.sh
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -79,47 +81,10 @@ jobs:
             GIT_USER_EMAIL="issl-test@example.com" \
             bash ./scripts/apply.sh
 
-      - name: Verify git installation
+      - name: Test git setup
         shell: bash
         env:
           PROFILE_PATH: ${{ steps.test-env.outputs.profile_path }}
-        run: |
-          test -x "${PROFILE_PATH}/bin/git"
-          PATH="${PROFILE_PATH}/bin:${PATH}" git --version
-
-      - name: Verify shared git config
-        shell: bash
-        env:
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-        run: |
-          cmp --silent assets/git/.gitconfig "${CONFIG_DIR}/issl/git/.gitconfig"
-
-      - name: Verify global git include
-        shell: bash
-        env:
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-        run: |
-          include_path="$(
-            HOME="${HOME_DIR}" XDG_CONFIG_HOME="${CONFIG_DIR}" \
-              git config --global --get-all include.path
-          )"
-          test "${include_path}" = "${CONFIG_DIR}/issl/git/.gitconfig"
-
-      - name: Verify git identity
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-        run: |
-          user_name="$(
-            HOME="${HOME_DIR}" XDG_CONFIG_HOME="${CONFIG_DIR}" \
-              git config --global --get user.name
-          )"
-          test "${user_name}" = "ISSL Test User"
-
-          user_email="$(
-            HOME="${HOME_DIR}" XDG_CONFIG_HOME="${CONFIG_DIR}" \
-              git config --global --get user.email
-          )"
-          test "${user_email}" = "issl-test@example.com"
+        run: ./tests/test-git.sh
