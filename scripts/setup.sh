@@ -6,6 +6,9 @@ repo_url="${REPO_URL:-git@github.com:ut-issl/issl-ubuntu-environment-setup.git}"
 repo_ref="${REPO_REF:-main}"
 data_root="${XDG_DATA_HOME:-$HOME/.local/share}"
 install_dir="${INSTALL_DIR:-$data_root/issl/ubuntu-environment-setup}"
+ssh_dir="${HOME}/.ssh"
+github_key_path="${ssh_dir}/github_ed25519"
+ssh_config_path="${ssh_dir}/config"
 temporary_git_installed=false
 
 require_command() {
@@ -15,6 +18,21 @@ require_command() {
     echo "required command not found: ${command_name}" >&2
     exit 1
   fi
+}
+
+prompt_yes_no() {
+  local prompt_message="$1"
+  local reply
+
+  read -r -p "${prompt_message} " reply
+  case "${reply}" in
+  y | Y | yes | YES | Yes)
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
+  esac
 }
 
 source_nix() {
@@ -63,19 +81,142 @@ ensure_git() {
   temporary_git_installed=true
 }
 
-ensure_repo_access() {
-  if git ls-remote --exit-code "${repo_url}" "${repo_ref}" >/dev/null 2>&1; then
+ensure_ssh_directory() {
+  mkdir -p "${ssh_dir}"
+  chmod 700 "${ssh_dir}"
+}
+
+github_ssh_key_exists() {
+  [ -f "${github_key_path}" ] && [ -f "${github_key_path}.pub" ]
+}
+
+can_access_repo() {
+  git ls-remote --exit-code "${repo_url}" "${repo_ref}" >/dev/null 2>&1
+}
+
+is_github_ssh_repo_url() {
+  case "${repo_url}" in
+  git@github.com:* | ssh://git@github.com/*)
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
+  esac
+}
+
+ensure_github_ssh_config() {
+  ensure_ssh_directory
+
+  if [ -f "${ssh_config_path}" ] &&
+    grep -Eq '^[[:space:]]*Host[[:space:]]+github\.com([[:space:]]|$)' "${ssh_config_path}"; then
     return
   fi
 
+  {
+    echo "Host github.com"
+    echo "  HostName github.com"
+    echo "  User git"
+    echo "  IdentityFile ~/.ssh/github_ed25519"
+  } >>"${ssh_config_path}"
+  chmod 600 "${ssh_config_path}"
+}
+
+create_github_ssh_key() {
+  local key_comment=""
+
+  ensure_ssh_directory
+  require_command ssh-keygen
+
+  read -r -p "Enter an email/comment for the GitHub SSH key (optional): " key_comment
+
+  if [ -n "${key_comment}" ]; then
+    ssh-keygen -t ed25519 -C "${key_comment}" -f "${github_key_path}"
+  else
+    ssh-keygen -t ed25519 -f "${github_key_path}"
+  fi
+}
+
+prompt_github_ssh_registration() {
+  echo "Register the following public key in GitHub:"
+  echo "https://github.com/settings/keys"
+  echo
+  cat "${github_key_path}.pub"
+  echo
+
+  if ! prompt_yes_no "Type yes after the key has been registered in GitHub."; then
+    echo "GitHub SSH key registration was not confirmed." >&2
+    exit 1
+  fi
+}
+
+prompt_github_ssh_setup() {
+  if ! github_ssh_key_exists; then
+    if ! prompt_yes_no "No GitHub SSH key was found at ${github_key_path}. Create one now? [y/N]"; then
+      return
+    fi
+
+    create_github_ssh_key
+  fi
+
+  ensure_github_ssh_config
+  prompt_github_ssh_registration
+}
+
+has_github_ssh_auth() {
+  local ssh_output
+  local ssh_status
+
+  ssh_output="$(ssh -T git@github.com 2>&1)" || ssh_status=$?
+  ssh_status="${ssh_status:-0}"
+
+  if [ "${ssh_status}" -eq 1 ] &&
+    printf '%s\n' "${ssh_output}" | grep -Fq "successfully authenticated"; then
+    return 0
+  fi
+
+  return 1
+}
+
+try_github_ssh_recovery() {
+  if ! is_github_ssh_repo_url; then
+    return 1
+  fi
+
+  if has_github_ssh_auth; then
+    return 1
+  fi
+
+  prompt_github_ssh_setup
+
+  if has_github_ssh_auth && can_access_repo; then
+    return 0
+  fi
+
+  return 1
+}
+
+fail_repo_access() {
   cat >&2 <<EOF
 failed to access ${repo_url}.
 confirm that:
-- your SSH key is registered with GitHub
-- your account has access to the private repository
+- if this is a GitHub SSH remote, your SSH key is registered with GitHub
+- your account has access to the repository
 - the repository ref exists: ${repo_ref}
 EOF
   exit 1
+}
+
+ensure_repo_access() {
+  if can_access_repo; then
+    return
+  fi
+
+  if try_github_ssh_recovery; then
+    return
+  fi
+
+  fail_repo_access
 }
 
 clone_repo() {
