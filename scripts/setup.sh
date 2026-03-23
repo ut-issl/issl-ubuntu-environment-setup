@@ -90,15 +90,26 @@ github_ssh_key_exists() {
   [ -f "${github_key_path}" ] && [ -f "${github_key_path}.pub" ]
 }
 
-github_host_is_configured() {
-  [ -f "${ssh_config_path}" ] &&
-    grep -Eq '^[[:space:]]*Host[[:space:]]+github\.com([[:space:]]|$)' "${ssh_config_path}"
+can_access_repo() {
+  git ls-remote --exit-code "${repo_url}" "${repo_ref}" >/dev/null 2>&1
 }
 
-append_github_ssh_config() {
+is_github_ssh_repo_url() {
+  case "${repo_url}" in
+  git@github.com:* | ssh://git@github.com/*)
+    return 0
+    ;;
+  *)
+    return 1
+    ;;
+  esac
+}
+
+ensure_github_ssh_config() {
   ensure_ssh_directory
 
-  if github_host_is_configured; then
+  if [ -f "${ssh_config_path}" ] &&
+    grep -Eq '^[[:space:]]*Host[[:space:]]+github\.com([[:space:]]|$)' "${ssh_config_path}"; then
     return
   fi
 
@@ -139,7 +150,7 @@ prompt_github_ssh_registration() {
   fi
 }
 
-maybe_setup_github_ssh() {
+prompt_github_ssh_setup() {
   if ! github_ssh_key_exists; then
     if ! prompt_yes_no "No GitHub SSH key was found at ${github_key_path}. Create one now? [y/N]"; then
       return
@@ -148,29 +159,64 @@ maybe_setup_github_ssh() {
     create_github_ssh_key
   fi
 
-  append_github_ssh_config
+  ensure_github_ssh_config
   prompt_github_ssh_registration
 }
 
-ensure_repo_access() {
-  if git ls-remote --exit-code "${repo_url}" "${repo_ref}" >/dev/null 2>&1; then
-    return
+has_github_ssh_auth() {
+  local ssh_output
+  local ssh_status
+
+  ssh_output="$(ssh -T git@github.com 2>&1)" || ssh_status=$?
+  ssh_status="${ssh_status:-0}"
+
+  if [ "${ssh_status}" -eq 1 ] &&
+    printf '%s\n' "${ssh_output}" | grep -Fq "successfully authenticated"; then
+    return 0
   fi
 
-  maybe_setup_github_ssh
+  return 1
+}
 
-  if git ls-remote --exit-code "${repo_url}" "${repo_ref}" >/dev/null 2>&1; then
-    return
+try_github_ssh_recovery() {
+  if ! is_github_ssh_repo_url; then
+    return 1
   fi
 
+  if has_github_ssh_auth; then
+    return 1
+  fi
+
+  prompt_github_ssh_setup
+
+  if has_github_ssh_auth && can_access_repo; then
+    return 0
+  fi
+
+  return 1
+}
+
+fail_repo_access() {
   cat >&2 <<EOF
 failed to access ${repo_url}.
 confirm that:
-- your SSH key is registered with GitHub
-- your account has access to the private repository
+- if this is a GitHub SSH remote, your SSH key is registered with GitHub
+- your account has access to the repository
 - the repository ref exists: ${repo_ref}
 EOF
   exit 1
+}
+
+ensure_repo_access() {
+  if can_access_repo; then
+    return
+  fi
+
+  if try_github_ssh_recovery; then
+    return
+  fi
+
+  fail_repo_access
 }
 
 clone_repo() {
