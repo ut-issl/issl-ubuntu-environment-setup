@@ -6,6 +6,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 shared_git_config_path="${XDG_CONFIG_HOME:-$HOME/.config}/issl/git/.gitconfig"
 git_user_name="${GIT_USER_NAME:-}"
 git_user_email="${GIT_USER_EMAIL:-}"
+issl_enable_zsh="${ISSL_ENABLE_ZSH:-}"
 nix_feature_config="experimental-features = nix-command flakes"
 hm_profile_dir="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles"
 
@@ -52,6 +53,48 @@ ensure_home_manager_profile_dir() {
   mkdir -p "${hm_profile_dir}"
 }
 
+is_yes() {
+  case "${1:-}" in
+  y | Y | yes | YES | Yes | true | TRUE | True | 1) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+is_no() {
+  case "${1:-}" in
+  n | N | no | NO | No | false | FALSE | False | 0) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+should_enable_zsh() {
+  local current_shell_name=""
+  local response=""
+
+  if [ -n "${issl_enable_zsh}" ]; then
+    if is_yes "${issl_enable_zsh}"; then
+      return 0
+    fi
+    if is_no "${issl_enable_zsh}"; then
+      return 1
+    fi
+    echo "ISSL_ENABLE_ZSH must be a yes/no style value." >&2
+    exit 1
+  fi
+
+  current_shell_name="$(basename "${SHELL:-}")"
+  if [ "${current_shell_name}" = "zsh" ]; then
+    return 0
+  fi
+
+  if [ ! -t 0 ]; then
+    return 1
+  fi
+
+  read -r -p "Enable shared zsh configuration as well? [y/N] " response
+  is_yes "${response}"
+}
+
 if ! command -v nix >/dev/null 2>&1; then
   echo "nix is required before running scripts/apply.sh." >&2
   exit 1
@@ -69,6 +112,12 @@ current_system="$(
 )"
 home_configuration_name="issl-common-${current_system}"
 
+ensure_home_manager_profile_dir
+if should_enable_zsh; then
+  export ISSL_ENABLE_ZSH=1
+else
+  export ISSL_ENABLE_ZSH=0
+fi
 ensure_home_manager_profile_dir
 
 nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \

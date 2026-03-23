@@ -21,6 +21,11 @@
         system:
         let
           pkgs = mkPkgs system;
+          enableZsh =
+            let
+              value = builtins.getEnv "ISSL_ENABLE_ZSH";
+            in
+            value == "1";
           username =
             let
               value = builtins.getEnv "USER";
@@ -38,7 +43,9 @@
             ./home-modules/common.nix
             ./home-modules/shell.nix
             ./home-modules/bash.nix
-            ./home-modules/zsh.nix
+          ]
+          ++ nixpkgs.lib.optional enableZsh ./home-modules/zsh.nix
+          ++ [
             {
               home = {
                 inherit username homeDirectory;
