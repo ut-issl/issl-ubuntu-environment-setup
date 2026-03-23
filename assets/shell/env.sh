@@ -1,9 +1,9 @@
 # shellcheck shell=sh
 
-issl_config_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
-export ISSL_CONFIG_HOME="${issl_config_home}"
+export ISSL_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
 
-issl_prepend_path() {
+# Prepend one existing directory to PATH if it is not already present.
+prepend_path() {
   [ "$#" -eq 1 ] || return 0
   [ -d "$1" ] || return 0
 

@@ -18,7 +18,7 @@ assert_shell_env_can_be_sourced() {
       shell_env_path="$1"
       . "${shell_env_path}"
       test "${ISSL_CONFIG_HOME}" = "${XDG_CONFIG_HOME}/issl"
-      issl_prepend_path /does/not/exist
+      prepend_path /does/not/exist
     ' _ "${config_dir}/issl/shell/env.sh"
 }
 
