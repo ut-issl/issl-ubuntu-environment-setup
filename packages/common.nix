@@ -2,4 +2,5 @@
 
 [
   pkgs.git
+  pkgs.uv
 ]
