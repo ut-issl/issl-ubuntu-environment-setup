@@ -78,6 +78,13 @@ jobs:
             GIT_USER_EMAIL="issl-test@example.com" \
             bash ./scripts/apply.sh
 
+      - name: Test shell setup
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+        run: ./tests/test-shell.sh
+
       - name: Add Home Manager profile to PATH
         shell: bash
         env:
