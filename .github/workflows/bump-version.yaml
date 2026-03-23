@@ -14,10 +14,27 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: conjikidow/bump-version@b8c451803408957d87a84939dca637fd37762f75 # v2.0.2
+      - id: bump-version
+        uses: conjikidow/bump-version@b8c451803408957d87a84939dca637fd37762f75 # v2.0.2
         with:
           label-major: 'update::major'
           label-minor: 'update::minor'
           label-patch: 'update::patch'
           labels-to-add: 'automated,versioning'
-          create-release: 'true'
+          create-release: 'false'
+
+      - name: Prepare release asset
+        if: steps.bump-version.outputs.version-bumped == 'true'
+        run: |
+          mkdir -p release-assets
+          cp scripts/setup.sh release-assets/setup.sh
+
+      - name: Create GitHub release
+        if: steps.bump-version.outputs.version-bumped == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: v${{ steps.bump-version.outputs.new-version }}
+        run: |
+          gh release create "${RELEASE_TAG}" release-assets/setup.sh \
+            --title "${RELEASE_TAG}" \
+            --generate-notes
