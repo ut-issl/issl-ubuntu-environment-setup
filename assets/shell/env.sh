@@ -12,3 +12,5 @@ prepend_path() {
   *) PATH="$1${PATH:+:$PATH}" ;;
   esac
 }
+
+prepend_path "$HOME/.local/bin"

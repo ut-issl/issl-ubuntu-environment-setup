@@ -37,6 +37,8 @@
           modules = [
             ./home-modules/common.nix
             ./home-modules/shell.nix
+            ./home-modules/bash.nix
+            ./home-modules/zsh.nix
             {
               home = {
                 inherit username homeDirectory;

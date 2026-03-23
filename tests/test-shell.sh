@@ -6,6 +6,7 @@ config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 
 assert_shared_shell_env() {
   cmp --silent assets/shell/env.sh "${config_dir}/issl/shell/env.sh"
+  cmp --silent assets/shell/rc.sh "${config_dir}/issl/shell/rc.sh"
 }
 
 assert_shell_env_can_be_sourced() {
