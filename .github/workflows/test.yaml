@@ -88,3 +88,9 @@ jobs:
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
         run: ./tests/test-git.sh
+
+      - name: Test uv setup
+        shell: bash
+        env:
+          PROFILE_PATH: ${{ steps.test-env.outputs.profile_path }}
+        run: ./tests/test-uv.sh
