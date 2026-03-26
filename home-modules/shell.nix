@@ -3,6 +3,7 @@
 {
   home = {
     packages = [
+      pkgs.bash-completion
       pkgs.colordiff
       pkgs.coreutils
     ];
