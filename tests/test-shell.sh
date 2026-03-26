@@ -11,16 +11,15 @@ assert_shared_shell_env() {
 }
 
 assert_shell_env_can_be_sourced() {
-  # shellcheck disable=SC2016
   env -i \
     HOME="${home_dir}" \
+    SHELL_ENV_PATH="${config_dir}/issl/shell/env.sh" \
     XDG_CONFIG_HOME="${config_dir}" \
     PATH="/usr/bin:/bin" \
-    bash -c '
-      shell_env_path="$1"
-      . "${shell_env_path}"
-      test "${ISSL_CONFIG_HOME}" = "${XDG_CONFIG_HOME}/issl"
-    ' _ "${config_dir}/issl/shell/env.sh"
+    bash <<'EOF'
+. "${SHELL_ENV_PATH}"
+test "${ISSL_CONFIG_HOME}" = "${XDG_CONFIG_HOME}/issl"
+EOF
 }
 
 assert_bash_startup_files() {

@@ -86,11 +86,11 @@ EOF
 }
 
 resolve_zdotdir_from_zshenv() {
-  # shellcheck disable=SC2016
   local zshenv_path="$1"
   local raw_value=""
 
   raw_value="$(
+    # shellcheck disable=SC2016
     sed -n 's/^[[:space:]]*\(export[[:space:]]\+\)\?ZDOTDIR[[:space:]]*=[[:space:]]*//p' "${zshenv_path}" |
       tail -n 1
   )"
@@ -105,8 +105,8 @@ resolve_zdotdir_from_zshenv() {
 
   # shellcheck disable=SC2016
   case "${raw_value}" in
-  '$HOME'/*) printf '%s\n' "${HOME}/${raw_value#\$HOME/}" ;;
-  '${HOME}'/*) printf '%s\n' "${HOME}/${raw_value#\$\{HOME\}/}" ;;
+  \$HOME/*) printf '%s\n' "${HOME}/${raw_value#\$HOME/}" ;;
+  \$\{HOME\}/*) printf '%s\n' "${HOME}/${raw_value#\$\{HOME\}/}" ;;
   ~/*) printf '%s\n' "${HOME}/${raw_value#~/}" ;;
   /*) printf '%s\n' "${raw_value}" ;;
   *) return 1 ;;
