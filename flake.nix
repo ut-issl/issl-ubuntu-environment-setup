@@ -17,15 +17,15 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
       mkPkgs = system: import nixpkgs { inherit system; };
+      enableZsh =
+        let
+          value = builtins.getEnv "ISSL_ENABLE_ZSH";
+        in
+        value == "1";
       mkHomeConfiguration =
         system:
         let
           pkgs = mkPkgs system;
-          enableZsh =
-            let
-              value = builtins.getEnv "ISSL_ENABLE_ZSH";
-            in
-            value == "1";
           username =
             let
               value = builtins.getEnv "USER";
@@ -39,6 +39,7 @@
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
+          extraSpecialArgs = { inherit enableZsh; };
           modules = [
             ./home-modules/common.nix
             ./home-modules/shell.nix

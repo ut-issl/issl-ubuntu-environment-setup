@@ -3,6 +3,7 @@ set -euo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
+nix_profile_bin="${home_dir}/.nix-profile/bin"
 default_zdotdir="${home_dir}/.zsh"
 
 assert_shared_shell_env() {
@@ -29,6 +30,10 @@ assert_bash_startup_files() {
   grep -Fq "${config_dir}/issl/bash/.bashrc" "${home_dir}/.bashrc"
 }
 
+assert_zsh_installation() {
+  test -x "${nix_profile_bin}/zsh"
+}
+
 assert_default_zsh_startup_files() {
   grep -Fq '# >>> ISSL zsh env >>>' "${home_dir}/.zshenv"
   # shellcheck disable=SC2016
@@ -43,6 +48,7 @@ main() {
   assert_shared_shell_env
   assert_shell_env_can_be_sourced
   assert_bash_startup_files
+  assert_zsh_installation
   assert_default_zsh_startup_files
 }
 
