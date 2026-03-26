@@ -32,10 +32,18 @@ permissions:
 
 jobs:
   install:
-    name: Test apply.sh
+    name: Test apply.sh (${{ matrix.enable_zsh_name }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - enable_zsh: "0"
+            enable_zsh_name: "zsh disabled"
+          - enable_zsh: "1"
+            enable_zsh_name: "zsh enabled"
 
     steps:
       - name: Checkout the main repository
@@ -74,7 +82,7 @@ jobs:
             XDG_CONFIG_HOME="${CONFIG_DIR}" \
             XDG_DATA_HOME="${DATA_DIR}" \
             XDG_STATE_HOME="${STATE_DIR}" \
-            ISSL_ENABLE_ZSH="1" \
+            ISSL_ENABLE_ZSH="${{ matrix.enable_zsh }}" \
             GIT_USER_NAME="ISSL Test User" \
             GIT_USER_EMAIL="issl-test@example.com" \
             bash ./scripts/apply.sh
@@ -90,6 +98,7 @@ jobs:
         env:
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+          ISSL_ENABLE_ZSH: ${{ matrix.enable_zsh }}
         run: ./tests/test-shell.sh
 
       - name: Test git setup

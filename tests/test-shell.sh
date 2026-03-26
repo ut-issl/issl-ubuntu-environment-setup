@@ -5,6 +5,7 @@ home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 default_zdotdir="${home_dir}/.zsh"
+issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 
 assert_shared_shell_env() {
   cmp --silent assets/shell/env.sh "${config_dir}/issl/shell/env.sh"
@@ -30,11 +31,11 @@ assert_bash_startup_files() {
   grep -Fq "${config_dir}/issl/bash/.bashrc" "${home_dir}/.bashrc"
 }
 
-assert_zsh_installation() {
+assert_zsh_enabled() {
   test -x "${nix_profile_bin}/zsh"
 }
 
-assert_default_zsh_startup_files() {
+assert_default_zsh_startup_files_enabled() {
   grep -Fq '# >>> ISSL zsh env >>>' "${home_dir}/.zshenv"
   # shellcheck disable=SC2016
   grep -Fq 'export ZDOTDIR="$HOME/.zsh"' "${home_dir}/.zshenv"
@@ -44,12 +45,24 @@ assert_default_zsh_startup_files() {
   grep -Fq "${config_dir}/issl/zsh/.zshrc" "${default_zdotdir}/.zshrc"
 }
 
+assert_zsh_disabled() {
+  test ! -x "${nix_profile_bin}/zsh"
+  test ! -e "${home_dir}/.zshenv"
+  test ! -e "${default_zdotdir}/.zprofile"
+  test ! -e "${default_zdotdir}/.zshrc"
+}
+
 main() {
   assert_shared_shell_env
   assert_shell_env_can_be_sourced
   assert_bash_startup_files
-  assert_zsh_installation
-  assert_default_zsh_startup_files
+
+  if [ "${issl_enable_zsh}" = "1" ]; then
+    assert_zsh_enabled
+    assert_default_zsh_startup_files_enabled
+  else
+    assert_zsh_disabled
+  fi
 }
 
 main "$@"
