@@ -118,7 +118,6 @@ if should_enable_zsh; then
 else
   export ISSL_ENABLE_ZSH=0
 fi
-ensure_home_manager_profile_dir
 
 nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
   switch --flake "${repo_root}#${home_configuration_name}" --impure
