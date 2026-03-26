@@ -38,3 +38,16 @@ if command -v colordiff >/dev/null 2>&1; then
 else
   alias diff='diff -u' # Unified diff without color.
 fi
+
+# ===== Functions ===== #
+
+man() {
+  env \
+    LESS_TERMCAP_md="$(printf '\033[01;36m')" \
+    LESS_TERMCAP_me="$(printf '\033[0m')" \
+    LESS_TERMCAP_us="$(printf '\033[01;32m')" \
+    LESS_TERMCAP_ue="$(printf '\033[0m')" \
+    LESS_TERMCAP_so="$(printf '\033[45;93m')" \
+    LESS_TERMCAP_se="$(printf '\033[0m')" \
+    command man "$@"
+}

@@ -1,4 +1,5 @@
 [default.extend-words]
+ue = "ue"
 
 [files]
 extend-exclude = []
