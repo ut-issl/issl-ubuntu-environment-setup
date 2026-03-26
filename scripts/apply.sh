@@ -88,30 +88,32 @@ zshrc_block() {
 
 resolve_zdotdir_from_zshenv() {
   local zshenv_path="$1"
-  local raw_value=""
+  local zsh_bin=""
+  local resolved_value=""
 
-  raw_value="$(
+  if [ -x "${HOME}/.nix-profile/bin/zsh" ]; then
+    zsh_bin="${HOME}/.nix-profile/bin/zsh"
+  elif command -v zsh >/dev/null 2>&1; then
+    zsh_bin="$(command -v zsh)"
+  else
+    return 1
+  fi
+
+  resolved_value="$(
+    env -i \
+      HOME="${HOME}" \
+      XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}" \
+      ZDOTDIR=""
     # shellcheck disable=SC2016
-    sed -n 's/^[[:space:]]*\(export[[:space:]]\+\)\?ZDOTDIR[[:space:]]*=[[:space:]]*//p' "${zshenv_path}" |
-      tail -n 1
+    "${zsh_bin}" -c '
+        . "$1"
+        if [ -n "${ZDOTDIR:-}" ]; then
+          print -r -- "${ZDOTDIR:A}"
+        fi
+      ' _ "${zshenv_path}"
   )"
-  [ -n "${raw_value}" ] || return 1
-
-  case "${raw_value}" in
-  \"*\" | \'*\')
-    raw_value="${raw_value#?}"
-    raw_value="${raw_value%?}"
-    ;;
-  esac
-
-  # shellcheck disable=SC2016
-  case "${raw_value}" in
-  \$HOME/*) printf '%s\n' "${HOME}/${raw_value#\$HOME/}" ;;
-  \$\{HOME\}/*) printf '%s\n' "${HOME}/${raw_value#\$\{HOME\}/}" ;;
-  ~/*) printf '%s\n' "${HOME}/${raw_value#~/}" ;;
-  /*) printf '%s\n' "${raw_value}" ;;
-  *) return 1 ;;
-  esac
+  [ -n "${resolved_value}" ] || return 1
+  printf '%s\n' "${resolved_value}"
 }
 
 ensure_bash_startup_files() {
