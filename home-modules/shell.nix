@@ -1,7 +1,12 @@
-_:
+{ pkgs, ... }:
 
 {
   home = {
+    packages = [
+      pkgs.colordiff
+      pkgs.coreutils
+    ];
+
     file = {
       ".config/issl/shell/env.sh".source = ../assets/shell/env.sh;
       ".config/issl/shell/rc.sh".source = ../assets/shell/rc.sh;
