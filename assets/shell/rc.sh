@@ -1,11 +1,18 @@
 # shellcheck shell=sh
+# shellcheck disable=SC1091
+
+issl_bootstrap_shell_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell"
+
+if [ -f "${issl_bootstrap_shell_home}/env.sh" ]; then
+  . "${issl_bootstrap_shell_home}/env.sh"
+fi
 
 # ===== Aliases ===== #
 
 # Configure GNU-style color output for common tools when available.
 if command -v dircolors >/dev/null 2>&1; then
   # Prefer ~/.dircolors, then the shared ISSL file.
-  issl_dircolors_path="${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/.dircolors"
+  issl_dircolors_path="${ISSL_SHELL_HOME}/.dircolors"
   if [ -r "${HOME}/.dircolors" ]; then
     eval "$(dircolors -b "${HOME}/.dircolors")"
   elif [ -r "${issl_dircolors_path}" ]; then
