@@ -252,20 +252,21 @@ current_system="$(
   nix --accept-flake-config --extra-experimental-features "nix-command flakes" \
     eval --impure --raw --expr builtins.currentSystem
 )"
-home_configuration_name="issl-common-${current_system}"
 
 ensure_home_manager_profile_dir
 if should_enable_zsh; then
-  export ISSL_ENABLE_ZSH=1
+  home_configuration_name="issl-common-zsh-${current_system}"
+  zsh_enabled=1
 else
-  export ISSL_ENABLE_ZSH=0
+  home_configuration_name="issl-common-${current_system}"
+  zsh_enabled=0
 fi
 
 nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
   switch --flake "${repo_root}#${home_configuration_name}" --impure
 
 ensure_bash_startup_files
-if [ "${ISSL_ENABLE_ZSH}" = "1" ]; then
+if [ "${zsh_enabled}" = "1" ]; then
   ensure_zsh_startup_files
 fi
 ensure_git_include
