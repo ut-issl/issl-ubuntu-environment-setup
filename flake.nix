@@ -36,7 +36,6 @@
           inherit pkgs;
           modules = [
             ./home-modules/common.nix
-            ./home-modules/git.nix
             {
               home = {
                 inherit username homeDirectory;
