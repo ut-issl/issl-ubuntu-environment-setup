@@ -35,7 +35,7 @@
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
           modules = [
-            ./home-modules/git.nix
+            ./home-modules/common.nix
             {
               home = {
                 inherit username homeDirectory;
@@ -48,18 +48,8 @@
     {
       packages = forAllSystems (
         system:
-        let
-          pkgs = mkPkgs system;
-          packageSets = {
-            common = import ./packages/common.nix { inherit pkgs; };
-          };
-          issl-common = import ./profiles/issl-common.nix {
-            inherit pkgs packageSets;
-          };
-        in
         {
-          default = issl-common;
-          inherit issl-common;
+          default = home-manager.packages.${system}.home-manager;
           inherit (home-manager.packages.${system}) home-manager;
         }
       );
@@ -75,7 +65,6 @@
         system:
         {
           home = self.homeConfigurations."issl-common-${system}".activationPackage;
-          package = self.packages.${system}.issl-common;
         }
       );
     };

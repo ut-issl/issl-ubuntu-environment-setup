@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-profile_path="${PROFILE_PATH:?PROFILE_PATH is required}"
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
+nix_profile_bin="${home_dir}/.nix-profile/bin"
 
 assert_git_installation() {
-  test -x "${profile_path}/bin/git"
-  PATH="${profile_path}/bin:${PATH}" git --version
+  test -x "${nix_profile_bin}/git"
+  test "$(command -v git)" = "${nix_profile_bin}/git"
+  git --version
 }
 
 assert_shared_git_config() {
