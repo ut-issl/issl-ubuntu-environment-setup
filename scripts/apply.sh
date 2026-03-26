@@ -3,12 +3,11 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-profile_name="issl-common"
 shared_git_config_path="${XDG_CONFIG_HOME:-$HOME/.config}/issl/git/.gitconfig"
-nix_profile_path="${NIX_PROFILE_PATH:-}"
 git_user_name="${GIT_USER_NAME:-}"
 git_user_email="${GIT_USER_EMAIL:-}"
 nix_feature_config="experimental-features = nix-command flakes"
+hm_profile_dir="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles"
 
 ensure_git_include() {
   if ! git config --global --get-all include.path | grep -Fxq "${shared_git_config_path}"; then
@@ -49,6 +48,10 @@ prompt_for_git_identity() {
   fi
 }
 
+ensure_home_manager_profile_dir() {
+  mkdir -p "${hm_profile_dir}"
+}
+
 if ! command -v nix >/dev/null 2>&1; then
   echo "nix is required before running scripts/apply.sh." >&2
   exit 1
@@ -66,16 +69,7 @@ current_system="$(
 )"
 home_configuration_name="issl-common-${current_system}"
 
-if [ -n "${nix_profile_path}" ]; then
-  nix profile add "${repo_root}#${profile_name}" \
-    --accept-flake-config \
-    --extra-experimental-features "nix-command flakes" \
-    --profile "${nix_profile_path}"
-else
-  nix profile add "${repo_root}#${profile_name}" \
-    --accept-flake-config \
-    --extra-experimental-features "nix-command flakes"
-fi
+ensure_home_manager_profile_dir
 
 nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
   switch --flake "${repo_root}#${home_configuration_name}" --impure
@@ -83,9 +77,4 @@ nix --accept-flake-config --extra-experimental-features "nix-command flakes" run
 ensure_git_include
 prompt_for_git_identity
 
-echo "Installed the ISSL environment packages and applied shared Home Manager configuration."
-echo "Installed package set: ${profile_name}"
-echo "Shared git config: ${shared_git_config_path}"
-if [ -n "${nix_profile_path}" ]; then
-  echo "Nix profile path: ${nix_profile_path}"
-fi
+echo "Applied the shared Home Manager configuration."

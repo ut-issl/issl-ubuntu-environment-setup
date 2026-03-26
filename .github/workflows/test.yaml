@@ -54,7 +54,6 @@ jobs:
         run: |
           tmpdir="$(mktemp -d)"
           {
-            echo "profile_path=${tmpdir}/profile"
             echo "home_dir=${tmpdir}/home"
             echo "config_dir=${tmpdir}/home/.config"
             echo "data_dir=${tmpdir}/home/.local/share"
@@ -64,7 +63,6 @@ jobs:
       - name: Run apply.sh
         shell: bash
         env:
-          PROFILE_PATH: ${{ steps.test-env.outputs.profile_path }}
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
           DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
@@ -76,15 +74,19 @@ jobs:
             XDG_CONFIG_HOME="${CONFIG_DIR}" \
             XDG_DATA_HOME="${DATA_DIR}" \
             XDG_STATE_HOME="${STATE_DIR}" \
-            NIX_PROFILE_PATH="${PROFILE_PATH}" \
             GIT_USER_NAME="ISSL Test User" \
             GIT_USER_EMAIL="issl-test@example.com" \
             bash ./scripts/apply.sh
 
+      - name: Add Home Manager profile to PATH
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+        run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
+
       - name: Test git setup
         shell: bash
         env:
-          PROFILE_PATH: ${{ steps.test-env.outputs.profile_path }}
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
         run: ./tests/test-git.sh
@@ -92,5 +94,5 @@ jobs:
       - name: Test uv setup
         shell: bash
         env:
-          PROFILE_PATH: ${{ steps.test-env.outputs.profile_path }}
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
         run: ./tests/test-uv.sh
