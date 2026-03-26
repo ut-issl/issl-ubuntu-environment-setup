@@ -16,6 +16,147 @@ ensure_git_include() {
   fi
 }
 
+prepend_block_once() {
+  local file_path="$1"
+  local begin_marker="$2"
+  local end_marker="$3"
+  local block_content="$4"
+  local file_dir=""
+  local temp_file=""
+
+  file_dir="$(dirname "${file_path}")"
+  mkdir -p "${file_dir}"
+  touch "${file_path}"
+
+  if grep -Fq "${begin_marker}" "${file_path}"; then
+    return
+  fi
+
+  temp_file="$(mktemp)"
+  {
+    printf '%s\n' "${begin_marker}"
+    printf '%s\n' "${block_content}"
+    printf '%s\n' "${end_marker}"
+    if [ -s "${file_path}" ]; then
+      printf '\n'
+      cat "${file_path}"
+    fi
+  } >"${temp_file}"
+  mv "${temp_file}" "${file_path}"
+}
+
+bash_profile_block() {
+  cat <<'EOF'
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/bash/.bash_profile" ]; then
+  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/bash/.bash_profile"
+fi
+EOF
+}
+
+bashrc_block() {
+  cat <<'EOF'
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/bash/.bashrc" ]; then
+  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/bash/.bashrc"
+fi
+EOF
+}
+
+zshenv_default_block() {
+  cat <<'EOF'
+if [ -z "${ZDOTDIR:-}" ]; then
+  export ZDOTDIR="$HOME/.zsh"
+fi
+EOF
+}
+
+zprofile_block() {
+  cat <<'EOF'
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/zsh/.zprofile" ]; then
+  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/zsh/.zprofile"
+fi
+EOF
+}
+
+zshrc_block() {
+  cat <<'EOF'
+if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/zsh/.zshrc" ]; then
+  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/zsh/.zshrc"
+fi
+EOF
+}
+
+resolve_zdotdir_from_zshenv() {
+  # shellcheck disable=SC2016
+  local zshenv_path="$1"
+  local raw_value=""
+
+  raw_value="$(
+    sed -n 's/^[[:space:]]*\(export[[:space:]]\+\)\?ZDOTDIR[[:space:]]*=[[:space:]]*//p' "${zshenv_path}" |
+      tail -n 1
+  )"
+  [ -n "${raw_value}" ] || return 1
+
+  case "${raw_value}" in
+  \"*\" | \'*\')
+    raw_value="${raw_value#?}"
+    raw_value="${raw_value%?}"
+    ;;
+  esac
+
+  # shellcheck disable=SC2016
+  case "${raw_value}" in
+  '$HOME'/*) printf '%s\n' "${HOME}/${raw_value#\$HOME/}" ;;
+  '${HOME}'/*) printf '%s\n' "${HOME}/${raw_value#\$\{HOME\}/}" ;;
+  ~/*) printf '%s\n' "${HOME}/${raw_value#~/}" ;;
+  /*) printf '%s\n' "${raw_value}" ;;
+  *) return 1 ;;
+  esac
+}
+
+ensure_bash_startup_files() {
+  prepend_block_once \
+    "${HOME}/.bash_profile" \
+    "# >>> ISSL bash profile >>>" \
+    "# <<< ISSL bash profile <<<" \
+    "$(bash_profile_block)"
+  prepend_block_once \
+    "${HOME}/.bashrc" \
+    "# >>> ISSL bash rc >>>" \
+    "# <<< ISSL bash rc <<<" \
+    "$(bashrc_block)"
+}
+
+ensure_zsh_startup_files() {
+  local zshenv_path="${HOME}/.zshenv"
+  local zdotdir_path=""
+
+  if [ -f "${zshenv_path}" ] && grep -Eq '^[[:space:]]*(export[[:space:]]+)?ZDOTDIR[[:space:]]*=' "${zshenv_path}"; then
+    if ! zdotdir_path="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
+      echo "Could not determine ZDOTDIR from ${zshenv_path}." >&2
+      exit 1
+    fi
+  else
+    prepend_block_once \
+      "${zshenv_path}" \
+      "# >>> ISSL zsh env >>>" \
+      "# <<< ISSL zsh env <<<" \
+      "$(zshenv_default_block)"
+    zdotdir_path="${HOME}/.zsh"
+  fi
+
+  mkdir -p "${zdotdir_path}"
+  prepend_block_once \
+    "${zdotdir_path}/.zprofile" \
+    "# >>> ISSL zsh profile >>>" \
+    "# <<< ISSL zsh profile <<<" \
+    "$(zprofile_block)"
+  prepend_block_once \
+    "${zdotdir_path}/.zshrc" \
+    "# >>> ISSL zsh rc >>>" \
+    "# <<< ISSL zsh rc <<<" \
+    "$(zshrc_block)"
+}
+
 prompt_for_git_identity() {
   local git_name=""
   local git_email=""
@@ -122,6 +263,10 @@ fi
 nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
   switch --flake "${repo_root}#${home_configuration_name}" --impure
 
+ensure_bash_startup_files
+if [ "${ISSL_ENABLE_ZSH}" = "1" ]; then
+  ensure_zsh_startup_files
+fi
 ensure_git_include
 prompt_for_git_identity
 
