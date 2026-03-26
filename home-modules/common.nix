@@ -1,10 +1,9 @@
-{ pkgs, enableZsh ? false, ... }:
+{ lib, enableZsh ? false, ... }:
 
 {
-  home.packages = [
-    pkgs.git
-    pkgs.uv
-  ] ++ pkgs.lib.optional enableZsh pkgs.zsh;
-
-  home.file.".config/issl/git/.gitconfig".source = ../assets/git/.gitconfig;
+  imports = [
+    ./shell.nix
+    ./git.nix
+    ./python.nix
+  ] ++ lib.optional enableZsh ./zsh.nix;
 }

@@ -42,11 +42,6 @@
           extraSpecialArgs = { inherit enableZsh; };
           modules = [
             ./home-modules/common.nix
-            ./home-modules/shell.nix
-            ./home-modules/bash.nix
-          ]
-          ++ nixpkgs.lib.optional enableZsh ./home-modules/zsh.nix
-          ++ [
             {
               home = {
                 inherit username homeDirectory;
