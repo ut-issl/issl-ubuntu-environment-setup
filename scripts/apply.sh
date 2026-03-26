@@ -3,7 +3,12 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-shared_git_config_path="${XDG_CONFIG_HOME:-$HOME/.config}/issl/git/.gitconfig"
+issl_config_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
+shared_git_config_path="${issl_config_home}/git/.gitconfig"
+shared_bash_profile_path="${issl_config_home}/bash/.bash_profile"
+shared_bashrc_path="${issl_config_home}/bash/.bashrc"
+shared_zprofile_path="${issl_config_home}/zsh/.zprofile"
+shared_zshrc_path="${issl_config_home}/zsh/.zshrc"
 git_user_name="${GIT_USER_NAME:-}"
 git_user_email="${GIT_USER_EMAIL:-}"
 issl_enable_zsh="${ISSL_ENABLE_ZSH:-}"
@@ -46,19 +51,17 @@ prepend_block_once() {
 }
 
 bash_profile_block() {
-  cat <<'EOF'
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/bash/.bash_profile" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/bash/.bash_profile"
-fi
-EOF
+  printf '%s\n' \
+    "if [ -f \"${shared_bash_profile_path}\" ]; then" \
+    "  . \"${shared_bash_profile_path}\"" \
+    "fi"
 }
 
 bashrc_block() {
-  cat <<'EOF'
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/bash/.bashrc" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/bash/.bashrc"
-fi
-EOF
+  printf '%s\n' \
+    "if [ -f \"${shared_bashrc_path}\" ]; then" \
+    "  . \"${shared_bashrc_path}\"" \
+    "fi"
 }
 
 zshenv_default_block() {
@@ -70,19 +73,17 @@ EOF
 }
 
 zprofile_block() {
-  cat <<'EOF'
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/zsh/.zprofile" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/zsh/.zprofile"
-fi
-EOF
+  printf '%s\n' \
+    "if [ -f \"${shared_zprofile_path}\" ]; then" \
+    "  . \"${shared_zprofile_path}\"" \
+    "fi"
 }
 
 zshrc_block() {
-  cat <<'EOF'
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/zsh/.zshrc" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/zsh/.zshrc"
-fi
-EOF
+  printf '%s\n' \
+    "if [ -f \"${shared_zshrc_path}\" ]; then" \
+    "  . \"${shared_zshrc_path}\"" \
+    "fi"
 }
 
 resolve_zdotdir_from_zshenv() {
