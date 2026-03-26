@@ -10,8 +10,6 @@ on:
       - flake.nix
       - flake.lock
       - home-modules/**
-      - packages/**
-      - profiles/**
       - scripts/apply.sh
       - tests/**
   pull_request:
@@ -22,8 +20,6 @@ on:
       - flake.nix
       - flake.lock
       - home-modules/**
-      - packages/**
-      - profiles/**
       - scripts/apply.sh
       - tests/**
 
