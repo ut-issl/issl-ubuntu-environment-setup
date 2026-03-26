@@ -10,6 +10,7 @@ issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 assert_shared_shell_env() {
   cmp --silent assets/shell/env.sh "${config_dir}/issl/shell/env.sh"
   cmp --silent assets/shell/rc.sh "${config_dir}/issl/shell/rc.sh"
+  cmp --silent assets/shell/.dircolors "${config_dir}/issl/shell/.dircolors"
 }
 
 assert_shell_env_can_be_sourced() {

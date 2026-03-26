@@ -4,9 +4,12 @@
 
 # Configure GNU-style color output for common tools when available.
 if command -v dircolors >/dev/null 2>&1; then
-  # Prefer user-provided color palette when ~/.dircolors exists.
+  # Prefer ~/.dircolors, then the shared ISSL file.
+  issl_dircolors_path="${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/.dircolors"
   if [ -r "${HOME}/.dircolors" ]; then
     eval "$(dircolors -b "${HOME}/.dircolors")"
+  elif [ -r "${issl_dircolors_path}" ]; then
+    eval "$(dircolors -b "${issl_dircolors_path}")"
   else
     # Fall back to system default LS_COLORS.
     eval "$(dircolors -b)"
