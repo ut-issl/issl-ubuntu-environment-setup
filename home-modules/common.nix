@@ -1,10 +1,9 @@
-{ pkgs, ... }:
+_:
 
 {
-  home.packages = [
-    pkgs.git
-    pkgs.uv
+  imports = [
+    ./shell.nix
+    ./git.nix
+    ./python.nix
   ];
-
-  home.file.".config/issl/git/.gitconfig".source = ../assets/git/.gitconfig;
 }

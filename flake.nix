@@ -18,7 +18,10 @@
       forAllSystems = nixpkgs.lib.genAttrs systems;
       mkPkgs = system: import nixpkgs { inherit system; };
       mkHomeConfiguration =
-        system:
+        {
+          system,
+          enableZsh ? false,
+        }:
         let
           pkgs = mkPkgs system;
           username =
@@ -36,6 +39,9 @@
           inherit pkgs;
           modules = [
             ./home-modules/common.nix
+          ]
+          ++ nixpkgs.lib.optional enableZsh ./home-modules/zsh.nix
+          ++ [
             {
               home = {
                 inherit username homeDirectory;
@@ -55,8 +61,20 @@
       );
 
       homeConfigurations = {
-        issl-common-x86_64-linux = mkHomeConfiguration "x86_64-linux";
-        issl-common-aarch64-linux = mkHomeConfiguration "aarch64-linux";
+        issl-common-x86_64-linux = mkHomeConfiguration {
+          system = "x86_64-linux";
+        };
+        issl-common-aarch64-linux = mkHomeConfiguration {
+          system = "aarch64-linux";
+        };
+        issl-common-zsh-x86_64-linux = mkHomeConfiguration {
+          system = "x86_64-linux";
+          enableZsh = true;
+        };
+        issl-common-zsh-aarch64-linux = mkHomeConfiguration {
+          system = "aarch64-linux";
+          enableZsh = true;
+        };
       };
 
       formatter = forAllSystems (system: (mkPkgs system).nixfmt-rfc-style);
@@ -65,6 +83,7 @@
         system:
         {
           home = self.homeConfigurations."issl-common-${system}".activationPackage;
+          home-zsh = self.homeConfigurations."issl-common-zsh-${system}".activationPackage;
         }
       );
     };
