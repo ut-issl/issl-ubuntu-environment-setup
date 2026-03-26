@@ -1,8 +1,9 @@
 { pkgs, ... }:
 
 {
-  home.packages = [ pkgs.zsh ];
-
-  home.file.".config/issl/zsh/.zprofile".source = ../assets/zsh/.zprofile;
-  home.file.".config/issl/zsh/.zshrc".source = ../assets/zsh/.zshrc;
+  home = {
+    packages = [ pkgs.zsh ];
+    file.".config/issl/zsh/.zprofile".source = ../assets/zsh/.zprofile;
+    file.".config/issl/zsh/.zshrc".source = ../assets/zsh/.zshrc;
+  };
 }
