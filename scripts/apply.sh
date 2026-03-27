@@ -9,9 +9,9 @@ shared_bash_profile_path="${issl_config_home}/bash/.bash_profile"
 shared_bashrc_path="${issl_config_home}/bash/.bashrc"
 shared_zprofile_path="${issl_config_home}/zsh/.zprofile"
 shared_zshrc_path="${issl_config_home}/zsh/.zshrc"
-git_user_name="${GIT_USER_NAME:-}"
-git_user_email="${GIT_USER_EMAIL:-}"
-issl_enable_zsh="${ISSL_ENABLE_ZSH:-}"
+git_user_name="${GIT_USER_NAME-}"
+git_user_email="${GIT_USER_EMAIL-}"
+issl_enable_zsh="${ISSL_ENABLE_ZSH-}"
 nix_feature_config="experimental-features = nix-command flakes"
 hm_profile_dir="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles"
 
@@ -198,14 +198,14 @@ ensure_home_manager_profile_dir() {
 }
 
 is_yes() {
-  case "${1:-}" in
+  case "${1-}" in
   y | Y | yes | YES | Yes | true | TRUE | True | 1) return 0 ;;
   *) return 1 ;;
   esac
 }
 
 is_no() {
-  case "${1:-}" in
+  case "${1-}" in
   n | N | no | NO | No | false | FALSE | False | 0) return 0 ;;
   *) return 1 ;;
   esac
@@ -226,7 +226,7 @@ should_enable_zsh() {
     exit 1
   fi
 
-  current_shell_name="$(basename "${SHELL:-}")"
+  current_shell_name="$(basename "${SHELL-}")"
   if [ "${current_shell_name}" = "zsh" ]; then
     return 0
   fi
@@ -244,7 +244,7 @@ if ! command -v nix >/dev/null 2>&1; then
   exit 1
 fi
 
-if [ -n "${NIX_CONFIG:-}" ]; then
+if [ -n "${NIX_CONFIG-}" ]; then
   export NIX_CONFIG="${NIX_CONFIG}"$'\n'"${nix_feature_config}"
 else
   export NIX_CONFIG="${nix_feature_config}"
