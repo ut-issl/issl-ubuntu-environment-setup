@@ -56,5 +56,5 @@ man() {
     LESS_TERMCAP_ue="$(printf '\033[0m')" \
     LESS_TERMCAP_so="$(printf '\033[45;93m')" \
     LESS_TERMCAP_se="$(printf '\033[0m')" \
-    command man "$@"
+    man "$@"
 }
