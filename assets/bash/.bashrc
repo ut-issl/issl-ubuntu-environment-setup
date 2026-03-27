@@ -1,10 +1,15 @@
-# shellcheck shell=sh
+# shellcheck shell=bash
 # shellcheck disable=SC1091
 
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/env.sh" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/env.sh"
+issl_bootstrap_shell_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell"
+
+if [[ -f "${issl_bootstrap_shell_home}/rc.sh" ]]; then
+  source "${issl_bootstrap_shell_home}/rc.sh"
 fi
 
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/rc.sh" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/rc.sh"
+# Enable bash completion from Home Manager profile when available.
+if [[ -f "${ISSL_NIX_PROFILE_PATH}/share/bash-completion/bash_completion" ]]; then
+  source "${ISSL_NIX_PROFILE_PATH}/share/bash-completion/bash_completion"
+elif [[ -f "/etc/bash_completion" ]]; then
+  source "/etc/bash_completion"
 fi

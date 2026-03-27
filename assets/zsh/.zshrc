@@ -1,12 +1,10 @@
 # shellcheck shell=sh
 # shellcheck disable=SC1091
 
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/env.sh" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/env.sh"
-fi
+issl_bootstrap_shell_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell"
 
-if [ -f "${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/rc.sh" ]; then
-  . "${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell/rc.sh"
+if [ -f "${issl_bootstrap_shell_home}/rc.sh" ]; then
+  . "${issl_bootstrap_shell_home}/rc.sh"
 fi
 
 # ===== History ===== #
