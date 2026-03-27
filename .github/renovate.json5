@@ -143,6 +143,19 @@
       automerge: true,
     },
     {
+      matchDepNames: [
+        'renovate',
+      ],
+      matchFileNames: [
+        '.github/workflows/ci.yaml',
+        '.github/workflows/ci.yml',
+      ],
+      matchUpdateTypes: [
+        'minor',
+      ],
+      automerge: true,
+    },
+    {
       matchManagers: [
         'pre-commit',
       ],
