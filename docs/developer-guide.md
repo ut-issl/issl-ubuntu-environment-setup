@@ -27,6 +27,9 @@ uvx pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type
 This repository enforces [Conventional Commits](https://www.conventionalcommits.org) in pre-commit hooks and CI,
 so your commit messages must follow that format.
 
+This repository uses squash merge by default, and the pull request title is used as the final commit message.
+Therefore, your pull request title must also follow Conventional Commits.
+
 You can maintain Conventional Commits manually, but automation tools such as Commitizen or cz-git can help.
 Any tool is fine, but this repository uses [commitizen-tools/commitizen](https://github.com/commitizen-tools/commitizen)
 for checks, so it is recommended.
