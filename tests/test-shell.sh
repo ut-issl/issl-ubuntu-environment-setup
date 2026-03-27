@@ -34,11 +34,15 @@ assert_bash_startup_files() {
 }
 
 assert_shared_shell_tools() {
-  test -x "${nix_profile_bin}/colordiff"
-  test -x "${nix_profile_bin}/dircolors"
   test -f "${nix_profile_share}/bash-completion/bash_completion"
+
+  test -x "${nix_profile_bin}/colordiff"
   test "$(command -v colordiff)" = "${nix_profile_bin}/colordiff"
+  colordiff --version
+
+  test -x "${nix_profile_bin}/dircolors"
   test "$(command -v dircolors)" = "${nix_profile_bin}/dircolors"
+  dircolors --version
 }
 
 assert_zsh_enabled() {
