@@ -8,10 +8,12 @@ nix_profile_share="${home_dir}/.nix-profile/share"
 default_zdotdir="${home_dir}/.zsh"
 issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 
-assert_shared_shell_env() {
+assert_shared_shell_assets() {
   cmp --silent assets/shell/env.sh "${config_dir}/issl/shell/env.sh"
   cmp --silent assets/shell/rc.sh "${config_dir}/issl/shell/rc.sh"
   cmp --silent assets/shell/.dircolors "${config_dir}/issl/shell/.dircolors"
+  cmp --silent assets/bash/.bash_profile "${config_dir}/issl/bash/.bash_profile"
+  cmp --silent assets/bash/.bashrc "${config_dir}/issl/bash/.bashrc"
 }
 
 assert_shell_env_can_be_sourced() {
@@ -67,7 +69,7 @@ assert_zsh_disabled() {
 }
 
 main() {
-  assert_shared_shell_env
+  assert_shared_shell_assets
   assert_shell_env_can_be_sourced
   assert_bash_startup_files
   assert_shared_shell_tools
