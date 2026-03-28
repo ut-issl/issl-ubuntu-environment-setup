@@ -4,7 +4,6 @@
   home = {
     packages = [
       pkgs.cargo-about
-      pkgs.rust-analyzer
       pkgs.rustup
     ];
 
