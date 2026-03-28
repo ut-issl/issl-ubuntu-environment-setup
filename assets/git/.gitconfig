@@ -1,11 +1,45 @@
-[fetch]
-    prune = true
+[alias]
+    ch = checkout
+    cr = clone --recursive
+    cm = commit
+    ca = commit --amend
+    d = diff --summary --stat --patch
+    wd = d --word-diff
+    stat = diff --stat
+    sgl = log --graph --all --decorate --date=format:'%Y/%m/%d %H:%M' --pretty=format:'%C(yellow)%h %C(green)%cd %C(auto)%d %C(white)%s %C(cyan)[%cn]'
+    sgls = sgl --stat
+    st = status
+    su = submodule update --init --recursive
+    which = "!_() { git config --get alias.$1; }; _"
+
+[core]
+    autocrlf = input
+    editor = vim
+    eol = lf
+    safecrlf = true
 
 [init]
     defaultBranch = main
 
+[fetch]
+    prune = true
+
 [pull]
     rebase = false
 
+[rebase]
+    autoStash = true
+
+[rerere]
+    enabled = true
+
 [push]
     default = simple
+    autoSetupRemote = true
+    recurseSubmodules = check
+
+[tag]
+    sort = version:refname
+
+[url "ssh://git@github.com/"]
+    insteadOf = https://github.com/
