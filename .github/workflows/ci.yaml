@@ -53,10 +53,6 @@ jobs:
               - '**/*.sh'
               - '**/*.bash'
               - '**/*.zsh'
-              - 'assets/bash/.bash_profile'
-              - 'assets/bash/.bashrc'
-              - 'assets/zsh/.zprofile'
-              - 'assets/zsh/.zshrc'
             md:
               - '**/*.md'
               - .markdownlint-cli2.yaml
@@ -203,11 +199,7 @@ jobs:
           find . -type f \( \
             -name '*.sh' -o \
             -name '*.bash' -o \
-            -name '*.zsh' -o \
-            -path './assets/bash/.bash_profile' -o \
-            -path './assets/bash/.bashrc' -o \
-            -path './assets/zsh/.zprofile' -o \
-            -path './assets/zsh/.zshrc' \
+            -name '*.zsh' \
           \) -not -path './.git/*' -print0 > "${shell_files_path}"
           echo "shell_files=${shell_files_path}" >> "$GITHUB_OUTPUT"
           if [ ! -s "${shell_files_path}" ]; then
