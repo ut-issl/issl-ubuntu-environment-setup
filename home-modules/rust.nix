@@ -3,10 +3,8 @@
 {
   home = {
     packages = [
-      pkgs.cargo
       pkgs.cargo-about
       pkgs.rust-analyzer
-      pkgs.rustc
       pkgs.rustup
     ];
 

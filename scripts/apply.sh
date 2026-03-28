@@ -307,6 +307,21 @@ ensure_cargo_config_include() {
     "$(cargo_config_include_block)"
 }
 
+ensure_rustup_default_stable() {
+  if ! command -v rustup >/dev/null 2>&1; then
+    echo "rustup is required before configuring the Rust toolchain." >&2
+    exit 1
+  fi
+
+  if ! rustup show active-toolchain >/dev/null 2>&1; then
+    rustup toolchain install stable
+  fi
+
+  if ! rustup show active-toolchain | grep -Eq '^stable(-|$)'; then
+    rustup default stable
+  fi
+}
+
 if ! command -v nix >/dev/null 2>&1; then
   echo "nix is required before running scripts/apply.sh." >&2
   exit 1
@@ -343,5 +358,6 @@ ensure_git_include
 prompt_for_git_identity
 ensure_python_startup_file
 ensure_cargo_config_include
+ensure_rustup_default_stable
 
 echo "Applied the shared Home Manager configuration."

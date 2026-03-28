@@ -5,12 +5,6 @@ home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 
-assert_cargo_installation() {
-  test -x "${nix_profile_bin}/cargo"
-  test "$(command -v cargo)" = "${nix_profile_bin}/cargo"
-  cargo --version
-}
-
 assert_cargo_about_installation() {
   test -x "${nix_profile_bin}/cargo-about"
   test "$(command -v cargo-about)" = "${nix_profile_bin}/cargo-about"
@@ -23,16 +17,20 @@ assert_rust_analyzer_installation() {
   rust-analyzer --version
 }
 
-assert_rustc_installation() {
-  test -x "${nix_profile_bin}/rustc"
-  test "$(command -v rustc)" = "${nix_profile_bin}/rustc"
-  rustc --version
-}
-
 assert_rustup_installation() {
   test -x "${nix_profile_bin}/rustup"
   test "$(command -v rustup)" = "${nix_profile_bin}/rustup"
   rustup --version
+}
+
+assert_cargo_installation() {
+  command -v cargo >/dev/null 2>&1
+  cargo --version
+}
+
+assert_rustc_installation() {
+  command -v rustc >/dev/null 2>&1
+  rustc --version
 }
 
 assert_shared_rust_config_asset() {
@@ -49,11 +47,11 @@ assert_cargo_config_include() {
 }
 
 main() {
-  assert_cargo_installation
   assert_cargo_about_installation
   assert_rust_analyzer_installation
-  assert_rustc_installation
   assert_rustup_installation
+  assert_cargo_installation
+  assert_rustc_installation
   assert_shared_rust_config_asset
   assert_cargo_config_include
 }
