@@ -15,10 +15,10 @@ issl_enable_zsh="${ISSL_ENABLE_ZSH-}"
 nix_feature_config="experimental-features = nix-command flakes"
 hm_profile_dir="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles"
 
-ensure_git_include() {
-  if ! git config --global --get-all include.path | grep -Fxq "${shared_git_config_path}"; then
-    git config --global --add include.path "${shared_git_config_path}"
-  fi
+# ===== Common ===== #
+
+ensure_home_manager_profile_dir() {
+  mkdir -p "${hm_profile_dir}"
 }
 
 prepend_block_once() {
@@ -50,6 +50,22 @@ prepend_block_once() {
   mv "${temp_file}" "${file_path}"
 }
 
+is_yes() {
+  case "${1-}" in
+  y | Y | yes | YES | Yes | true | TRUE | True | 1) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+is_no() {
+  case "${1-}" in
+  n | N | no | NO | No | false | FALSE | False | 0) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+# ===== Bash ===== #
+
 bash_profile_block() {
   printf '%s\n' \
     "if [ -f \"${shared_bash_profile_path}\" ]; then" \
@@ -64,43 +80,47 @@ bashrc_block() {
     "fi"
 }
 
-zshenv_default_block() {
-  cat <<'EOF'
-if [ -z "${ZDOTDIR:-}" ]; then
-  export ZDOTDIR="$HOME/.zsh"
-fi
-EOF
+ensure_bash_startup_files() {
+  prepend_block_once \
+    "${HOME}/.bash_profile" \
+    "# >>> ISSL bash profile >>>" \
+    "# <<< ISSL bash profile <<<" \
+    "$(bash_profile_block)"
+  prepend_block_once \
+    "${HOME}/.bashrc" \
+    "# >>> ISSL bash rc >>>" \
+    "# <<< ISSL bash rc <<<" \
+    "$(bashrc_block)"
 }
 
-zprofile_block() {
-  printf '%s\n' \
-    "if [ -f \"${shared_zprofile_path}\" ]; then" \
-    "  . \"${shared_zprofile_path}\"" \
-    "fi"
-}
+# ===== Zsh ===== #
 
-zshrc_block() {
-  printf '%s\n' \
-    "if [ -f \"${shared_zshrc_path}\" ]; then" \
-    "  . \"${shared_zshrc_path}\"" \
-    "fi"
-}
+should_enable_zsh() {
+  local current_shell_name=""
+  local response=""
 
-pythonrc_block() {
-  cat <<'EOF'
-import os
-from pathlib import Path
-import runpy
+  if [ -n "${issl_enable_zsh}" ]; then
+    if is_yes "${issl_enable_zsh}"; then
+      return 0
+    fi
+    if is_no "${issl_enable_zsh}"; then
+      return 1
+    fi
+    echo "ISSL_ENABLE_ZSH must be a yes/no style value." >&2
+    exit 1
+  fi
 
-issl_python_home = os.environ.get("ISSL_PYTHON_HOME")
-if not issl_python_home:
-  config_home = os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))
-  issl_python_home = str(Path(config_home) / "issl" / "python")
+  current_shell_name="$(basename "${SHELL-}")"
+  if [ "${current_shell_name}" = "zsh" ]; then
+    return 0
+  fi
 
-shared_pythonrc = Path(issl_python_home) / "pythonrc.py"
-if shared_pythonrc.is_file():
-  runpy.run_path(str(shared_pythonrc), run_name="__main__")
-EOF
+  if [ ! -t 0 ]; then
+    return 1
+  fi
+
+  read -r -p "Enable shared zsh configuration as well? [y/N] " response
+  is_yes "${response}"
 }
 
 resolve_zdotdir_from_zshenv() {
@@ -133,17 +153,26 @@ resolve_zdotdir_from_zshenv() {
   printf '%s\n' "${resolved_value}"
 }
 
-ensure_bash_startup_files() {
-  prepend_block_once \
-    "${HOME}/.bash_profile" \
-    "# >>> ISSL bash profile >>>" \
-    "# <<< ISSL bash profile <<<" \
-    "$(bash_profile_block)"
-  prepend_block_once \
-    "${HOME}/.bashrc" \
-    "# >>> ISSL bash rc >>>" \
-    "# <<< ISSL bash rc <<<" \
-    "$(bashrc_block)"
+zshenv_default_block() {
+  cat <<'ZSHENV_EOF'
+if [ -z "${ZDOTDIR:-}" ]; then
+  export ZDOTDIR="$HOME/.zsh"
+fi
+ZSHENV_EOF
+}
+
+zprofile_block() {
+  printf '%s\n' \
+    "if [ -f \"${shared_zprofile_path}\" ]; then" \
+    "  . \"${shared_zprofile_path}\"" \
+    "fi"
+}
+
+zshrc_block() {
+  printf '%s\n' \
+    "if [ -f \"${shared_zshrc_path}\" ]; then" \
+    "  . \"${shared_zshrc_path}\"" \
+    "fi"
 }
 
 ensure_zsh_startup_files() {
@@ -177,12 +206,12 @@ ensure_zsh_startup_files() {
     "$(zshrc_block)"
 }
 
-ensure_python_startup_file() {
-  prepend_block_once \
-    "${HOME}/.python/.pythonrc.py" \
-    "# >>> ISSL python startup >>>" \
-    "# <<< ISSL python startup <<<" \
-    "$(pythonrc_block)"
+# ===== Git ===== #
+
+ensure_git_include() {
+  if ! git config --global --get-all include.path | grep -Fxq "${shared_git_config_path}"; then
+    git config --global --add include.path "${shared_git_config_path}"
+  fi
 }
 
 prompt_for_git_identity() {
@@ -218,50 +247,31 @@ prompt_for_git_identity() {
   fi
 }
 
-ensure_home_manager_profile_dir() {
-  mkdir -p "${hm_profile_dir}"
+# ===== Python ===== #
+
+pythonrc_block() {
+  cat <<'PYTHON_EOF'
+import os
+from pathlib import Path
+import runpy
+
+issl_python_home = os.environ.get("ISSL_PYTHON_HOME")
+if not issl_python_home:
+  config_home = os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))
+  issl_python_home = str(Path(config_home) / "issl" / "python")
+
+shared_pythonrc = Path(issl_python_home) / "pythonrc.py"
+if shared_pythonrc.is_file():
+  runpy.run_path(str(shared_pythonrc), run_name="__main__")
+PYTHON_EOF
 }
 
-is_yes() {
-  case "${1-}" in
-  y | Y | yes | YES | Yes | true | TRUE | True | 1) return 0 ;;
-  *) return 1 ;;
-  esac
-}
-
-is_no() {
-  case "${1-}" in
-  n | N | no | NO | No | false | FALSE | False | 0) return 0 ;;
-  *) return 1 ;;
-  esac
-}
-
-should_enable_zsh() {
-  local current_shell_name=""
-  local response=""
-
-  if [ -n "${issl_enable_zsh}" ]; then
-    if is_yes "${issl_enable_zsh}"; then
-      return 0
-    fi
-    if is_no "${issl_enable_zsh}"; then
-      return 1
-    fi
-    echo "ISSL_ENABLE_ZSH must be a yes/no style value." >&2
-    exit 1
-  fi
-
-  current_shell_name="$(basename "${SHELL-}")"
-  if [ "${current_shell_name}" = "zsh" ]; then
-    return 0
-  fi
-
-  if [ ! -t 0 ]; then
-    return 1
-  fi
-
-  read -r -p "Enable shared zsh configuration as well? [y/N] " response
-  is_yes "${response}"
+ensure_python_startup_file() {
+  prepend_block_once \
+    "${HOME}/.python/.pythonrc.py" \
+    "# >>> ISSL python startup >>>" \
+    "# <<< ISSL python startup <<<" \
+    "$(pythonrc_block)"
 }
 
 if ! command -v nix >/dev/null 2>&1; then
