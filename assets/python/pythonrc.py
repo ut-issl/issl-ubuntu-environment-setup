@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import atexit
+import builtins
 import os
 import readline
-import rlcompleter
 import sys
 from pprint import pprint
 
@@ -20,7 +20,6 @@ def _history_path() -> str:
 
 
 def _enable_completion() -> None:
-    rlcompleter.Completer()
     readline.parse_and_bind("tab: complete")
 
 
@@ -33,7 +32,7 @@ def _enable_history() -> None:
     if os.path.exists(histfile):
         try:
             readline.read_history_file(histfile)
-        except OSError:
+        except Exception:
             pass
 
     readline.set_history_length(10_000)
@@ -41,7 +40,7 @@ def _enable_history() -> None:
     def save_history() -> None:
         try:
             readline.write_history_file(histfile)
-        except OSError:
+        except Exception:
             pass
 
     atexit.register(save_history)
@@ -51,11 +50,7 @@ def _enable_pretty_display() -> None:
     def displayhook(value: object) -> None:
         if value is None:
             return
-        builtins_obj = __builtins__
-        if isinstance(builtins_obj, dict):
-            builtins_obj["_"] = value
-        else:
-            setattr(builtins_obj, "_", value)
+        builtins._ = value
         pprint(value, indent=1, width=100, compact=True, depth=3)
 
     sys.displayhook = displayhook
@@ -63,7 +58,7 @@ def _enable_pretty_display() -> None:
 
 def _set_colored_prompts() -> None:
     term = os.environ.get("TERM", "")
-    if term in {"xterm-color", "xterm-256color", "linux", "screen", "screen-256color", "screen-bce"}:
+    if sys.stdout.isatty() and term and term != "dumb":
         purple = "\001\033[0;35m\002"
         brown = "\001\033[0;33m\002"
         normal = "\001\033[0m\002"
