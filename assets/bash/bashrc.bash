@@ -16,6 +16,13 @@ elif [[ -f "/etc/bash_completion" ]]; then
   source "/etc/bash_completion"
 fi
 
+# Enable uv completion when uv is available.
+if command -v uv >/dev/null 2>&1; then
+  if uv generate-shell-completion bash >/dev/null 2>&1; then
+    eval "$(uv generate-shell-completion bash)"
+  fi
+fi
+
 # Enable rustup/cargo completion when rustup is available.
 if command -v rustup >/dev/null 2>&1; then
   eval "$(rustup completions bash)"

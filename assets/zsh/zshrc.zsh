@@ -26,6 +26,14 @@ setopt share_history        # Share history across concurrent zsh sessions.
 autoload -Uz compinit
 compinit
 
+# Enable uv completion when uv is available.
+if command -v uv >/dev/null 2>&1; then
+  if uv generate-shell-completion zsh >/dev/null 2>&1; then
+    eval "$(uv generate-shell-completion zsh)"
+  fi
+fi
+
+# Enable rustup/cargo completion when rustup is available.
 if command -v rustup >/dev/null 2>&1; then
   eval "$(rustup completions zsh)"
   if rustup completions zsh cargo >/dev/null 2>&1; then
