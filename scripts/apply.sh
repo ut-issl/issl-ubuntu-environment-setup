@@ -86,6 +86,23 @@ zshrc_block() {
     "fi"
 }
 
+pythonrc_block() {
+  cat <<'EOF'
+import os
+from pathlib import Path
+import runpy
+
+issl_python_home = os.environ.get("ISSL_PYTHON_HOME")
+if not issl_python_home:
+  config_home = os.environ.get("XDG_CONFIG_HOME", str(Path.home() / ".config"))
+  issl_python_home = str(Path(config_home) / "issl" / "python")
+
+shared_pythonrc = Path(issl_python_home) / "pythonrc.py"
+if shared_pythonrc.is_file():
+  runpy.run_path(str(shared_pythonrc), run_name="__main__")
+EOF
+}
+
 resolve_zdotdir_from_zshenv() {
   local zshenv_path="$1"
   local zsh_bin=""
@@ -158,6 +175,14 @@ ensure_zsh_startup_files() {
     "# >>> ISSL zsh rc >>>" \
     "# <<< ISSL zsh rc <<<" \
     "$(zshrc_block)"
+}
+
+ensure_python_startup_file() {
+  prepend_block_once \
+    "${HOME}/.python/.pythonrc.py" \
+    "# >>> ISSL python startup >>>" \
+    "# <<< ISSL python startup <<<" \
+    "$(pythonrc_block)"
 }
 
 prompt_for_git_identity() {
@@ -273,5 +298,6 @@ if [ "${zsh_enabled}" = "1" ]; then
 fi
 ensure_git_include
 prompt_for_git_identity
+ensure_python_startup_file
 
 echo "Applied the shared Home Manager configuration."
