@@ -17,6 +17,12 @@ assert_cargo_about_installation() {
   cargo-about --version
 }
 
+assert_rust_analyzer_installation() {
+  test -x "${nix_profile_bin}/rust-analyzer"
+  test "$(command -v rust-analyzer)" = "${nix_profile_bin}/rust-analyzer"
+  rust-analyzer --version
+}
+
 assert_rustc_installation() {
   test -x "${nix_profile_bin}/rustc"
   test "$(command -v rustc)" = "${nix_profile_bin}/rustc"
@@ -45,6 +51,7 @@ assert_cargo_config_include() {
 main() {
   assert_cargo_installation
   assert_cargo_about_installation
+  assert_rust_analyzer_installation
   assert_rustc_installation
   assert_rustup_installation
   assert_shared_rust_config_asset
