@@ -115,6 +115,17 @@
       datasourceTemplate: 'pypi',
       depNameTemplate: 'yamllint',
     },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows/ci\\.ya?ml$/',
+      ],
+      matchStrings: [
+        'ruff==(?<currentValue>[^"\\s]+)',
+      ],
+      datasourceTemplate: 'pypi',
+      depNameTemplate: 'ruff',
+    },
   ],
   packageRules: [
     {
