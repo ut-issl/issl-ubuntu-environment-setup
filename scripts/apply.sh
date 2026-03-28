@@ -9,6 +9,7 @@ shared_bash_profile_path="${issl_config_home}/bash/.bash_profile"
 shared_bashrc_path="${issl_config_home}/bash/.bashrc"
 shared_zprofile_path="${issl_config_home}/zsh/.zprofile"
 shared_zshrc_path="${issl_config_home}/zsh/.zshrc"
+shared_rust_config_path="${issl_config_home}/rust/config.toml"
 git_user_name="${GIT_USER_NAME-}"
 git_user_email="${GIT_USER_EMAIL-}"
 issl_enable_zsh="${ISSL_ENABLE_ZSH-}"
@@ -274,6 +275,38 @@ ensure_python_startup_file() {
     "$(pythonrc_block)"
 }
 
+# ===== Rust ===== #
+
+cargo_config_include_block() {
+  printf '%s\n' \
+    "include = [" \
+    "  { path = \"${shared_rust_config_path}\", optional = true }," \
+    "]"
+}
+
+ensure_cargo_config_include() {
+  local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
+  local cargo_config_path="${cargo_home_path}/config.toml"
+
+  mkdir -p "${cargo_home_path}"
+
+  if [ -f "${cargo_config_path}" ] && grep -Fq "${shared_rust_config_path}" "${cargo_config_path}"; then
+    return
+  fi
+
+  if [ -f "${cargo_config_path}" ] && grep -Eq '^[[:space:]]*include[[:space:]]*=' "${cargo_config_path}"; then
+    echo "Skipping Cargo include setup because ${cargo_config_path} already defines include." >&2
+    echo "Please add ${shared_rust_config_path} to include manually." >&2
+    return
+  fi
+
+  prepend_block_once \
+    "${cargo_config_path}" \
+    "# >>> ISSL cargo config >>>" \
+    "# <<< ISSL cargo config <<<" \
+    "$(cargo_config_include_block)"
+}
+
 if ! command -v nix >/dev/null 2>&1; then
   echo "nix is required before running scripts/apply.sh." >&2
   exit 1
@@ -309,5 +342,6 @@ fi
 ensure_git_include
 prompt_for_git_identity
 ensure_python_startup_file
+ensure_cargo_config_include
 
 echo "Applied the shared Home Manager configuration."

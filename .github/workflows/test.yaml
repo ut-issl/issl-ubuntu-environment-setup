@@ -115,4 +115,5 @@ jobs:
         shell: bash
         env:
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
         run: ./tests/test-rust.sh
