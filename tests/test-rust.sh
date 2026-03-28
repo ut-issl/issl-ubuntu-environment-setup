@@ -10,6 +10,12 @@ assert_cargo_installation() {
   cargo --version
 }
 
+assert_cargo_about_installation() {
+  test -x "${nix_profile_bin}/cargo-about"
+  test "$(command -v cargo-about)" = "${nix_profile_bin}/cargo-about"
+  cargo-about --version
+}
+
 assert_rustc_installation() {
   test -x "${nix_profile_bin}/rustc"
   test "$(command -v rustc)" = "${nix_profile_bin}/rustc"
@@ -24,6 +30,7 @@ assert_rustup_installation() {
 
 main() {
   assert_cargo_installation
+  assert_cargo_about_installation
   assert_rustc_installation
   assert_rustup_installation
 }
