@@ -39,6 +39,10 @@ assert_clang_format_installation() {
   clang-format --version
 }
 
+assert_shared_clang_format_configuration() {
+  cmp --silent assets/cpp/clang-format.yaml "${home_dir}/.clang-format"
+}
+
 main() {
   assert_gcc_installation
   assert_gxx_installation
@@ -46,6 +50,7 @@ main() {
   assert_make_installation
   assert_cmake_installation
   assert_clang_format_installation
+  assert_shared_clang_format_configuration
 }
 
 main "$@"

@@ -11,6 +11,7 @@ rules:
     ignore: |
       .github/workflows/*.yml
       .github/workflows/*.yaml
+      assets/cpp/clang-format.yaml
   comments:
     ignore: |
       .github/workflows/*.yml
