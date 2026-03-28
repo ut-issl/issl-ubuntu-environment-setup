@@ -37,10 +37,12 @@
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
+          extraSpecialArgs = {
+            inherit enableZsh;
+          };
           modules = [
             ./home-modules/common.nix
           ]
-          ++ nixpkgs.lib.optional enableZsh ./home-modules/zsh.nix
           ++ [
             {
               home = {
