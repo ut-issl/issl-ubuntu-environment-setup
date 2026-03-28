@@ -12,8 +12,8 @@ assert_shared_shell_assets() {
   cmp --silent assets/shell/env.sh "${config_dir}/issl/shell/env.sh"
   cmp --silent assets/shell/rc.sh "${config_dir}/issl/shell/rc.sh"
   cmp --silent assets/shell/.dircolors "${config_dir}/issl/shell/.dircolors"
-  cmp --silent assets/bash/.bash_profile "${config_dir}/issl/bash/.bash_profile"
-  cmp --silent assets/bash/.bashrc "${config_dir}/issl/bash/.bashrc"
+  cmp --silent assets/bash/bash_profile.bash "${config_dir}/issl/bash/.bash_profile"
+  cmp --silent assets/bash/bashrc.bash "${config_dir}/issl/bash/.bashrc"
 }
 
 assert_shell_env_can_be_sourced() {
