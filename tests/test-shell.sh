@@ -56,6 +56,11 @@ assert_zsh_enabled() {
   test -x "${nix_profile_bin}/zsh"
 }
 
+assert_shared_zsh_assets() {
+  cmp --silent assets/zsh/zprofile.zsh "${config_dir}/issl/zsh/.zprofile"
+  cmp --silent assets/zsh/zshrc.zsh "${config_dir}/issl/zsh/.zshrc"
+}
+
 assert_default_zsh_startup_files_enabled() {
   grep -Fq '# >>> ISSL zsh env >>>' "${home_dir}/.zshenv"
   # shellcheck disable=SC2016
@@ -81,6 +86,7 @@ main() {
 
   if [ "${issl_enable_zsh}" = "1" ]; then
     assert_zsh_enabled
+    assert_shared_zsh_assets
     assert_default_zsh_startup_files_enabled
   else
     assert_zsh_disabled
