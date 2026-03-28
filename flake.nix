@@ -41,7 +41,7 @@
             inherit enableZsh;
           };
           modules = [
-            ./home-modules/common.nix
+            ./home-modules/main.nix
           ]
           ++ [
             {
