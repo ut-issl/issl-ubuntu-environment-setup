@@ -25,6 +25,9 @@ assert_shell_env_can_be_sourced() {
     bash <<'EOF'
 . "${SHELL_ENV_PATH}"
 test "${ISSL_CONFIG_HOME}" = "${XDG_CONFIG_HOME}/issl"
+test "${ISSL_PYTHON_HOME}" = "${XDG_CONFIG_HOME}/issl/python"
+test "${PYTHONSTARTUP}" = "${HOME}/.python/.pythonrc.py"
+test "${PYTHONHISTFILE}" = "${HOME}/.python/.python_history"
 EOF
 }
 
