@@ -104,6 +104,12 @@ jobs:
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
         run: ./tests/test-git.sh
 
+      - name: Test vim setup
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+        run: ./tests/test-vim.sh
+
       - name: Test C/C++ setup
         shell: bash
         env:
