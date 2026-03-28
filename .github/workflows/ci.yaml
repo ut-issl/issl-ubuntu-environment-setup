@@ -26,6 +26,7 @@ jobs:
       json5_files: ${{ steps.changed-files.outputs.json5_all_changed_files }}
       toml: ${{ steps.changed-files.outputs.toml_any_changed }}
       yaml: ${{ steps.changed-files.outputs.yaml_any_changed }}
+      python: ${{ steps.changed-files.outputs.python_any_changed }}
 
     steps:
       - name: Checkout the main repository
@@ -68,6 +69,11 @@ jobs:
               - '**/*.yml'
               - '**/*.yaml'
               - .yamllint.yaml
+            python:
+              - '**/*.py'
+              - pyproject.toml
+              - .python-version
+              - uv.lock
 
   lint-gh-actions:
     name: Lint GitHub Actions
@@ -367,6 +373,75 @@ jobs:
           reporter: github-pr-review
           fail_level: error
           yamllint_flags: .
+
+  lint-python:
+    name: Lint Python
+    needs: determine-changes
+    if: ${{ needs.determine-changes.outputs.python == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7.6.0
+        with:
+          version: '0.11.2'
+
+      - name: Lint with Ruff
+        if: github.event_name != 'pull_request'
+        run: uvx --from "ruff==0.13.3" ruff check . --output-format=github
+
+      - name: Set up reviewdog
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
+        with:
+          reviewdog_version: 'v0.21.0'
+
+      - name: Lint with Ruff (reviewdog)
+        if: github.event_name == 'pull_request'
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ruff_rc=0
+          uvx --from "ruff==0.13.3" ruff check . --output-format=json > /tmp/ruff-report.json || ruff_rc=$?
+          reviewdog_rc=0
+          jq -c '
+            .[] |
+            {
+              source: {name: "ruff"},
+              severity: "ERROR",
+              message: (.message + " (" + .code + ")"),
+              location: {
+                path: .filename,
+                range: {
+                  start: {line: .location.row, column: .location.column},
+                  end: {
+                    line: (.end_location.row // .location.row),
+                    column: (.end_location.column // .location.column)
+                  }
+                }
+              }
+            }
+          ' /tmp/ruff-report.json > /tmp/ruff-rdjsonl.txt || true
+          reviewdog < /tmp/ruff-rdjsonl.txt \
+              -f=rdjsonl \
+              -name=ruff \
+              -reporter=github-pr-review \
+              -fail-level=error \
+              -tee || reviewdog_rc=$?
+          if [ $ruff_rc -ne 0 ] && [ ! -s /tmp/ruff-rdjsonl.txt ]; then
+            echo "::error title=ruff::ruff failed before producing diagnostics for reviewdog"
+            exit $ruff_rc
+          fi
+          exit $reviewdog_rc
 
   check-prek:
     name: Check prek
