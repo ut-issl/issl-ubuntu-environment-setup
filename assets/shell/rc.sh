@@ -46,6 +46,8 @@ else
   alias diff='diff -u' # Unified diff without color.
 fi
 
+alias makej='make -j$(( $(nproc 2>/dev/null || echo 1) + 1 ))' # Build in parallel with CPU cores + 1 jobs.
+
 # ===== Functions ===== #
 
 man() {
