@@ -54,6 +54,8 @@ assert_shared_shell_tools() {
 
 assert_zsh_enabled() {
   test -x "${nix_profile_bin}/zsh"
+  test "$(command -v zsh)" = "${nix_profile_bin}/zsh"
+  zsh --version
 }
 
 assert_shared_zsh_assets() {
