@@ -74,6 +74,7 @@ jobs:
               - pyproject.toml
               - .python-version
               - uv.lock
+              - .ruff.toml
 
   lint-gh-actions:
     name: Lint GitHub Actions
