@@ -19,6 +19,12 @@ prepend_path() {
 
 prepend_path "$HOME/.local/bin"
 
+# ===== Python ===== #
+
 if [ -z "${PYTHONSTARTUP:-}" ]; then
   export PYTHONSTARTUP="${HOME}/.python/.pythonrc.py"
+fi
+
+if [ -z "${PYTHONHISTFILE:-}" ]; then
+  export PYTHONHISTFILE="${HOME}/.python/.python_history"
 fi

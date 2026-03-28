@@ -11,8 +11,11 @@ from pprint import pprint
 
 
 def _history_path() -> str:
-    config_home = os.environ.get("XDG_CONFIG_HOME", os.path.join(os.path.expanduser("~"), ".config"))
-    python_home = os.environ.get("ISSL_PYTHON_HOME", os.path.join(config_home, "issl", "python"))
+    histfile = os.environ.get("PYTHONHISTFILE")
+    if histfile:
+        return histfile
+
+    python_home = os.path.join(os.path.expanduser("~"), ".python")
     return os.path.join(python_home, ".python_history")
 
 
@@ -28,10 +31,20 @@ def _enable_history() -> None:
         os.makedirs(histdir, exist_ok=True)
 
     if os.path.exists(histfile):
-        readline.read_history_file(histfile)
+        try:
+            readline.read_history_file(histfile)
+        except OSError:
+            pass
 
     readline.set_history_length(10_000)
-    atexit.register(readline.write_history_file, histfile)
+
+    def save_history() -> None:
+        try:
+            readline.write_history_file(histfile)
+        except OSError:
+            pass
+
+    atexit.register(save_history)
 
 
 def _enable_pretty_display() -> None:
