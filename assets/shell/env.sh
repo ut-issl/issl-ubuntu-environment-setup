@@ -3,8 +3,10 @@
 export ISSL_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
 export ISSL_SHELL_HOME="${ISSL_CONFIG_HOME}/shell"
 export ISSL_PYTHON_HOME="${ISSL_CONFIG_HOME}/python"
+export ISSL_RUST_HOME="${ISSL_CONFIG_HOME}/rust"
 
 export ISSL_NIX_PROFILE_PATH="${ISSL_NIX_PROFILE_PATH:-$HOME/.nix-profile}"
+export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
 
 # Prepend one existing directory to PATH if it is not already present.
 prepend_path() {
@@ -18,6 +20,7 @@ prepend_path() {
 }
 
 prepend_path "$HOME/.local/bin"
+prepend_path "${CARGO_HOME}/bin"
 
 # ===== Python ===== #
 

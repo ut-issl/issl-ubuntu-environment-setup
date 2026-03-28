@@ -110,3 +110,10 @@ jobs:
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
         run: ./tests/test-python.sh
+
+      - name: Test rust setup
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+        run: ./tests/test-rust.sh

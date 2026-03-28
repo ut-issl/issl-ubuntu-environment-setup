@@ -7,9 +7,19 @@ if [[ -f "${issl_bootstrap_shell_home}/rc.sh" ]]; then
   source "${issl_bootstrap_shell_home}/rc.sh"
 fi
 
+# ===== Completion ===== #
+
 # Enable bash completion from Home Manager profile when available.
 if [[ -f "${ISSL_NIX_PROFILE_PATH}/share/bash-completion/bash_completion" ]]; then
   source "${ISSL_NIX_PROFILE_PATH}/share/bash-completion/bash_completion"
 elif [[ -f "/etc/bash_completion" ]]; then
   source "/etc/bash_completion"
+fi
+
+# Enable rustup/cargo completion when rustup is available.
+if command -v rustup >/dev/null 2>&1; then
+  eval "$(rustup completions bash)"
+  if rustup completions bash cargo >/dev/null 2>&1; then
+    eval "$(rustup completions bash cargo)"
+  fi
 fi

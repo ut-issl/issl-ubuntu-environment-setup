@@ -19,3 +19,16 @@ setopt hist_ignore_all_dups # Remove older duplicates when a command repeats.
 setopt hist_ignore_space    # Skip commands that start with a space.
 setopt hist_reduce_blanks   # Compress redundant internal whitespace before saving.
 setopt share_history        # Share history across concurrent zsh sessions.
+
+# ===== Completion ===== #
+
+# shellcheck disable=SC3044
+autoload -Uz compinit
+compinit
+
+if command -v rustup >/dev/null 2>&1; then
+  eval "$(rustup completions zsh)"
+  if rustup completions zsh cargo >/dev/null 2>&1; then
+    eval "$(rustup completions zsh cargo)"
+  fi
+fi

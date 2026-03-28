@@ -26,6 +26,8 @@ assert_shell_env_can_be_sourced() {
 . "${SHELL_ENV_PATH}"
 test "${ISSL_CONFIG_HOME}" = "${XDG_CONFIG_HOME}/issl"
 test "${ISSL_PYTHON_HOME}" = "${XDG_CONFIG_HOME}/issl/python"
+test "${ISSL_RUST_HOME}" = "${XDG_CONFIG_HOME}/issl/rust"
+test "${CARGO_HOME}" = "${HOME}/.cargo"
 test "${PYTHONSTARTUP}" = "${HOME}/.python/.pythonrc.py"
 test "${PYTHONHISTFILE}" = "${HOME}/.python/.python_history"
 EOF
