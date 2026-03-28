@@ -18,6 +18,7 @@ prepend_path() {
 }
 
 prepend_path "$HOME/.local/bin"
+prepend_path "$HOME/.cargo/bin"
 
 # ===== Python ===== #
 
