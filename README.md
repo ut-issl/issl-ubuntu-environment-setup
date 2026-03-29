@@ -21,6 +21,13 @@ To pin the setup to a fixed release instead of `latest`, replace `latest` with a
 bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/v0.1.1/setup.sh)
 ```
 
+To override setup variables, set them before the command. For example, to change the clone destination:
+
+```bash
+INSTALL_DIR="$HOME/.local/share/issl/custom-ubuntu-environment-setup" \
+bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
+```
+
 ## License
 
 Licensed under either of [MIT license](LICENSE-MIT) or [Apache License, Version 2.0](LICENSE-APACHE) at your option.
