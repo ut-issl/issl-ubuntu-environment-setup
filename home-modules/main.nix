@@ -1,6 +1,8 @@
 { lib, enableZsh, ... }:
 
 {
+  xdg.enable = true;
+
   imports =
     [
       ./shell.nix

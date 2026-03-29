@@ -1,19 +1,17 @@
 { pkgs, ... }:
 
 {
-  home = {
-    packages = [
-      pkgs.bash-completion
-      pkgs.colordiff
-      pkgs.coreutils
-    ];
+  home.packages = [
+    pkgs.bash-completion
+    pkgs.colordiff
+    pkgs.coreutils
+  ];
 
-    file = {
-      ".config/issl/shell/env.sh".source = ../assets/shell/env.sh;
-      ".config/issl/shell/rc.sh".source = ../assets/shell/rc.sh;
-      ".config/issl/shell/.dircolors".source = ../assets/shell/.dircolors;
-      ".config/issl/bash/.bash_profile".source = ../assets/bash/bash_profile.bash;
-      ".config/issl/bash/.bashrc".source = ../assets/bash/bashrc.bash;
-    };
+  xdg.configFile = {
+    "issl/shell/env.sh".source = ../assets/shell/env.sh;
+    "issl/shell/rc.sh".source = ../assets/shell/rc.sh;
+    "issl/shell/.dircolors".source = ../assets/shell/.dircolors;
+    "issl/bash/.bash_profile".source = ../assets/bash/bash_profile.bash;
+    "issl/bash/.bashrc".source = ../assets/bash/bashrc.bash;
   };
 }
