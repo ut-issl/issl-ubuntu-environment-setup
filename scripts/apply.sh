@@ -214,16 +214,22 @@ ensure_shell_listed_in_etc_shells() {
     return 0
   fi
 
-  if ! command -v sudo >/dev/null 2>&1; then
-    echo "warning: sudo is required to add ${shell_path} to /etc/shells. Skipping login shell switch." >&2
+  if [ -w /etc/shells ]; then
+    if printf '%s\n' "${shell_path}" >>/etc/shells; then
+      return 0
+    fi
+    echo "warning: failed to append ${shell_path} to /etc/shells directly." >&2
+  fi
+
+  if command -v sudo >/dev/null 2>&1; then
+    if printf '%s\n' "${shell_path}" | sudo tee -a /etc/shells >/dev/null; then
+      return 0
+    fi
+    echo "warning: failed to add ${shell_path} to /etc/shells via sudo. Skipping login shell switch." >&2
     return 1
   fi
 
-  if printf '%s\n' "${shell_path}" | sudo tee -a /etc/shells >/dev/null; then
-    return 0
-  fi
-
-  echo "warning: failed to add ${shell_path} to /etc/shells. Skipping login shell switch." >&2
+  echo "warning: /etc/shells is not writable and sudo is unavailable. Skipping login shell switch." >&2
   return 1
 }
 
