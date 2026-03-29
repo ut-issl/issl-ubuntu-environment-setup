@@ -1,9 +1,7 @@
 { pkgs, ... }:
 
 {
-  home = {
-    packages = [ pkgs.git ];
+  home.packages = [ pkgs.git ];
 
-    file.".config/issl/git/.gitconfig".source = ../assets/git/.gitconfig;
-  };
+  xdg.configFile."issl/git/.gitconfig".source = ../assets/git/.gitconfig;
 }
