@@ -11,6 +11,28 @@ github_key_path="${ssh_dir}/github_ed25519"
 ssh_config_path="${ssh_dir}/config"
 temporary_git_installed=false
 
+prepend_path_if_exists() {
+  local path_entry="$1"
+
+  [ -d "${path_entry}" ] || return
+
+  case ":${PATH}:" in
+  *:"${path_entry}":*) ;;
+  *) PATH="${path_entry}:${PATH}" ;;
+  esac
+}
+
+refresh_path_for_nix() {
+  prepend_path_if_exists "${HOME}/.nix-profile/bin"
+  prepend_path_if_exists "/nix/var/nix/profiles/default/bin"
+
+  if [ -n "${USER:-}" ]; then
+    prepend_path_if_exists "/nix/var/nix/profiles/per-user/${USER}/profile/bin"
+  fi
+
+  hash -r 2>/dev/null || true
+}
+
 require_command() {
   local command_name="$1"
 
@@ -238,6 +260,7 @@ cleanup_temporary_git() {
   fi
 
   source_nix
+  refresh_path_for_nix
 
   if ! command -v git >/dev/null 2>&1; then
     echo "git is not available after setup; keeping the apt-installed git." >&2
