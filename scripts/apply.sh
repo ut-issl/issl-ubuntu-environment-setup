@@ -207,6 +207,100 @@ ensure_zsh_startup_files() {
     "$(zshrc_block)"
 }
 
+ensure_shell_listed_in_etc_shells() {
+  local shell_path="$1"
+
+  if grep -Fxq "${shell_path}" /etc/shells 2>/dev/null; then
+    return 0
+  fi
+
+  if [ -w /etc/shells ]; then
+    if printf '%s\n' "${shell_path}" >>/etc/shells; then
+      return 0
+    fi
+    echo "warning: failed to append ${shell_path} to /etc/shells directly." >&2
+  fi
+
+  if command -v sudo >/dev/null 2>&1; then
+    if printf '%s\n' "${shell_path}" | sudo tee -a /etc/shells >/dev/null; then
+      return 0
+    fi
+    echo "warning: failed to add ${shell_path} to /etc/shells via sudo. Skipping login shell switch." >&2
+    return 1
+  fi
+
+  echo "warning: /etc/shells is not writable and sudo is unavailable. Skipping login shell switch." >&2
+  return 1
+}
+
+resolve_desired_zsh_path() {
+  if [ -x "${HOME}/.nix-profile/bin/zsh" ]; then
+    printf '%s\n' "${HOME}/.nix-profile/bin/zsh"
+    return 0
+  fi
+
+  if command -v zsh >/dev/null 2>&1; then
+    command -v zsh
+    return 0
+  fi
+
+  return 1
+}
+
+current_login_shell() {
+  if command -v getent >/dev/null 2>&1; then
+    getent passwd "${USER}" | cut -d: -f7
+    return 0
+  fi
+
+  if [ -n "${SHELL-}" ]; then
+    printf '%s\n' "${SHELL}"
+    return 0
+  fi
+
+  return 1
+}
+
+maybe_switch_login_shell_to_zsh() {
+  local desired_zsh_path=""
+  local active_login_shell=""
+  local response=""
+
+  if [ -z "${issl_enable_zsh}" ] || ! is_yes "${issl_enable_zsh}"; then
+    return
+  fi
+
+  if [ ! -t 0 ]; then
+    echo "warning: skipping login shell switch prompt because this run is non-interactive." >&2
+    return
+  fi
+
+  if ! desired_zsh_path="$(resolve_desired_zsh_path)"; then
+    echo "warning: zsh binary not found while trying to switch login shell." >&2
+    return
+  fi
+
+  active_login_shell="$(current_login_shell || true)"
+  if [ -n "${active_login_shell}" ] && [ "${active_login_shell}" = "${desired_zsh_path}" ]; then
+    return
+  fi
+
+  read -r -p "Switch your login shell to ${desired_zsh_path}? [y/N] " response
+  if ! is_yes "${response}"; then
+    return
+  fi
+
+  if ! ensure_shell_listed_in_etc_shells "${desired_zsh_path}"; then
+    return
+  fi
+
+  if chsh -s "${desired_zsh_path}"; then
+    echo "Updated login shell to ${desired_zsh_path}. This will apply to new login sessions."
+  else
+    echo "warning: failed to run chsh. You can retry manually with: chsh -s ${desired_zsh_path}" >&2
+  fi
+}
+
 # ===== Git ===== #
 
 ensure_git_include() {
@@ -358,6 +452,7 @@ nix --accept-flake-config --extra-experimental-features "nix-command flakes" run
 ensure_bash_startup_files
 if [ "${zsh_enabled}" = "1" ]; then
   ensure_zsh_startup_files
+  maybe_switch_login_shell_to_zsh
 fi
 ensure_git_include
 prompt_for_git_identity
