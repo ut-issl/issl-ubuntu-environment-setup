@@ -266,10 +266,6 @@ maybe_switch_login_shell_to_zsh() {
   local active_login_shell=""
   local response=""
 
-  if [ -z "${issl_enable_zsh}" ] || ! is_yes "${issl_enable_zsh}"; then
-    return
-  fi
-
   if [ ! -t 0 ]; then
     echo "warning: skipping login shell switch prompt because this run is non-interactive." >&2
     return
