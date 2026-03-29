@@ -1,5 +1,10 @@
 # shellcheck shell=sh
 
+if [ "${ISSL_ENV_SH_LOADED:-0}" = "1" ]; then
+  return 0
+fi
+export ISSL_ENV_SH_LOADED=1
+
 export ISSL_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
 export ISSL_SHELL_HOME="${ISSL_CONFIG_HOME}/shell"
 export ISSL_PYTHON_HOME="${ISSL_CONFIG_HOME}/python"
