@@ -218,6 +218,7 @@ ensure_git_include() {
 prompt_for_git_identity() {
   local git_name=""
   local git_email=""
+  local missing_identity=0
 
   if ! git_name="$(git config --global --get user.name 2>/dev/null)" || [ -z "${git_name}" ]; then
     if [ -n "${git_user_name}" ]; then
@@ -225,8 +226,8 @@ prompt_for_git_identity() {
     elif [ -t 0 ]; then
       read -r -p "Enter your full name for Git commits: " git_name
     else
-      echo "user.name is not set; provide GIT_USER_NAME or run interactively." >&2
-      exit 1
+      echo 'warning: Git user.name setup was skipped. Run with GIT_USER_NAME, or set it later with: git config --global user.name "Your Name"' >&2
+      missing_identity=1
     fi
     if [ -n "${git_name}" ]; then
       git config --global user.name "${git_name}"
@@ -239,12 +240,16 @@ prompt_for_git_identity() {
     elif [ -t 0 ]; then
       read -r -p "Enter your email address for Git commits: " git_email
     else
-      echo "user.email is not set; provide GIT_USER_EMAIL or run interactively." >&2
-      exit 1
+      echo 'warning: Git user.email setup was skipped. Run with GIT_USER_EMAIL, or set it later with: git config --global user.email "you@example.com"' >&2
+      missing_identity=1
     fi
     if [ -n "${git_email}" ]; then
       git config --global user.email "${git_email}"
     fi
+  fi
+
+  if [ "${missing_identity}" = "1" ]; then
+    echo "warning: Git identity was not configured. Environment variables were not provided, and this run is non-interactive so prompts could not be used. Pass the env vars, run interactively, or set it later." >&2
   fi
 }
 
