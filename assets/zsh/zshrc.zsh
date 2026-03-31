@@ -27,6 +27,15 @@ setopt share_history        # Share history across concurrent zsh sessions.
 
 # ===== Completion ===== #
 
+# Make toolchain-provided cargo completion discoverable by compinit.
+if command -v rustc >/dev/null 2>&1; then
+  issl_rustup_cargo_completion_dir="$(rustc --print sysroot 2>/dev/null)/share/zsh/site-functions"
+  if [ -f "${issl_rustup_cargo_completion_dir}/_cargo" ]; then
+    # shellcheck disable=SC3030,SC3054
+    fpath=("${issl_rustup_cargo_completion_dir}" "${fpath[@]}")
+  fi
+fi
+
 # shellcheck disable=SC3044
 autoload -Uz compinit
 compinit
@@ -38,10 +47,7 @@ if command -v uv >/dev/null 2>&1; then
   fi
 fi
 
-# Enable rustup/cargo completion when rustup is available.
+# Enable rustup completion when rustup is available.
 if command -v rustup >/dev/null 2>&1; then
   eval "$(rustup completions zsh)"
-  if rustup completions zsh cargo >/dev/null 2>&1; then
-    eval "$(rustup completions zsh cargo)"
-  fi
 fi
