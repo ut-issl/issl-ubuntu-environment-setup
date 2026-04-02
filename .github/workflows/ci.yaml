@@ -325,7 +325,14 @@ jobs:
           persist-credentials: false
 
       - name: Install Taplo
-        run: cargo install taplo-cli@0.10.0 --locked
+        env:
+          TAPLO_VERSION: '0.10.0'
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL "https://github.com/tamasfe/taplo/releases/download/${TAPLO_VERSION}/taplo-linux-x86_64.gz" \
+            | gzip -d > "$HOME/.local/bin/taplo"
+          chmod +x "$HOME/.local/bin/taplo"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Check TOML format
         run: taplo fmt --check

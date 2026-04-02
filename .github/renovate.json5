@@ -99,10 +99,10 @@
         '/^\\.github/workflows/ci\\.ya?ml$/',
       ],
       matchStrings: [
-        'taplo-cli@(?<currentValue>\\S+)',
+        "TAPLO_VERSION: '(?<currentValue>[^']+)'",
       ],
-      datasourceTemplate: 'crate',
-      depNameTemplate: 'taplo-cli',
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'tamasfe/taplo',
     },
     {
       customType: 'regex',
