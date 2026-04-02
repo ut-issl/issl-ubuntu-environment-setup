@@ -19,39 +19,6 @@
     {
       customType: 'regex',
       managerFilePatterns: [
-        '/^\\.github/workflows/.*\\.ya?ml$/',
-      ],
-      matchStrings: [
-        "uses: zizmorcore/zizmor-action@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+version: '(?<currentValue>[^'\\s]+)'",
-      ],
-      datasourceTemplate: 'github-releases',
-      depNameTemplate: 'zizmorcore/zizmor',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/.*\\.ya?ml$/',
-      ],
-      matchStrings: [
-        "uses: reviewdog/action-setup@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+reviewdog_version: '(?<currentValue>[^'\\s]+)'",
-      ],
-      datasourceTemplate: 'github-releases',
-      depNameTemplate: 'reviewdog/reviewdog',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/.*\\.ya?ml$/',
-      ],
-      matchStrings: [
-        "uses: j178/prek-action@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+prek-version: '(?<currentValue>[^'\\s]+)'",
-      ],
-      datasourceTemplate: 'github-releases',
-      depNameTemplate: 'j178/prek',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
         '/^\\.github/workflows/ci\\.ya?ml$/',
       ],
       matchStrings: [
@@ -59,6 +26,17 @@
       ],
       datasourceTemplate: 'github-releases',
       depNameTemplate: 'rhysd/actionlint',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows/ci\\.ya?ml$/',
+      ],
+      matchStrings: [
+        "uses: zizmorcore/zizmor-action@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+version: '(?<currentValue>[^'\\s]+)'",
+      ],
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'zizmorcore/zizmor',
     },
     {
       customType: 'regex',
@@ -81,6 +59,17 @@
       ],
       datasourceTemplate: 'npm',
       depNameTemplate: 'markdownlint-cli2',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows/ci\\.ya?ml$/',
+      ],
+      matchStrings: [
+        "uses: reviewdog/action-setup@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+reviewdog_version: '(?<currentValue>[^'\\s]+)'",
+      ],
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'reviewdog/reviewdog',
     },
     {
       customType: 'regex',
@@ -125,6 +114,17 @@
       ],
       datasourceTemplate: 'pypi',
       depNameTemplate: 'ruff',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows/ci\\.ya?ml$/',
+      ],
+      matchStrings: [
+        "uses: j178/prek-action@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+prek-version: '(?<currentValue>[^'\\s]+)'",
+      ],
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'j178/prek',
     },
   ],
   packageRules: [
