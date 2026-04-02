@@ -27,6 +27,16 @@ setopt share_history        # Share history across concurrent zsh sessions.
 
 # ===== Completion ===== #
 
+# Add $ZDOTDIR/functions to fpath for user-managed functions and completions.
+issl_zsh_functions_dir="${ZDOTDIR}/functions"
+if [ ! -d "${issl_zsh_functions_dir}" ]; then
+  mkdir -p "${issl_zsh_functions_dir}" 2>/dev/null || true
+fi
+if [ -d "${issl_zsh_functions_dir}" ]; then
+  # shellcheck disable=SC3030,SC3054
+  fpath=("${issl_zsh_functions_dir}" "${fpath[@]}")
+fi
+
 # Make toolchain-provided cargo completion discoverable by compinit.
 if command -v rustc >/dev/null 2>&1; then
   issl_rustup_cargo_completion_dir="$(rustc --print sysroot 2>/dev/null)/share/zsh/site-functions"
