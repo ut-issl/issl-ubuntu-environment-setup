@@ -89,6 +89,13 @@ jobs:
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
         run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
 
+      - name: Test nix setup
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+        run: ./tests/test-nix.sh
+
       - name: Test shell setup
         shell: bash
         env:
@@ -103,12 +110,6 @@ jobs:
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
         run: ./tests/test-git.sh
-
-      - name: Test vim setup
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-        run: ./tests/test-vim.sh
 
       - name: Test C/C++ setup
         shell: bash
@@ -129,3 +130,9 @@ jobs:
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
         run: ./tests/test-rust.sh
+
+      - name: Test vim setup
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+        run: ./tests/test-vim.sh
