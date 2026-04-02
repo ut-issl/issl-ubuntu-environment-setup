@@ -4,11 +4,12 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 issl_config_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
-shared_git_config_path="${issl_config_home}/git/.gitconfig"
+shared_nix_config_path="${issl_config_home}/nix/issl.conf"
 shared_bash_profile_path="${issl_config_home}/bash/.bash_profile"
 shared_bashrc_path="${issl_config_home}/bash/.bashrc"
 shared_zprofile_path="${issl_config_home}/zsh/.zprofile"
 shared_zshrc_path="${issl_config_home}/zsh/.zshrc"
+shared_git_config_path="${issl_config_home}/git/.gitconfig"
 shared_rust_config_path="${issl_config_home}/rust/config.toml"
 git_user_name="${GIT_USER_NAME-}"
 git_user_email="${GIT_USER_EMAIL-}"
@@ -63,6 +64,29 @@ is_no() {
   n | N | no | NO | No | false | FALSE | False | 0) return 0 ;;
   *) return 1 ;;
   esac
+}
+
+# ===== Nix ===== #
+
+nix_conf_include_block() {
+  printf '%s\n' "!include ${shared_nix_config_path}"
+}
+
+ensure_nix_conf_include() {
+  local nix_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nix"
+  local nix_config_path="${nix_config_dir}/nix.conf"
+
+  mkdir -p "${nix_config_dir}"
+
+  if [ -f "${nix_config_path}" ] && grep -Fq "${shared_nix_config_path}" "${nix_config_path}"; then
+    return
+  fi
+
+  prepend_block_once \
+    "${nix_config_path}" \
+    "# >>> ISSL nix config >>>" \
+    "# <<< ISSL nix config <<<" \
+    "$(nix_conf_include_block)"
 }
 
 # ===== Bash ===== #
@@ -445,6 +469,7 @@ fi
 nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
   switch --flake "${repo_root}#${home_configuration_name}" --impure
 
+ensure_nix_conf_include
 ensure_bash_startup_files
 if [ "${zsh_enabled}" = "1" ]; then
   ensure_zsh_startup_files
