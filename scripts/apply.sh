@@ -4,7 +4,7 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 issl_config_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
-shared_nix_config_path="${issl_config_home}/nix/issl.conf"
+shared_nix_config_path="${issl_config_home}/nix/nix.conf"
 shared_bash_profile_path="${issl_config_home}/bash/.bash_profile"
 shared_bashrc_path="${issl_config_home}/bash/.bashrc"
 shared_zprofile_path="${issl_config_home}/zsh/.zprofile"
