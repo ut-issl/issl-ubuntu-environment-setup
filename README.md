@@ -21,16 +21,16 @@ Bootstrap the ISSL Ubuntu environment with a single command:
 bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
 ```
 
-To pin the setup to a fixed release instead of `latest`, replace `latest` with a release tag such as `v0.1.1`:
+To pin the setup to a fixed release instead of `latest`, replace `latest` with a release tag such as `v0.1.2`:
 
 ```bash
-bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/v0.1.1/setup.sh)
+bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/v0.1.2/setup.sh)
 ```
 
 To override setup variables, set them before the command. For example, to change the clone destination:
 
 ```bash
-INSTALL_DIR="$HOME/.local/share/issl/custom-ubuntu-environment-setup" \
+INSTALL_DIR="$HOME/.issl-ubuntu-environment-setup" \
 bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
 ```
 
