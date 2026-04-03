@@ -36,6 +36,7 @@ bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/relea
 
 ## Documentation
 
+- Users: User Guide (TBW).
 - Developers: see [Developer Guide](docs/developer-guide.md).
 
 ## License
