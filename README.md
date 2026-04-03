@@ -7,6 +7,12 @@
 
 A repository for distributing a reproducible and maintainable shared Ubuntu environment for ISSL.
 
+> [!WARNING]
+> This repository is an early-stage prototype and is under active development.
+> It may be made private or deleted without prior notice.
+> It is provided as-is, without user support or compatibility guarantees.
+> Use it at your own risk.
+
 ## Quick Setup
 
 Bootstrap the ISSL Ubuntu environment with a single command:
@@ -27,6 +33,10 @@ To override setup variables, set them before the command. For example, to change
 INSTALL_DIR="$HOME/.local/share/issl/custom-ubuntu-environment-setup" \
 bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
 ```
+
+## Documentation
+
+- Developers: see [Developer Guide](docs/developer-guide.md).
 
 ## License
 
