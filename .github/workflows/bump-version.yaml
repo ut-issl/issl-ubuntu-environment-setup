@@ -15,7 +15,7 @@ jobs:
 
     steps:
       - id: bump-version
-        uses: conjikidow/bump-version@b8c451803408957d87a84939dca637fd37762f75 # v2.0.2
+        uses: conjikidow/bump-version-action@82f8dcf6a8b9e2d2102d5fba70dafabd5ec59342 # v3.0.0
         with:
           label-major: 'update::major'
           label-minor: 'update::minor'

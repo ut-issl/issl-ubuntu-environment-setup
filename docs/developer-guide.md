@@ -57,4 +57,4 @@ following labels:
 - `update::minor`
 - `update::patch`
 
-For more details, see [conjikidow/bump-version](https://github.com/conjikidow/bump-version).
+For more details, see [conjikidow/bump-version-action](https://github.com/conjikidow/bump-version-action).
