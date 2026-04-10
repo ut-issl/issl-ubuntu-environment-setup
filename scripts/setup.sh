@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-repo_url="${REPO_URL:-git@github.com:ut-issl/issl-ubuntu-environment-setup.git}"
+repo_url="${REPO_URL:-https://github.com/ut-issl/issl-ubuntu-environment-setup.git}"
 repo_ref="${REPO_REF:-main}"
 data_root="${XDG_DATA_HOME:-$HOME/.local/share}"
 install_dir="${INSTALL_DIR:-$data_root/issl/ubuntu-environment-setup}"
