@@ -502,7 +502,7 @@ jobs:
           persist-credentials: false
 
       - name: Set up Commitizen
-        uses: commitizen-tools/setup-cz@b5732b16bea57feca2bd37bde05885a1880f71ac # v0.7.1
+        uses: commitizen-tools/setup-cz@7247d00792cbaf3408d7f8d2c6a010ca3b40c10e # v0.9.0
         with:
           python-version: '3.x'
           version: '4.13.9'
