@@ -89,6 +89,62 @@ ensure_nix_conf_include() {
     "$(nix_conf_include_block)"
 }
 
+is_systemd_available() {
+  [ -d /run/systemd/system ] && command -v systemctl >/dev/null 2>&1
+}
+
+resolve_nix_daemon_path() {
+  if command -v nix-daemon >/dev/null 2>&1; then
+    command -v nix-daemon
+    return 0
+  fi
+
+  if [ -x /nix/var/nix/profiles/default/bin/nix-daemon ]; then
+    printf '%s\n' "/nix/var/nix/profiles/default/bin/nix-daemon"
+    return 0
+  fi
+
+  return 1
+}
+
+start_nix_daemon_without_systemd() {
+  local nix_daemon_path=""
+
+  if is_systemd_available; then
+    return
+  fi
+
+  if pgrep -x nix-daemon >/dev/null 2>&1; then
+    return
+  fi
+
+  if ! nix_daemon_path="$(resolve_nix_daemon_path)"; then
+    echo "warning: nix-daemon binary was not found. Nix commands may fail in no-systemd environments." >&2
+    return
+  fi
+
+  if [ "$(id -u)" = "0" ]; then
+    "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+  elif command -v sudo >/dev/null 2>&1; then
+    if [ -t 0 ]; then
+      sudo "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+    elif sudo -n true >/dev/null 2>&1; then
+      sudo "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+    else
+      echo "warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode)." >&2
+      return
+    fi
+  else
+    echo "warning: cannot start nix-daemon automatically (sudo is unavailable in a no-systemd environment)." >&2
+    return
+  fi
+
+  sleep 1
+  if ! pgrep -x nix-daemon >/dev/null 2>&1; then
+    echo "warning: attempted to start nix-daemon, but it is not running. Nix commands may fail." >&2
+  fi
+}
+
 # ===== Bash ===== #
 
 bash_profile_block() {
@@ -451,6 +507,8 @@ if [ -n "${NIX_CONFIG-}" ]; then
 else
   export NIX_CONFIG="${nix_feature_config}"
 fi
+
+start_nix_daemon_without_systemd
 
 current_system="$(
   nix --accept-flake-config --extra-experimental-features "nix-command flakes" \
