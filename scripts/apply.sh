@@ -124,12 +124,21 @@ start_nix_daemon_without_systemd() {
   fi
 
   if [ "$(id -u)" = "0" ]; then
-    "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+    if ! "${nix_daemon_path}" --daemon >/dev/null 2>&1; then
+      echo "warning: failed to start nix-daemon as root. Nix commands may fail." >&2
+      return
+    fi
   elif command -v sudo >/dev/null 2>&1; then
     if [ -t 0 ]; then
-      sudo "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+      if ! sudo "${nix_daemon_path}" --daemon >/dev/null 2>&1; then
+        echo "warning: failed to start nix-daemon via sudo. Nix commands may fail." >&2
+        return
+      fi
     elif sudo -n true >/dev/null 2>&1; then
-      sudo "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+      if ! sudo "${nix_daemon_path}" --daemon >/dev/null 2>&1; then
+        echo "warning: failed to start nix-daemon via passwordless sudo. Nix commands may fail." >&2
+        return
+      fi
     else
       echo "warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode)." >&2
       return
@@ -139,10 +148,14 @@ start_nix_daemon_without_systemd() {
     return
   fi
 
-  sleep 1
-  if ! pgrep -x nix-daemon >/dev/null 2>&1; then
-    echo "warning: attempted to start nix-daemon, but it is not running. Nix commands may fail." >&2
-  fi
+  for _ in {1..10}; do
+    if pgrep -x nix-daemon >/dev/null 2>&1; then
+      return
+    fi
+    sleep 1
+  done
+
+  echo "warning: attempted to start nix-daemon, but it is not running yet. Nix commands may fail." >&2
 }
 
 # ===== Bash ===== #
