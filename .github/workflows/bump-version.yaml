@@ -3,11 +3,20 @@ name: Bump Version
 on:
   pull_request:
     types: [closed]
+  workflow_dispatch:
+    inputs:
+      bump_type:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
 
 jobs:
 
   bump-version:
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,11 +24,12 @@ jobs:
 
     steps:
       - id: bump-version
-        uses: conjikidow/bump-version-action@82f8dcf6a8b9e2d2102d5fba70dafabd5ec59342 # v3.0.0
+        uses: conjikidow/bump-version-action@ecaaa809029ee948812b3372bfbbe9fd09dddfa7 # v3.1.0
         with:
           label-major: 'update::major'
           label-minor: 'update::minor'
           label-patch: 'update::patch'
+          manual-bump-type: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.bump_type || '' }}
           labels-to-add: 'automated,versioning'
           create-release: 'false'
 
