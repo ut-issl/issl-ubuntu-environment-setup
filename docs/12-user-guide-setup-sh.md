@@ -38,7 +38,7 @@ Open a pull request, or contact the maintainers if you are not going to prepare 
 ### 2. If it is personal, but you want reproducibility
 
 If the tool or setting is only for your own use, but you still want to restore it across machines or after reinstallation,
-move to a personal Nix/Home Manager config repository.
+move to a personal Nix configuration repository with Home Manager.
 
 TBW
 

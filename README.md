@@ -17,7 +17,7 @@ A repository for distributing a reproducible and maintainable shared Ubuntu envi
 
 This repository provides two ways of use:
 
-1. Create and maintain a personal Nix/Home Manager config repository
+1. Create and maintain a personal Nix configuration repository with Home Manager
    that is designed to import this ISSL config from the start.
    - See [User Guide (personal config repository)](docs/11-user-guide-personal-nix-config.md).
 

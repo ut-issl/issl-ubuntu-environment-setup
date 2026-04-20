@@ -4,7 +4,7 @@
 
 This repository provides two ways of use:
 
-1. Create and maintain a personal Nix/Home Manager config repository
+1. Create and maintain a personal Nix configuration repository with Home Manager
    that is designed to import this ISSL config from the start.
    - Recommended for individual users who want customization with reproducibility and long-term maintainability.
    - See [User Guide (personal config repository)](11-user-guide-personal-nix-config.md).
