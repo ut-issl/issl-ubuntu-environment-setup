@@ -11,6 +11,10 @@ github_key_path="${ssh_dir}/github_ed25519"
 ssh_config_path="${ssh_dir}/config"
 temporary_git_installed=false
 
+is_interactive() {
+  [ -t 0 ] && [ -t 1 ]
+}
+
 prepend_path_if_exists() {
   local path_entry="$1"
 
@@ -44,9 +48,28 @@ require_command() {
 
 prompt_yes_no() {
   local prompt_message="$1"
+  local default_answer="${2:-no}"
   local reply
 
-  read -r -p "${prompt_message} " reply
+  if ! is_interactive; then
+    return 1
+  fi
+
+  if ! read -r -p "${prompt_message} " reply; then
+    return 1
+  fi
+
+  if [ -z "${reply}" ]; then
+    case "${default_answer}" in
+    y | Y | yes | YES | Yes)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+    esac
+  fi
+
   case "${reply}" in
   y | Y | yes | YES | Yes)
     return 0
@@ -189,6 +212,10 @@ has_github_ssh_auth() {
   local ssh_output
   local ssh_status
 
+  if ! command -v ssh >/dev/null 2>&1; then
+    return 1
+  fi
+
   ssh_output="$(ssh -T git@github.com 2>&1)" || ssh_status=$?
   ssh_status="${ssh_status:-0}"
 
@@ -198,6 +225,22 @@ has_github_ssh_auth() {
   fi
 
   return 1
+}
+
+maybe_offer_github_ssh_setup() {
+  if ! is_interactive; then
+    return
+  fi
+
+  if has_github_ssh_auth; then
+    return
+  fi
+
+  if ! prompt_yes_no "Set up GitHub SSH access now for future private repository use? [Y/n]" yes; then
+    return
+  fi
+
+  prompt_github_ssh_setup
 }
 
 try_github_ssh_recovery() {
@@ -280,6 +323,7 @@ cleanup_temporary_git() {
 main() {
   ensure_nix
   ensure_git
+  maybe_offer_github_ssh_setup
   ensure_repo_access
   clone_repo
   run_install
