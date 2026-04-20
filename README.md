@@ -26,10 +26,9 @@ This repository provides two ways of use:
 
 For more details, see the [User Guide](docs/10-user-guide.md).
 
-## Documentation
+## For Developers
 
-- Users: see [User Guide](docs/10-user-guide.md).
-- Developers: see [Developer Guide](docs/90-developer-guide.md).
+See [Developer Guide](docs/90-developer-guide.md).
 
 ## License
 
