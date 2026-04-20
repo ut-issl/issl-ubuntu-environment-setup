@@ -24,7 +24,7 @@ When updating or adding an asset:
 1. Update an existing file under `assets/`, or create a new one if needed.
 2. Update the relevant module under `home-modules/` so the asset is deployed.
 3. Update `scripts/apply.sh` if the asset must also be connected to user-managed files.
-4. Add or extend tests under `tests/`.
+4. Add or extend tests under `tests/`, and update `.github/workflows/test.yaml` if you add a new test script.
 
 For how to reflect the asset in Home Manager, see [Updating or Adding a Module](#updating-or-adding-a-module).
 
@@ -66,7 +66,7 @@ When updating or adding a module:
 2. Update `home-modules/main.nix` if you added a new module.
 3. Add or update assets under `assets/` if the module needs them.
 4. Update `scripts/apply.sh` if imperative wiring is required.
-5. Add or extend tests under `tests/`.
+5. Add or extend tests under `tests/`, and update `.github/workflows/test.yaml` if you add a new test script.
 
 If you add a new module, import it from `home-modules/main.nix`.
 Add it conditionally if it should only be enabled in specific situations, similar to `zsh.nix`.
@@ -88,10 +88,9 @@ or preserve existing user content in files such as:
 - `~/.cargo/config.toml`
 - `~/.config/nix/nix.conf`
 
-## Testing and Documentation
+## Documentation Updates
 
 After updating or adding an asset or module:
 
-1. Add or extend tests under `tests/` so the behavior is checked explicitly.
-2. Update developer docs if the contributor workflow changes.
-3. Update user docs under `docs/` if the user-visible setup behavior changes.
+1. Update developer docs under `docs/` if the contributor workflow changes.
+2. Update user docs under `docs/` if the user-visible setup behavior changes.
