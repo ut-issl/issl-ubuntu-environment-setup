@@ -2,7 +2,7 @@
 
 ## How to Use
 
-This repository provides two ways of use:
+This repository can be used in two ways:
 
 1. Create and maintain a personal Nix configuration repository with Home Manager
    that is designed to import this ISSL config from the start.
