@@ -1,6 +1,6 @@
 # Script-Based Setup
 
-This guide covers the quick-setup workflow using `setup.sh` from this repository.
+This guide covers the quick-setup workflow using the setup script provided by this repository.
 
 ## Initial Setup
 

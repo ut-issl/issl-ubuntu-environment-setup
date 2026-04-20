@@ -13,7 +13,7 @@ When choosing how to install tools after setup, use this order by default:
 Use Nix with Home Manager for tools that should be available across your user environment.
 
 - For a personal reproducible setup, see [setup with a personal config repository](11-setup-with-a-personal-config-repository.md).
-- For the `setup.sh` workflow, see [script-based setup](12-script-based-setup.md#if-you-need-additional-tools-or-settings).
+- For the script-based setup workflow, see [script-based setup](12-script-based-setup.md#if-you-need-additional-tools-or-settings).
 
 ## 2. Project-Local Dependencies
 

@@ -21,7 +21,7 @@ This repository provides two ways of use:
    that is designed to import this ISSL config from the start.
    - See [setup with a personal config repository](docs/11-setup-with-a-personal-config-repository.md).
 
-2. Run `setup.sh` from this repository.
+2. Use the setup script provided by this repository.
    - See [script-based setup](docs/12-script-based-setup.md).
 
 For more details, see the [User Guide](docs/10-user-guide.md).
