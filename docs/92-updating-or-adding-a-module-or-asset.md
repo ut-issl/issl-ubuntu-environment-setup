@@ -56,6 +56,7 @@ For example:
 {
   home.packages = [ pkgs.foo ];
 
+  home.file.".foo.rc".source = ../assets/foo/foo.rc;
   xdg.configFile."issl/foo/config.toml".source = ../assets/foo/config.toml;
 }
 ```
