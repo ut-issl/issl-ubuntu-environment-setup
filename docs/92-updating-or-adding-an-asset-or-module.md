@@ -1,4 +1,4 @@
-# Updating or Adding a Module or Asset
+# Updating or Adding an Asset or Module
 
 This page explains the usual workflow for updating or adding a shared asset or module in this repository.
 
