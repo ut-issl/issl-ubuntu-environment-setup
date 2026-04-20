@@ -1,4 +1,4 @@
-# User Guide (setup.sh workflow)
+# Script-Based Setup
 
 This guide covers the quick-setup workflow using `setup.sh` from this repository.
 

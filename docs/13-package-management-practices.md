@@ -1,6 +1,6 @@
-# User Guide (Package Management Practices)
+# Package Management Practices
 
-This page describes the default practices for package management after setup.
+This page describes the recommended practices for package management after setup.
 
 When choosing how to install tools after setup, use this order by default:
 
@@ -12,8 +12,8 @@ When choosing how to install tools after setup, use this order by default:
 
 Use Nix with Home Manager for tools that should be available across your user environment.
 
-- For a personal reproducible setup, see [User Guide (Personal Config Repository)](11-user-guide-personal-nix-config.md).
-- For the `setup.sh` workflow, see [User Guide (setup.sh workflow)](12-user-guide-setup-sh.md#if-you-need-additional-tools-or-settings).
+- For a personal reproducible setup, see [setup with a personal config repository](11-setup-with-a-personal-config-repository.md).
+- For the `setup.sh` workflow, see [script-based setup](12-script-based-setup.md#if-you-need-additional-tools-or-settings).
 
 ## 2. Project-Local Dependencies
 
