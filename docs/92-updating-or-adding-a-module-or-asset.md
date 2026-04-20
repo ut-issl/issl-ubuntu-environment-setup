@@ -76,15 +76,16 @@ Add it conditionally if it should only be enabled in specific situations, simila
 
 Prefer declarative integration in `home-modules/` first.
 
-Update `scripts/apply.sh` when the setup must also modify user-controlled files
-in a careful, incremental way that Home Manager alone does not cover well
-in this repository's current workflow.
+For settings where user flexibility should be preserved, this repository avoids direct
+Home Manager ownership of user-managed config files.
+Instead, the shared ISSL-managed configuration is typically imported or sourced
+from those user-managed files.
 
-This usually applies when the repository must prepend include blocks, source shared files,
-or preserve existing user content in files such as:
+Update `scripts/apply.sh` when the setup must connect the shared configuration
+to user-managed files in a careful, incremental way that preserves existing user content.
+In practice, this usually means adding include blocks or source commands to user-managed files such as:
 
 - `~/.bashrc`
-- `~/.bash_profile`
 - `~/.zshenv`
 - `~/.cargo/config.toml`
 - `~/.config/nix/nix.conf`
