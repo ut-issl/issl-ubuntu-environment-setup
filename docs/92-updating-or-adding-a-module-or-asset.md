@@ -74,10 +74,11 @@ Add it conditionally if it should only be enabled in specific situations, simila
 
 ## When `apply.sh` Needs Changes
 
-Prefer declarative integration in `home-modules/` first.
+Prefer declarative integration in `home-modules/` first,
+and update `scripts/apply.sh` only when that is not enough.
 
-For settings where user flexibility should be preserved, this repository avoids direct
-Home Manager ownership of user-managed config files.
+For settings where user flexibility should be preserved,
+this repository avoids direct Home Manager ownership of user-managed config files.
 Instead, the shared ISSL-managed configuration is typically imported or sourced
 from those user-managed files.
 
