@@ -13,30 +13,22 @@ A repository for distributing a reproducible and maintainable shared Ubuntu envi
 > It is provided as-is, without user support or compatibility guarantees.
 > Use it at your own risk.
 
-## Quick Setup
+## How to Use
 
-Bootstrap the ISSL Ubuntu environment with a single command:
+This repository provides two ways of use:
 
-```bash
-bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
-```
+1. Create and maintain a personal Nix/Home Manager config repository
+   that is designed to import this ISSL config from the start.
+   - See [User Guide (personal config repository)](docs/user-guide-personal-nix-config.md).
 
-To pin the setup to a fixed release instead of `latest`, replace `latest` with a release tag such as `v0.1.2`:
+2. Run `setup.sh` from this repository.
+   - See [User Guide (setup.sh workflow)](docs/user-guide-setup-sh.md).
 
-```bash
-bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/v0.1.2/setup.sh)
-```
-
-To override setup variables, set them before the command. For example, to change the clone destination:
-
-```bash
-INSTALL_DIR="$HOME/.issl-ubuntu-environment-setup" \
-bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
-```
+For more details, see the [User Guide](docs/user-guide.md).
 
 ## Documentation
 
-- Users: User Guide (TBW).
+- Users: see [User Guide](docs/user-guide.md).
 - Developers: see [Developer Guide](docs/developer-guide.md).
 
 ## License
