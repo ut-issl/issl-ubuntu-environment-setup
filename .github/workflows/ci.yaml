@@ -16,8 +16,8 @@ jobs:
     name: Determine changed files
     runs-on: ubuntu-latest
     outputs:
-      workflow: ${{ steps.changed-files.outputs.workflow_any_changed }}
-      workflow_ci: ${{ steps.changed-files.outputs.workflow_ci_any_changed }}
+      github_actions: ${{ steps.changed-files.outputs.github_actions_any_changed }}
+      github_actions_ci: ${{ steps.changed-files.outputs.github_actions_ci_any_changed }}
       renovate_config: ${{ steps.changed-files.outputs.renovate_config_any_changed }}
       nix: ${{ steps.changed-files.outputs.nix_any_changed }}
       shell: ${{ steps.changed-files.outputs.shell_any_changed }}
@@ -40,9 +40,9 @@ jobs:
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
           files_yaml: |
-            workflow:
+            github_actions:
               - .github/workflows/**
-            workflow_ci:
+            github_actions_ci:
               - .github/workflows/ci.yaml
             renovate_config:
               - .github/renovate.json5
@@ -75,7 +75,7 @@ jobs:
   lint-gh-actions:
     name: Lint GitHub Actions
     needs: determine-changes
-    if: ${{ needs.determine-changes.outputs.workflow == 'true' }}
+    if: ${{ needs.determine-changes.outputs.github_actions == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -113,7 +113,7 @@ jobs:
     needs: determine-changes
     if: >-
       ${{ needs.determine-changes.outputs.renovate_config == 'true' ||
-      needs.determine-changes.outputs.workflow_ci == 'true' }}
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -137,7 +137,9 @@ jobs:
   lint-nix:
     name: Lint Nix
     needs: determine-changes
-    if: ${{ needs.determine-changes.outputs.nix == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    if: >-
+      ${{ needs.determine-changes.outputs.nix == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -170,7 +172,9 @@ jobs:
   lint-shell-scripts:
     name: Lint Shell Scripts
     needs: determine-changes
-    if: ${{ needs.determine-changes.outputs.shell == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    if: >-
+      ${{ needs.determine-changes.outputs.shell == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -236,7 +240,9 @@ jobs:
   lint-markdown:
     name: Lint Markdown
     needs: determine-changes
-    if: ${{ needs.determine-changes.outputs.md == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    if: >-
+      ${{ needs.determine-changes.outputs.md == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -281,7 +287,9 @@ jobs:
   lint-json5:
     name: Lint JSON5
     needs: determine-changes
-    if: ${{ needs.determine-changes.outputs.json5 == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    if: >-
+      ${{ needs.determine-changes.outputs.json5 == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -313,7 +321,9 @@ jobs:
   lint-toml:
     name: Lint TOML
     needs: determine-changes
-    if: ${{ needs.determine-changes.outputs.toml == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    if: >-
+      ${{ needs.determine-changes.outputs.toml == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -343,7 +353,9 @@ jobs:
   lint-yaml:
     name: Lint YAML
     needs: determine-changes
-    if: ${{ needs.determine-changes.outputs.yaml == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    if: >-
+      ${{ needs.determine-changes.outputs.yaml == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -377,7 +389,9 @@ jobs:
   lint-python:
     name: Lint Python
     needs: determine-changes
-    if: ${{ needs.determine-changes.outputs.python == 'true' || needs.determine-changes.outputs.workflow_ci == 'true' }}
+    if: >-
+      ${{ needs.determine-changes.outputs.python == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
