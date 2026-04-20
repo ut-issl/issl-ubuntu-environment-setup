@@ -19,17 +19,17 @@ This repository provides two ways of use:
 
 1. Create and maintain a personal Nix/Home Manager config repository
    that is designed to import this ISSL config from the start.
-   - See [User Guide (personal config repository)](docs/user-guide-personal-nix-config.md).
+   - See [User Guide (personal config repository)](docs/11-user-guide-personal-nix-config.md).
 
 2. Run `setup.sh` from this repository.
-   - See [User Guide (setup.sh workflow)](docs/user-guide-setup-sh.md).
+   - See [User Guide (setup.sh workflow)](docs/12-user-guide-setup-sh.md).
 
-For more details, see the [User Guide](docs/user-guide.md).
+For more details, see the [User Guide](docs/10-user-guide.md).
 
 ## Documentation
 
-- Users: see [User Guide](docs/user-guide.md).
-- Developers: see [Developer Guide](docs/developer-guide.md).
+- Users: see [User Guide](docs/10-user-guide.md).
+- Developers: see [Developer Guide](docs/90-developer-guide.md).
 
 ## License
 

@@ -2,7 +2,7 @@
 
 This guide covers the quick-setup workflow using `setup.sh` from this repository.
 
-## Setup
+## Initial Setup
 
 Run:
 
@@ -23,7 +23,7 @@ INSTALL_DIR="$HOME/.issl-ubuntu-environment-setup" \
 bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
 ```
 
-After setup, open a **new shell**.
+After setup, open a new shell.
 
 ## If You Need Additional Tools or Settings
 
