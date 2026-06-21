@@ -131,6 +131,9 @@
       matchManagers: [
         'github-actions',
       ],
+      matchDepTypes: [
+        'action',
+      ],
       allowedVersions: '/^v?\\d+\\.\\d+\\.\\d+$/',
     },
     {
