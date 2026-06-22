@@ -182,6 +182,12 @@
       groupName: 'yamllint',
     },
     {
+      matchDepNames: [
+        'ghcr.io/zizmorcore/zizmor',
+      ],
+      minimumReleaseAge: '4 days',
+    },
+    {
       matchFileNames: [
         '.github/workflows/**',
       ],
