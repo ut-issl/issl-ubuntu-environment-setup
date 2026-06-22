@@ -9,7 +9,12 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      home-manager,
+    }:
     let
       systems = [
         "x86_64-linux"
@@ -54,13 +59,10 @@
         };
     in
     {
-      packages = forAllSystems (
-        system:
-        {
-          default = home-manager.packages.${system}.home-manager;
-          inherit (home-manager.packages.${system}) home-manager;
-        }
-      );
+      packages = forAllSystems (system: {
+        default = home-manager.packages.${system}.home-manager;
+        inherit (home-manager.packages.${system}) home-manager;
+      });
 
       homeConfigurations = {
         issl-common-x86_64-linux = mkHomeConfiguration {
@@ -81,12 +83,9 @@
 
       formatter = forAllSystems (system: (mkPkgs system).nixfmt-rfc-style);
 
-      checks = forAllSystems (
-        system:
-        {
-          home = self.homeConfigurations."issl-common-${system}".activationPackage;
-          home-zsh = self.homeConfigurations."issl-common-zsh-${system}".activationPackage;
-        }
-      );
+      checks = forAllSystems (system: {
+        home = self.homeConfigurations."issl-common-${system}".activationPackage;
+        home-zsh = self.homeConfigurations."issl-common-zsh-${system}".activationPackage;
+      });
     };
 }
