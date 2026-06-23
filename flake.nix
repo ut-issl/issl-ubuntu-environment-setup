@@ -11,9 +11,9 @@
 
   outputs =
     {
-      self,
       nixpkgs,
       home-manager,
+      ...
     }:
     let
       systems = [
@@ -22,23 +22,24 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
       mkPkgs = system: import nixpkgs { inherit system; };
+      requireEnv =
+        name:
+        let
+          value = builtins.getEnv name;
+        in
+        if value != "" then
+          value
+        else
+          throw "Environment variable ${name} is required. Run Home Manager with --impure.";
       mkHomeConfiguration =
         {
           system,
+          username ? requireEnv "USER",
+          homeDirectory ? requireEnv "HOME",
           enableZsh ? false,
         }:
         let
           pkgs = mkPkgs system;
-          username =
-            let
-              value = builtins.getEnv "USER";
-            in
-            if value != "" then value else "issl";
-          homeDirectory =
-            let
-              value = builtins.getEnv "HOME";
-            in
-            if value != "" then value else "/tmp/issl-home";
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
@@ -84,8 +85,19 @@
       formatter = forAllSystems (system: (mkPkgs system).nixfmt-rfc-style);
 
       checks = forAllSystems (system: {
-        home = self.homeConfigurations."issl-common-${system}".activationPackage;
-        home-zsh = self.homeConfigurations."issl-common-zsh-${system}".activationPackage;
+        home =
+          (mkHomeConfiguration {
+            inherit system;
+            username = "issl";
+            homeDirectory = "/tmp/issl-home";
+          }).activationPackage;
+        home-zsh =
+          (mkHomeConfiguration {
+            inherit system;
+            username = "issl";
+            homeDirectory = "/tmp/issl-home";
+            enableZsh = true;
+          }).activationPackage;
       });
     };
 }
