@@ -3,6 +3,7 @@ set -euo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
+nix_profile_bin="${home_dir}/.nix-profile/bin"
 nix_config_path="${config_dir}/nix/nix.conf"
 issl_nix_config_path="${config_dir}/issl/nix/nix.conf"
 
@@ -29,7 +30,9 @@ assert_nix_command_available_without_extra_flags() {
 }
 
 assert_home_manager_installation() {
-  command -v home-manager >/dev/null
+  test -x "${nix_profile_bin}/home-manager"
+  test "$(command -v home-manager)" = "${nix_profile_bin}/home-manager"
+  home-manager --version
 }
 
 main() {
