@@ -1,4 +1,4 @@
 [tool.bumpversion]
-current_version = "0.1.9"
+current_version = "0.2.0"
 commit = false
 tag = false
