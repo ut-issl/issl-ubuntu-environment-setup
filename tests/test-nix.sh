@@ -28,11 +28,16 @@ assert_nix_command_available_without_extra_flags() {
     nix profile list >/dev/null
 }
 
+assert_home_manager_installation() {
+  command -v home-manager >/dev/null
+}
+
 main() {
   assert_nix_installation
   assert_shared_nix_config
   assert_nix_conf_include
   assert_nix_command_available_without_extra_flags
+  assert_home_manager_installation
 }
 
 main "$@"
