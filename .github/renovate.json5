@@ -253,6 +253,9 @@
   'pre-commit': {
     enabled: true,
   },
+  nix: {
+    enabled: true,
+  },
   labels: [
     'automated',
     'dependencies',
