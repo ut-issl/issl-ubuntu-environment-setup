@@ -27,6 +27,10 @@ assert_rustc_installation() {
   rustc --version
 }
 
+assert_default_toolchain_stable() {
+  rustup show active-toolchain | grep -Eq '^stable(-|$)'
+}
+
 assert_shared_rust_config_asset() {
   cmp --silent assets/rust/config.toml "${config_dir}/issl/rust/config.toml"
 }
@@ -45,6 +49,7 @@ main() {
   assert_rustup_installation
   assert_cargo_installation
   assert_rustc_installation
+  assert_default_toolchain_stable
   assert_shared_rust_config_asset
   assert_cargo_config_include
 }
