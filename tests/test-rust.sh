@@ -5,6 +5,8 @@ home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 
+export RUSTUP_HOME="${home_dir}/.rustup"
+
 assert_cargo_about_installation() {
   test -x "${nix_profile_bin}/cargo-about"
   test "$(command -v cargo-about)" = "${nix_profile_bin}/cargo-about"
