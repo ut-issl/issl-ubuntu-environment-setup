@@ -5,6 +5,8 @@ home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 
+export RUSTUP_HOME="${home_dir}/.rustup"
+
 assert_cargo_about_installation() {
   test -x "${nix_profile_bin}/cargo-about"
   test "$(command -v cargo-about)" = "${nix_profile_bin}/cargo-about"
@@ -27,6 +29,10 @@ assert_rustc_installation() {
   rustc --version
 }
 
+assert_default_toolchain_stable() {
+  rustup show active-toolchain | grep -Eq '^stable(-|$)'
+}
+
 assert_shared_rust_config_asset() {
   cmp --silent assets/rust/config.toml "${config_dir}/issl/rust/config.toml"
 }
@@ -45,6 +51,7 @@ main() {
   assert_rustup_installation
   assert_cargo_installation
   assert_rustc_installation
+  assert_default_toolchain_stable
   assert_shared_rust_config_asset
   assert_cargo_config_include
 }
