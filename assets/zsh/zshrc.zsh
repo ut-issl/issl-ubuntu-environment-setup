@@ -25,6 +25,18 @@ setopt hist_ignore_space    # Skip commands that start with a space.
 setopt hist_reduce_blanks   # Compress redundant internal whitespace before saving.
 setopt share_history        # Share history across concurrent zsh sessions.
 
+# ===== Options ===== #
+
+setopt auto_menu            # Show completion menu automatically on ambiguous completion.
+setopt auto_param_keys      # Insert matching parameter expansion syntax during completion.
+setopt complete_in_word     # Complete from both ends of the word around the cursor.
+setopt correct              # Ask before running a command whose name looks misspelled.
+setopt interactive_comments # Allow comments in interactive commands.
+setopt magic_equal_subst    # Expand command arguments after '=' as file names where applicable.
+setopt mark_dirs            # Append a trailing slash to completed directory names.
+setopt no_beep              # Disable terminal beeps from Zsh.
+setopt rm_star_wait         # Add a short delay before confirming dangerous rm globs.
+
 # ===== Completion ===== #
 
 # Add $ZDOTDIR/functions to fpath for user-managed functions and completions.
