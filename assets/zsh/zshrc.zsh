@@ -73,3 +73,8 @@ fi
 if command -v rustup >/dev/null 2>&1; then
   eval "$(rustup completions zsh)"
 fi
+
+# ===== Functions and Aliases ===== #
+
+autoload -Uz zmv
+alias mmv='noglob zmv -W'
