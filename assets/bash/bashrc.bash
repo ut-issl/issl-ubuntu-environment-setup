@@ -12,6 +12,15 @@ if [[ -f "${issl_bootstrap_shell_home}/rc.sh" ]]; then
   source "${issl_bootstrap_shell_home}/rc.sh"
 fi
 
+# ===== History ===== #
+
+export HISTSIZE=1000                         # Keep up to 1000 commands in memory.
+export HISTFILESIZE=10000                    # Persist up to 10000 commands to HISTFILE.
+export HISTTIMEFORMAT="[%Y-%m-%d %H:%M:%S] " # Show timestamps in history output.
+export HISTCONTROL=ignoreboth:erasedups      # Ignore leading-space commands and duplicate entries.
+
+shopt -s histappend # Append history entries instead of overwriting the file.
+
 # ===== Completion ===== #
 
 # Enable bash completion from Home Manager profile when available.
