@@ -25,6 +25,18 @@ setopt hist_ignore_space    # Skip commands that start with a space.
 setopt hist_reduce_blanks   # Compress redundant internal whitespace before saving.
 setopt share_history        # Share history across concurrent zsh sessions.
 
+# ===== Options ===== #
+
+setopt auto_menu            # Show completion menu automatically on ambiguous completion.
+setopt auto_param_keys      # Insert matching parameter expansion syntax during completion.
+setopt complete_in_word     # Complete from both ends of the word around the cursor.
+setopt correct              # Ask before running a command whose name looks misspelled.
+setopt interactive_comments # Allow comments in interactive commands.
+setopt magic_equal_subst    # Expand command arguments after '=' as file names where applicable.
+setopt mark_dirs            # Append a trailing slash to completed directory names.
+setopt no_beep              # Disable terminal beeps from Zsh.
+setopt rm_star_wait         # Add a short delay before confirming dangerous rm globs.
+
 # ===== Completion ===== #
 
 # Add $ZDOTDIR/functions to fpath for user-managed functions and completions.
@@ -46,6 +58,35 @@ if command -v rustc >/dev/null 2>&1; then
   fi
 fi
 
+# Configure completion styles.
+if [ -n "${LS_COLORS-}" ]; then
+  eval "zstyle ':completion:*:default' list-colors \${(s.:.)LS_COLORS}"
+fi
+zstyle ':completion:*' auto-description 'specify: %d'
+zstyle ':completion:*' completer _oldlist _expand _complete _correct
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' ignore-parents parent pwd ..
+zstyle ':completion:*' insert-tab false
+zstyle ':completion:*' list-dirs-first true
+zstyle ':completion:*' list-prompt '%SAt %p: hit TAB for more, or the character to insert%s'
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+zstyle ':completion:*' menu select=2
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' select-prompt '%SScrolling active: current selection at %p%s'
+zstyle ':completion:*' squeeze-slashes true
+zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' verbose true
+zstyle ':completion:*:corrections' format '%F{green}%d (errors: %e)%f'
+zstyle ':completion:*:descriptions' format '%B%F{white}--- %d ---%f%b'
+zstyle ':completion:*:messages' format '%F{yellow}%d'
+zstyle ':completion:*:options' description 'yes'
+zstyle ':completion:*:warnings' format '%F{red}No matches for: %F{white}%d%b'
+zstyle ':completion:*:*:git-checkout:*:*' list-colors '=(#b) #([0-9]#)*=0=00;33'
+zstyle ':completion:*:*:git-switch:*:*' list-colors '=(#b) #([0-9]#)*=0=00;33'
+# shellcheck disable=SC2016
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=00;31'
+
 # shellcheck disable=SC3044
 autoload -Uz compinit
 compinit
@@ -61,3 +102,8 @@ fi
 if command -v rustup >/dev/null 2>&1; then
   eval "$(rustup completions zsh)"
 fi
+
+# ===== Functions and Aliases ===== #
+
+autoload -Uz zmv
+alias mmv='noglob zmv -W'

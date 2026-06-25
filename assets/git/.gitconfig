@@ -1,15 +1,12 @@
 [alias]
-    ch = checkout
-    cr = clone --recursive
-    cm = commit
-    ca = commit --amend
+    amend = commit --amend
     d = diff --summary --stat --patch
     wd = d --word-diff
     stat = diff --stat
     sgl = log --graph --all --decorate --date=format:'%Y/%m/%d %H:%M' --pretty=format:'%C(yellow)%h %C(green)%cd %C(auto)%d %C(white)%s %C(cyan)[%cn]'
     sgls = sgl --stat
-    st = status
     su = submodule update --init --recursive
+    unstage = restore --staged
     which = "!_() { git config --get alias.$1; }; _"
 
 [core]
@@ -21,17 +18,27 @@
 [init]
     defaultBranch = main
 
-[fetch]
-    prune = true
+[status]
+    showStash = true
 
-[pull]
-    rebase = false
+[diff]
+    colorMoved = default
+    colorMovedWS = allow-indentation-change
+
+[merge]
+    conflictStyle = zdiff3
 
 [rebase]
     autoStash = true
 
 [rerere]
     enabled = true
+
+[fetch]
+    prune = true
+
+[pull]
+    rebase = false
 
 [push]
     default = simple
@@ -40,9 +47,3 @@
 
 [tag]
     sort = version:refname
-
-[help]
-    autocorrect = 1
-
-[url "ssh://git@github.com/"]
-    insteadOf = https://github.com/

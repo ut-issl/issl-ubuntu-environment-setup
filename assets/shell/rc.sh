@@ -12,7 +12,7 @@ if [ -f "${issl_bootstrap_shell_home}/env.sh" ]; then
   . "${issl_bootstrap_shell_home}/env.sh"
 fi
 
-# ===== Aliases ===== #
+# ===== Functions and Aliases ===== #
 
 # Configure GNU-style color output for common tools when available.
 if command -v dircolors >/dev/null 2>&1; then
@@ -52,8 +52,6 @@ else
 fi
 
 alias makej='make -j$(( $(nproc 2>/dev/null || echo 1) + 1 ))' # Build in parallel with CPU cores + 1 jobs.
-
-# ===== Functions ===== #
 
 man() {
   env \
