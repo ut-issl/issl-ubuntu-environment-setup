@@ -24,7 +24,8 @@ jobs:
       github_actions_ci: ${{ steps.changed-files.outputs.github_actions_ci_any_changed }}
       renovate_config: ${{ steps.changed-files.outputs.renovate_config_any_changed }}
       nix: ${{ steps.changed-files.outputs.nix_any_changed }}
-      shell: ${{ steps.changed-files.outputs.shell_any_changed }}
+      sh_bash: ${{ steps.changed-files.outputs.sh_bash_any_changed }}
+      zsh: ${{ steps.changed-files.outputs.zsh_any_changed }}
       md: ${{ steps.changed-files.outputs.md_any_changed }}
       json5: ${{ steps.changed-files.outputs.json5_any_changed }}
       json5_files: ${{ steps.changed-files.outputs.json5_all_changed_files }}
@@ -53,9 +54,10 @@ jobs:
             nix:
               - '**/*.nix'
               - flake.lock
-            shell:
+            sh_bash:
               - '**/*.sh'
               - '**/*.bash'
+            zsh:
               - '**/*.zsh'
             md:
               - '**/*.md'
@@ -208,11 +210,11 @@ jobs:
             echo "No flake.nix found. Skipping flake check."
           fi
 
-  lint-shell-scripts:
-    name: Lint Shell Scripts
+  lint-sh-bash:
+    name: Lint sh/Bash
     needs: determine-changes
     if: >-
-      ${{ needs.determine-changes.outputs.shell == 'true' ||
+      ${{ needs.determine-changes.outputs.sh_bash == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
     permissions:
@@ -227,46 +229,46 @@ jobs:
           persist-credentials: false
 
       - name: Install shell tools
+        shell: bash
         run: |
+          go install mvdan.cc/sh/v3/cmd/shfmt@2f3f5e36d9b0f8f14c998d50aa20a28832205ae8 # v3.13.1
           sudo apt-get update
-          sudo apt-get install -y shfmt
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             sudo apt-get install -y shellcheck
           fi
 
-      - name: Collect shell scripts
-        id: shell-files
+      - name: Collect sh/bash files
+        id: sh-bash-files
         shell: bash
         run: |
-          shell_files_path="$(mktemp)"
+          sh_bash_files_path="$(mktemp)"
           find . -type f \( \
             -name '*.sh' -o \
-            -name '*.bash' -o \
-            -name '*.zsh' \
-          \) -not -path './.git/*' -print0 > "${shell_files_path}"
-          echo "shell_files=${shell_files_path}" >> "$GITHUB_OUTPUT"
-          if [ ! -s "${shell_files_path}" ]; then
-            echo "No shell scripts found."
+            -name '*.bash' \
+          \) -not -path './.git/*' -print0 > "${sh_bash_files_path}"
+          echo "sh_bash_files=${sh_bash_files_path}" >> "$GITHUB_OUTPUT"
+          if [ ! -s "${sh_bash_files_path}" ]; then
+            echo "No sh/bash files found."
             echo "found=false" >> "$GITHUB_OUTPUT"
           else
             echo "found=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run shfmt
-        if: steps.shell-files.outputs.found == 'true'
+        if: steps.sh-bash-files.outputs.found == 'true'
         shell: bash
         env:
-          SHELL_FILES: ${{ steps.shell-files.outputs.shell_files }}
+          SH_BASH_FILES: ${{ steps.sh-bash-files.outputs.sh_bash_files }}
         run: |
-          xargs -0 shfmt --diff --simplify -i 2 < "${SHELL_FILES}"
+          xargs -0 "$(go env GOPATH)/bin/shfmt" --diff --simplify -i 2 < "${SH_BASH_FILES}"
 
       - name: Run shellcheck
-        if: github.event_name != 'pull_request' && steps.shell-files.outputs.found == 'true'
+        if: github.event_name != 'pull_request' && steps.sh-bash-files.outputs.found == 'true'
         shell: bash
         env:
-          SHELL_FILES: ${{ steps.shell-files.outputs.shell_files }}
+          SH_BASH_FILES: ${{ steps.sh-bash-files.outputs.sh_bash_files }}
         run: |
-          xargs -0 shellcheck --external-sources < "${SHELL_FILES}"
+          xargs -0 shellcheck --external-sources < "${SH_BASH_FILES}"
 
       - name: Run shellcheck (reviewdog)
         if: github.event_name == 'pull_request'
@@ -275,6 +277,62 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           fail_level: error
+          pattern: |
+            *.sh
+            *.bash
+
+  lint-zsh:
+    name: Lint Zsh
+    needs: determine-changes
+    if: >-
+      ${{ needs.determine-changes.outputs.zsh == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Install Zsh tools
+        shell: bash
+        run: |
+          go install mvdan.cc/sh/v3/cmd/shfmt@2f3f5e36d9b0f8f14c998d50aa20a28832205ae8 # v3.13.1
+          sudo apt-get update
+          sudo apt-get install -y zsh
+
+      - name: Collect Zsh files
+        id: zsh-files
+        shell: bash
+        run: |
+          zsh_files_path="$(mktemp)"
+          find . -type f -name '*.zsh' -not -path './.git/*' -print0 > "${zsh_files_path}"
+          echo "zsh_files=${zsh_files_path}" >> "$GITHUB_OUTPUT"
+          if [ ! -s "${zsh_files_path}" ]; then
+            echo "No Zsh files found."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run shfmt
+        if: steps.zsh-files.outputs.found == 'true'
+        shell: bash
+        env:
+          ZSH_FILES: ${{ steps.zsh-files.outputs.zsh_files }}
+        run: |
+          xargs -0 "$(go env GOPATH)/bin/shfmt" --language-dialect zsh --diff --simplify -i 2 < "${ZSH_FILES}"
+
+      - name: Check Zsh syntax
+        if: steps.zsh-files.outputs.found == 'true'
+        shell: bash
+        env:
+          ZSH_FILES: ${{ steps.zsh-files.outputs.zsh_files }}
+        run: |
+          xargs -0 -n 1 zsh -n < "${ZSH_FILES}"
 
   lint-markdown:
     name: Lint Markdown
