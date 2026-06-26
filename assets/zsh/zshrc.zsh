@@ -1,6 +1,3 @@
-# shellcheck shell=sh
-# shellcheck disable=SC1091
-
 if [ "${ISSL_ZSHRC_LOADED:-0}" = "1" ]; then
   return 0
 fi
@@ -45,7 +42,6 @@ if [ ! -d "${issl_zsh_functions_dir}" ]; then
   mkdir -p "${issl_zsh_functions_dir}" 2>/dev/null || true
 fi
 if [ -d "${issl_zsh_functions_dir}" ]; then
-  # shellcheck disable=SC3030,SC3054
   fpath=("${issl_zsh_functions_dir}" "${fpath[@]}")
 fi
 
@@ -53,14 +49,13 @@ fi
 if command -v rustc >/dev/null 2>&1; then
   issl_rustup_cargo_completion_dir="$(rustc --print sysroot 2>/dev/null)/share/zsh/site-functions"
   if [ -f "${issl_rustup_cargo_completion_dir}/_cargo" ]; then
-    # shellcheck disable=SC3030,SC3054
     fpath=("${issl_rustup_cargo_completion_dir}" "${fpath[@]}")
   fi
 fi
 
 # Configure completion styles.
-if [ -n "${LS_COLORS-}" ]; then
-  eval "zstyle ':completion:*:default' list-colors \${(s.:.)LS_COLORS}"
+if [ -n "${LS_COLORS:-}" ]; then
+  zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 fi
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _oldlist _expand _complete _correct
@@ -83,11 +78,9 @@ zstyle ':completion:*:options' description 'yes'
 zstyle ':completion:*:warnings' format '%F{red}No matches for: %F{white}%d%b'
 zstyle ':completion:*:*:git-checkout:*:*' list-colors '=(#b) #([0-9]#)*=0=00;33'
 zstyle ':completion:*:*:git-switch:*:*' list-colors '=(#b) #([0-9]#)*=0=00;33'
-# shellcheck disable=SC2016
 zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=00;31'
 
-# shellcheck disable=SC3044
 autoload -Uz compinit
 compinit
 

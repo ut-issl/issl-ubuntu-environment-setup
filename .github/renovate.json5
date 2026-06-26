@@ -50,6 +50,20 @@
         '/^\\.github/workflows/ci\\.ya?ml$/',
       ],
       matchStrings: [
+        'mvdan\\.cc/sh/v3/cmd/shfmt@(?<currentDigest>[a-f0-9]{40}) # (?<currentValue>v[^\\s]+)',
+      ],
+      autoReplaceStringTemplate: 'mvdan.cc/sh/v3/cmd/shfmt@{{{newDigest}}} # {{{newValue}}}',
+      datasourceTemplate: 'github-tags',
+      depNameTemplate: 'mvdan/shfmt',
+      packageNameTemplate: 'mvdan/sh',
+      versioningTemplate: 'semver',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows/ci\\.ya?ml$/',
+      ],
+      matchStrings: [
         'markdownlint-cli2@(?<currentValue>\\S+)',
       ],
       datasourceTemplate: 'npm',
@@ -160,6 +174,13 @@
         'astral-sh/ruff-pre-commit',
       ],
       groupName: 'ruff',
+    },
+    {
+      matchDepNames: [
+        'mvdan/shfmt',
+        'scop/pre-commit-shfmt',
+      ],
+      groupName: 'shfmt',
     },
     {
       matchDepNames: [
