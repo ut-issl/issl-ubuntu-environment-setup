@@ -40,9 +40,23 @@ EOF
 assert_bash_startup_files() {
   test -f "${home_dir}/.bash_profile"
   test -f "${home_dir}/.bashrc"
+}
 
-  grep -Fq "${config_dir}/issl/bash/.bash_profile" "${home_dir}/.bash_profile"
-  grep -Fq "${config_dir}/issl/bash/.bashrc" "${home_dir}/.bashrc"
+assert_bash_startup_is_loaded() {
+  # Drive a login + interactive bash and confirm the shared startup files ran,
+  # observed through their load guards.
+  # shellcheck disable=SC2016  # ${...} inside the single-quoted -c argument expand in the subshell.
+  env -i \
+    HOME="${home_dir}" \
+    XDG_CONFIG_HOME="${config_dir}" \
+    PATH="${nix_profile_bin}:/usr/bin:/bin" \
+    TERM=dumb \
+    bash -lic '
+      ok=1
+      [ "${ISSL_ENV_SH_LOADED:-0}" = "1" ] || { echo "login shell did not load the shared env.sh" >&2; ok=0; }
+      [ "${ISSL_BASHRC_LOADED:-0}" = "1" ] || { echo "interactive shell did not load the shared bashrc" >&2; ok=0; }
+      [ "${ok}" = "1" ]
+    '
 }
 
 assert_shared_shell_tools() {
@@ -68,13 +82,25 @@ assert_shared_zsh_assets() {
   cmp "${common_dir}/assets/zsh/zshrc.zsh" "${config_dir}/issl/zsh/.zshrc"
 }
 
-assert_default_zsh_startup_files_enabled() {
+assert_zsh_startup_files() {
   test -f "${home_dir}/.zshenv"
   test -f "${default_zdotdir}/.zprofile"
   test -f "${default_zdotdir}/.zshrc"
+}
 
-  grep -Fq "${config_dir}/issl/zsh/.zprofile" "${default_zdotdir}/.zprofile"
-  grep -Fq "${config_dir}/issl/zsh/.zshrc" "${default_zdotdir}/.zshrc"
+assert_zsh_startup_is_loaded() {
+  # shellcheck disable=SC2016  # ${...} inside the single-quoted -c argument expand in the subshell.
+  env -i \
+    HOME="${home_dir}" \
+    XDG_CONFIG_HOME="${config_dir}" \
+    PATH="${nix_profile_bin}:/usr/bin:/bin" \
+    TERM=dumb \
+    zsh -lic '
+      ok=1
+      [ "${ISSL_ENV_SH_LOADED:-0}" = "1" ] || { echo "login shell did not load the shared env.sh" >&2; ok=0; }
+      [ "${ISSL_ZSHRC_LOADED:-0}" = "1" ] || { echo "interactive shell did not load the shared zshrc" >&2; ok=0; }
+      [ "${ok}" = "1" ]
+    '
 }
 
 assert_zsh_disabled() {
@@ -88,12 +114,14 @@ main() {
   run_assert assert_shared_shell_assets
   run_assert assert_shell_env_can_be_sourced
   run_assert assert_bash_startup_files
+  run_assert assert_bash_startup_is_loaded
   run_assert assert_shared_shell_tools
 
   if [ "${issl_enable_zsh}" = "1" ]; then
     run_assert assert_zsh_enabled
     run_assert assert_shared_zsh_assets
-    run_assert assert_default_zsh_startup_files_enabled
+    run_assert assert_zsh_startup_files
+    run_assert assert_zsh_startup_is_loaded
   else
     run_assert assert_zsh_disabled
   fi
