@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
+
+# shellcheck source=tests/lib.sh
+source "${common_dir}/tests/lib.sh"
 
 assert_gcc_installation() {
   test -x "${nix_profile_bin}/gcc"
@@ -47,18 +50,18 @@ assert_pkg_config_installation() {
 }
 
 assert_shared_clang_format_configuration() {
-  cmp --silent "${common_dir}/assets/cpp/clang-format.yaml" "${home_dir}/.clang-format"
+  cmp "${common_dir}/assets/cpp/clang-format.yaml" "${home_dir}/.clang-format"
 }
 
 main() {
-  assert_gcc_installation
-  assert_gxx_installation
-  assert_multilib_support
-  assert_make_installation
-  assert_cmake_installation
-  assert_clang_format_installation
-  assert_pkg_config_installation
-  assert_shared_clang_format_configuration
+  run_assert assert_gcc_installation
+  run_assert assert_gxx_installation
+  run_assert assert_multilib_support
+  run_assert assert_make_installation
+  run_assert assert_cmake_installation
+  run_assert assert_clang_format_installation
+  run_assert assert_pkg_config_installation
+  run_assert assert_shared_clang_format_configuration
 }
 
 main "$@"

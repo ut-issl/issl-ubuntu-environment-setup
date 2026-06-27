@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
@@ -9,6 +9,9 @@ pythonrc_path="${home_dir}/.python/.pythonrc.py"
 issl_python_home="${config_dir}/issl/python"
 issl_pythonrc_path="${issl_python_home}/pythonrc.py"
 
+# shellcheck source=tests/lib.sh
+source "${common_dir}/tests/lib.sh"
+
 assert_uv_installation() {
   test -x "${nix_profile_bin}/uv"
   test "$(command -v uv)" = "${nix_profile_bin}/uv"
@@ -16,7 +19,7 @@ assert_uv_installation() {
 }
 
 assert_shared_pythonrc_asset() {
-  cmp --silent "${common_dir}/assets/python/pythonrc.py" "${issl_pythonrc_path}"
+  cmp "${common_dir}/assets/python/pythonrc.py" "${issl_pythonrc_path}"
 }
 
 assert_user_python_startup_file() {
@@ -42,10 +45,10 @@ assert_python_startup_is_loaded() {
 }
 
 main() {
-  assert_uv_installation
-  assert_shared_pythonrc_asset
-  assert_user_python_startup_file
-  assert_python_startup_is_loaded
+  run_assert assert_uv_installation
+  run_assert assert_shared_pythonrc_asset
+  run_assert assert_user_python_startup_file
+  run_assert assert_python_startup_is_loaded
 }
 
 main "$@"

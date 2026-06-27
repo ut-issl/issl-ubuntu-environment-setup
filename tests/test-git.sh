@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
+
+# shellcheck source=tests/lib.sh
+source "${common_dir}/tests/lib.sh"
 
 assert_git_installation() {
   test -x "${nix_profile_bin}/git"
@@ -13,7 +16,7 @@ assert_git_installation() {
 }
 
 assert_shared_git_config() {
-  cmp --silent "${common_dir}/assets/git/.gitconfig" "${config_dir}/issl/git/.gitconfig"
+  cmp "${common_dir}/assets/git/.gitconfig" "${config_dir}/issl/git/.gitconfig"
 }
 
 assert_global_git_include() {
@@ -44,10 +47,10 @@ assert_git_identity() {
 }
 
 main() {
-  assert_git_installation
-  assert_shared_git_config
-  assert_global_git_include
-  assert_git_identity
+  run_assert assert_git_installation
+  run_assert assert_shared_git_config
+  run_assert assert_global_git_include
+  run_assert assert_git_identity
 }
 
 main "$@"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
@@ -8,13 +8,16 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 nix_config_path="${config_dir}/nix/nix.conf"
 issl_nix_config_path="${config_dir}/issl/nix/nix.conf"
 
+# shellcheck source=tests/lib.sh
+source "${common_dir}/tests/lib.sh"
+
 assert_nix_installation() {
   command -v nix >/dev/null
   nix --version
 }
 
 assert_shared_nix_config() {
-  cmp --silent "${common_dir}/assets/nix/nix.conf" "${issl_nix_config_path}"
+  cmp "${common_dir}/assets/nix/nix.conf" "${issl_nix_config_path}"
 }
 
 assert_nix_conf_include() {
@@ -36,11 +39,11 @@ assert_home_manager_installation() {
 }
 
 main() {
-  assert_nix_installation
-  assert_shared_nix_config
-  assert_nix_conf_include
-  assert_nix_command_available_without_extra_flags
-  assert_home_manager_installation
+  run_assert assert_nix_installation
+  run_assert assert_shared_nix_config
+  run_assert assert_nix_conf_include
+  run_assert assert_nix_command_available_without_extra_flags
+  run_assert assert_home_manager_installation
 }
 
 main "$@"
