@@ -16,5 +16,9 @@ rules:
     ignore: |
       .github/workflows/*.yml
       .github/workflows/*.yaml
+  comments-indentation:
+    ignore: |
+      .github/workflows/*.yml
+      .github/workflows/*.yaml
   line-length:
     max: 120

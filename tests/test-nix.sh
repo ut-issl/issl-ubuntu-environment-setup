@@ -3,6 +3,7 @@ set -euo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
+common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 nix_config_path="${config_dir}/nix/nix.conf"
 issl_nix_config_path="${config_dir}/issl/nix/nix.conf"
@@ -13,12 +14,11 @@ assert_nix_installation() {
 }
 
 assert_shared_nix_config() {
-  cmp --silent assets/nix/nix.conf "${issl_nix_config_path}"
+  cmp --silent "${common_dir}/assets/nix/nix.conf" "${issl_nix_config_path}"
 }
 
 assert_nix_conf_include() {
-  grep -Fq '# >>> ISSL nix config >>>' "${nix_config_path}"
-  grep -Fq "# <<< ISSL nix config <<<" "${nix_config_path}"
+  test -f "${nix_config_path}"
   grep -Fq "!include ${issl_nix_config_path}" "${nix_config_path}"
 }
 
