@@ -18,6 +18,7 @@ assert_shared_nix_config() {
 }
 
 assert_nix_conf_include() {
+  test -f "${nix_config_path}"
   grep -Fq "!include ${issl_nix_config_path}" "${nix_config_path}"
 }
 

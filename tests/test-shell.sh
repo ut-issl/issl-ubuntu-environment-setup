@@ -35,6 +35,9 @@ EOF
 }
 
 assert_bash_startup_files() {
+  test -f "${home_dir}/.bash_profile"
+  test -f "${home_dir}/.bashrc"
+
   grep -Fq "${config_dir}/issl/bash/.bash_profile" "${home_dir}/.bash_profile"
   grep -Fq "${config_dir}/issl/bash/.bashrc" "${home_dir}/.bashrc"
 }
