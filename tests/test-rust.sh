@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
-
 export RUSTUP_HOME="${home_dir}/.rustup"
+
+# shellcheck source=tests/lib.sh
+source "${common_dir}/tests/lib.sh"
 
 assert_cargo_about_installation() {
   test -x "${nix_profile_bin}/cargo-about"
@@ -35,7 +37,7 @@ assert_default_toolchain_stable() {
 }
 
 assert_shared_rust_config_asset() {
-  cmp --silent "${common_dir}/assets/rust/config.toml" "${config_dir}/issl/rust/config.toml"
+  cmp "${common_dir}/assets/rust/config.toml" "${config_dir}/issl/rust/config.toml"
 }
 
 assert_cargo_config_include() {
@@ -46,13 +48,13 @@ assert_cargo_config_include() {
 }
 
 main() {
-  assert_cargo_about_installation
-  assert_rustup_installation
-  assert_cargo_installation
-  assert_rustc_installation
-  assert_default_toolchain_stable
-  assert_shared_rust_config_asset
-  assert_cargo_config_include
+  run_assert assert_cargo_about_installation
+  run_assert assert_rustup_installation
+  run_assert assert_cargo_installation
+  run_assert assert_rustc_installation
+  run_assert assert_default_toolchain_stable
+  run_assert assert_shared_rust_config_asset
+  run_assert assert_cargo_config_include
 }
 
 main "$@"

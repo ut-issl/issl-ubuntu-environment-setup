@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -Eeuo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
@@ -9,12 +9,15 @@ nix_profile_share="${home_dir}/.nix-profile/share"
 default_zdotdir="${home_dir}/.zsh"
 issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 
+# shellcheck source=tests/lib.sh
+source "${common_dir}/tests/lib.sh"
+
 assert_shared_shell_assets() {
-  cmp --silent "${common_dir}/assets/shell/env.sh" "${config_dir}/issl/shell/env.sh"
-  cmp --silent "${common_dir}/assets/shell/rc.sh" "${config_dir}/issl/shell/rc.sh"
-  cmp --silent "${common_dir}/assets/shell/.dircolors" "${config_dir}/issl/shell/.dircolors"
-  cmp --silent "${common_dir}/assets/bash/bash_profile.bash" "${config_dir}/issl/bash/.bash_profile"
-  cmp --silent "${common_dir}/assets/bash/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
+  cmp "${common_dir}/assets/shell/env.sh" "${config_dir}/issl/shell/env.sh"
+  cmp "${common_dir}/assets/shell/rc.sh" "${config_dir}/issl/shell/rc.sh"
+  cmp "${common_dir}/assets/shell/.dircolors" "${config_dir}/issl/shell/.dircolors"
+  cmp "${common_dir}/assets/bash/bash_profile.bash" "${config_dir}/issl/bash/.bash_profile"
+  cmp "${common_dir}/assets/bash/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
 }
 
 assert_shell_env_can_be_sourced() {
@@ -61,8 +64,8 @@ assert_zsh_enabled() {
 }
 
 assert_shared_zsh_assets() {
-  cmp --silent "${common_dir}/assets/zsh/zprofile.zsh" "${config_dir}/issl/zsh/.zprofile"
-  cmp --silent "${common_dir}/assets/zsh/zshrc.zsh" "${config_dir}/issl/zsh/.zshrc"
+  cmp "${common_dir}/assets/zsh/zprofile.zsh" "${config_dir}/issl/zsh/.zprofile"
+  cmp "${common_dir}/assets/zsh/zshrc.zsh" "${config_dir}/issl/zsh/.zshrc"
 }
 
 assert_default_zsh_startup_files_enabled() {
@@ -82,17 +85,17 @@ assert_zsh_disabled() {
 }
 
 main() {
-  assert_shared_shell_assets
-  assert_shell_env_can_be_sourced
-  assert_bash_startup_files
-  assert_shared_shell_tools
+  run_assert assert_shared_shell_assets
+  run_assert assert_shell_env_can_be_sourced
+  run_assert assert_bash_startup_files
+  run_assert assert_shared_shell_tools
 
   if [ "${issl_enable_zsh}" = "1" ]; then
-    assert_zsh_enabled
-    assert_shared_zsh_assets
-    assert_default_zsh_startup_files_enabled
+    run_assert assert_zsh_enabled
+    run_assert assert_shared_zsh_assets
+    run_assert assert_default_zsh_startup_files_enabled
   else
-    assert_zsh_disabled
+    run_assert assert_zsh_disabled
   fi
 }
 
