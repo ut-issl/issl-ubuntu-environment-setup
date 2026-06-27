@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - .github/workflows/test.yaml
+      - .github/workflows/test-environment.yaml
       - assets/**
       - flake.nix
       - flake.lock
@@ -16,6 +17,7 @@ on:
     types: [opened, synchronize, reopened]
     paths:
       - .github/workflows/test.yaml
+      - .github/workflows/test-environment.yaml
       - assets/**
       - flake.nix
       - flake.lock
@@ -31,112 +33,21 @@ permissions:
   contents: read
 
 jobs:
-  install:
-    name: Test apply.sh (${{ matrix.enable_zsh_name }})
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - enable_zsh: "0"
-            enable_zsh_name: "zsh disabled"
-          - enable_zsh: "1"
-            enable_zsh_name: "zsh enabled"
+  apply:
+    name: Test apply.sh
+    uses: ./.github/workflows/test-environment.yaml
+    with:
+      setup-mode: script-based
+      common-repository: ${{ github.repository }}
+      common-ref: ${{ github.sha }}
 
-    steps:
-      - name: Checkout the main repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - name: Install Nix
-        uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3 # v31.10.6
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare test environment
-        id: test-env
-        shell: bash
-        run: |
-          tmpdir="$(mktemp -d)"
-          {
-            echo "home_dir=${tmpdir}/home"
-            echo "config_dir=${tmpdir}/home/.config"
-            echo "data_dir=${tmpdir}/home/.local/share"
-            echo "state_dir=${tmpdir}/home/.local/state"
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Run apply.sh
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
-          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
-        run: |
-          env \
-            HOME="${HOME_DIR}" \
-            USER="issl-test" \
-            XDG_CONFIG_HOME="${CONFIG_DIR}" \
-            XDG_DATA_HOME="${DATA_DIR}" \
-            XDG_STATE_HOME="${STATE_DIR}" \
-            ISSL_ENABLE_ZSH="${{ matrix.enable_zsh }}" \
-            GIT_USER_NAME="ISSL Test User" \
-            GIT_USER_EMAIL="issl-test@example.com" \
-            bash ./scripts/apply.sh
-
-      - name: Add Home Manager profile to PATH
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-        run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
-
-      - name: Test nix setup
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-        run: ./tests/test-nix.sh
-
-      - name: Test shell setup
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          ISSL_ENABLE_ZSH: ${{ matrix.enable_zsh }}
-        run: ./tests/test-shell.sh
-
-      - name: Test git setup
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-        run: ./tests/test-git.sh
-
-      - name: Test C/C++ setup
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-        run: ./tests/test-cpp.sh
-
-      - name: Test python setup
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-        run: ./tests/test-python.sh
-
-      - name: Test rust setup
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-        run: ./tests/test-rust.sh
-
-      - name: Test vim setup
-        shell: bash
-        env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-        run: ./tests/test-vim.sh
+  # user-repo:
+  #   name: Test user repo
+  #   uses: ./.github/workflows/test-environment.yaml
+  #   with:
+  #     setup-mode: repository-based
+  #     common-repository: ${{ github.repository }}
+  #     common-ref: ${{ github.sha }}
+  #     user-repository: ut-issl/personal-nix-config-template
+  #     user-ref: main
+  #     override-issl-input: true

@@ -1,0 +1,165 @@
+name: Test environment
+
+on:
+  workflow_call:
+    inputs:
+      setup-mode:
+        required: true
+        type: string
+      common-repository:
+        required: false
+        type: string
+        default: ut-issl/issl-ubuntu-environment-setup
+      common-ref:
+        required: false
+        type: string
+        default: main
+      user-repository:
+        required: false
+        type: string
+        default: ''
+      user-ref:
+        required: false
+        type: string
+        default: ''
+      override-issl-input:
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (${{ matrix.enable_zsh_name }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - enable_zsh: "0"
+            enable_zsh_name: "zsh disabled"
+            flake_target: user
+          - enable_zsh: "1"
+            enable_zsh_name: "zsh enabled"
+            flake_target: user-zsh
+
+    steps:
+      - name: Checkout common repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ${{ inputs.common-repository }}
+          ref: ${{ inputs.common-ref }}
+          path: common
+          persist-credentials: false
+
+      - name: Checkout user repository
+        if: inputs.setup-mode == 'repository-based'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: ${{ inputs.user-repository }}
+          ref: ${{ inputs.user-ref }}
+          path: user
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@8aa03977d8d733052d78f4e008a241fd1dbf36b3 # v31.10.6
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare test environment
+        id: test-env
+        shell: bash
+        run: |
+          tmpdir="$(mktemp -d)"
+          {
+            echo "home_dir=${tmpdir}/home"
+            echo "config_dir=${tmpdir}/home/.config"
+            echo "data_dir=${tmpdir}/home/.local/share"
+            echo "state_dir=${tmpdir}/home/.local/state"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Run apply.sh
+        if: inputs.setup-mode == 'script-based'
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+          DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
+          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
+        run: |
+          env \
+            HOME="${HOME_DIR}" \
+            USER="issl-test" \
+            XDG_CONFIG_HOME="${CONFIG_DIR}" \
+            XDG_DATA_HOME="${DATA_DIR}" \
+            XDG_STATE_HOME="${STATE_DIR}" \
+            ISSL_ENABLE_ZSH="${{ matrix.enable_zsh }}" \
+            GIT_USER_NAME="ISSL Test User" \
+            GIT_USER_EMAIL="issl-test@example.com" \
+            bash ./common/scripts/apply.sh
+
+      - name: Apply Home Manager configuration
+        if: inputs.setup-mode == 'repository-based'
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+          DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
+          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
+          FLAKE_TARGET: ${{ matrix.flake_target }}
+        run: |
+          cd user
+
+          switch_args=(
+            --impure
+            --show-trace
+          )
+
+          if [ "${{ inputs.override-issl-input }}" = "true" ]; then
+            switch_args+=(
+              --override-input
+              issl
+              "path:${GITHUB_WORKSPACE}/common"
+            )
+          fi
+
+          env \
+            HOME="${HOME_DIR}" \
+            USER="issl-test" \
+            XDG_CONFIG_HOME="${CONFIG_DIR}" \
+            XDG_DATA_HOME="${DATA_DIR}" \
+            XDG_STATE_HOME="${STATE_DIR}" \
+            nix run ".#home-manager" -- \
+              switch --flake ".#${FLAKE_TARGET}" "${switch_args[@]}"
+
+      - name: Add Home Manager profile to PATH
+        shell: bash
+        env:
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+        run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
+
+      - name: Run environment tests
+        if: inputs.setup-mode == 'script-based'
+        shell: bash
+        env:
+          COMMON_DIR: ${{ github.workspace }}/common
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+          ISSL_ENABLE_ZSH: ${{ matrix.enable_zsh }}
+          EXPECTED_GIT_USER_NAME: ISSL Test User
+          EXPECTED_GIT_USER_EMAIL: issl-test@example.com
+        run: ./common/tests/run.sh
+
+      - name: Run environment tests
+        if: inputs.setup-mode == 'repository-based'
+        shell: bash
+        env:
+          COMMON_DIR: ${{ github.workspace }}/common
+          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+          ISSL_ENABLE_ZSH: ${{ matrix.enable_zsh }}
+        run: ./common/tests/run.sh
