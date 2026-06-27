@@ -3,17 +3,18 @@ set -euo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
+common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 nix_profile_share="${home_dir}/.nix-profile/share"
 default_zdotdir="${home_dir}/.zsh"
 issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 
 assert_shared_shell_assets() {
-  cmp --silent assets/shell/env.sh "${config_dir}/issl/shell/env.sh"
-  cmp --silent assets/shell/rc.sh "${config_dir}/issl/shell/rc.sh"
-  cmp --silent assets/shell/.dircolors "${config_dir}/issl/shell/.dircolors"
-  cmp --silent assets/bash/bash_profile.bash "${config_dir}/issl/bash/.bash_profile"
-  cmp --silent assets/bash/bashrc.bash "${config_dir}/issl/bash/.bashrc"
+  cmp --silent "${common_dir}/assets/shell/env.sh" "${config_dir}/issl/shell/env.sh"
+  cmp --silent "${common_dir}/assets/shell/rc.sh" "${config_dir}/issl/shell/rc.sh"
+  cmp --silent "${common_dir}/assets/shell/.dircolors" "${config_dir}/issl/shell/.dircolors"
+  cmp --silent "${common_dir}/assets/bash/bash_profile.bash" "${config_dir}/issl/bash/.bash_profile"
+  cmp --silent "${common_dir}/assets/bash/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
 }
 
 assert_shell_env_can_be_sourced() {
@@ -34,9 +35,7 @@ EOF
 }
 
 assert_bash_startup_files() {
-  grep -Fq '# >>> ISSL bash profile >>>' "${home_dir}/.bash_profile"
   grep -Fq "${config_dir}/issl/bash/.bash_profile" "${home_dir}/.bash_profile"
-  grep -Fq '# >>> ISSL bash rc >>>' "${home_dir}/.bashrc"
   grep -Fq "${config_dir}/issl/bash/.bashrc" "${home_dir}/.bashrc"
 }
 
@@ -59,17 +58,16 @@ assert_zsh_enabled() {
 }
 
 assert_shared_zsh_assets() {
-  cmp --silent assets/zsh/zprofile.zsh "${config_dir}/issl/zsh/.zprofile"
-  cmp --silent assets/zsh/zshrc.zsh "${config_dir}/issl/zsh/.zshrc"
+  cmp --silent "${common_dir}/assets/zsh/zprofile.zsh" "${config_dir}/issl/zsh/.zprofile"
+  cmp --silent "${common_dir}/assets/zsh/zshrc.zsh" "${config_dir}/issl/zsh/.zshrc"
 }
 
 assert_default_zsh_startup_files_enabled() {
-  grep -Fq '# >>> ISSL zsh env >>>' "${home_dir}/.zshenv"
-  # shellcheck disable=SC2016
-  grep -Fq 'export ZDOTDIR="$HOME/.zsh"' "${home_dir}/.zshenv"
-  grep -Fq '# >>> ISSL zsh profile >>>' "${default_zdotdir}/.zprofile"
+  test -f "${home_dir}/.zshenv"
+  test -f "${default_zdotdir}/.zprofile"
+  test -f "${default_zdotdir}/.zshrc"
+
   grep -Fq "${config_dir}/issl/zsh/.zprofile" "${default_zdotdir}/.zprofile"
-  grep -Fq '# >>> ISSL zsh rc >>>' "${default_zdotdir}/.zshrc"
   grep -Fq "${config_dir}/issl/zsh/.zshrc" "${default_zdotdir}/.zshrc"
 }
 

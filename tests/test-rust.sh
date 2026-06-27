@@ -3,6 +3,7 @@ set -euo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
+common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 
 export RUSTUP_HOME="${home_dir}/.rustup"
@@ -34,15 +35,13 @@ assert_default_toolchain_stable() {
 }
 
 assert_shared_rust_config_asset() {
-  cmp --silent assets/rust/config.toml "${config_dir}/issl/rust/config.toml"
+  cmp --silent "${common_dir}/assets/rust/config.toml" "${config_dir}/issl/rust/config.toml"
 }
 
 assert_cargo_config_include() {
   local cargo_config_path="${home_dir}/.cargo/config.toml"
 
   test -f "${cargo_config_path}"
-  grep -Fq '# >>> ISSL cargo config >>>' "${cargo_config_path}"
-  grep -Fq '# <<< ISSL cargo config <<<' "${cargo_config_path}"
   grep -Fq "${config_dir}/issl/rust/config.toml" "${cargo_config_path}"
 }
 

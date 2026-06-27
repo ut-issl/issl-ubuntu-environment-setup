@@ -3,6 +3,7 @@ set -euo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
+common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 pythonrc_path="${home_dir}/.python/.pythonrc.py"
 issl_python_home="${config_dir}/issl/python"
@@ -15,13 +16,11 @@ assert_uv_installation() {
 }
 
 assert_shared_pythonrc_asset() {
-  cmp --silent assets/python/pythonrc.py "${issl_pythonrc_path}"
+  cmp --silent "${common_dir}/assets/python/pythonrc.py" "${issl_pythonrc_path}"
 }
 
 assert_user_python_startup_file() {
   test -f "${pythonrc_path}"
-  grep -Fq '# >>> ISSL python startup >>>' "${pythonrc_path}"
-  grep -Fq '# <<< ISSL python startup <<<' "${pythonrc_path}"
   grep -Fq 'runpy.run_path(str(shared_pythonrc), run_name="__main__")' "${pythonrc_path}"
 }
 

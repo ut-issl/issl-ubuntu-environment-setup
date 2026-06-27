@@ -2,6 +2,7 @@
 set -euo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
+common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 
 assert_gcc_installation() {
@@ -46,7 +47,7 @@ assert_pkg_config_installation() {
 }
 
 assert_shared_clang_format_configuration() {
-  cmp --silent assets/cpp/clang-format.yaml "${home_dir}/.clang-format"
+  cmp --silent "${common_dir}/assets/cpp/clang-format.yaml" "${home_dir}/.clang-format"
 }
 
 main() {
