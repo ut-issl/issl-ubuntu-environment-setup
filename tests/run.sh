@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
-
-cd "${common_dir}"
+common_dir="$(cd -- "${COMMON_DIR:-$(dirname -- "${BASH_SOURCE[0]}")/..}" && pwd)"
+export COMMON_DIR="${common_dir}"
 
 "${common_dir}/tests/test-nix.sh"
 "${common_dir}/tests/test-shell.sh"
