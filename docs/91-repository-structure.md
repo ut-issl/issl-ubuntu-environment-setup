@@ -79,7 +79,9 @@ Examples:
 - `test-cpp.sh`, `test-vim.sh`, and `test-nix.sh` check the corresponding shared setup.
 
 These tests verify that the expected tools are available and that the shared assets are deployed and referenced correctly.
-They are executed in GitHub Actions by `.github/workflows/test.yaml`.
+`tests/run.sh` runs all of them in order.
+In GitHub Actions they run through the reusable `.github/workflows/test-environment.yaml`,
+which validates both the script-based and personal-config-repository-based setups.
 
 ### `docs/`
 
