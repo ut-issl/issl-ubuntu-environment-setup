@@ -7,6 +7,7 @@
     ./nix.nix
     ./shell.nix
     ./git.nix
+    ./dev.nix
     ./cpp.nix
     ./python.nix
     ./rust.nix

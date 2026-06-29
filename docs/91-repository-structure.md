@@ -36,6 +36,7 @@ This directory contains the Home Manager modules that define the shared environm
   - `nix.nix`
   - `shell.nix`
   - `git.nix`
+  - `dev.nix`
   - `cpp.nix`
   - `python.nix`
   - `rust.nix`
@@ -75,6 +76,7 @@ Examples:
 
 - `test-shell.sh` checks shell assets and startup file integration.
 - `test-git.sh` checks Git installation and global include behavior.
+- `test-dev.sh` checks installation of the language-agnostic development tools.
 - `test-python.sh` and `test-rust.sh` check tool installation and shared config wiring.
 - `test-cpp.sh`, `test-vim.sh`, and `test-nix.sh` check the corresponding shared setup.
 
