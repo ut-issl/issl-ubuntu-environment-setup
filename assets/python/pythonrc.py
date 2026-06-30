@@ -15,8 +15,8 @@ def _history_path() -> str:
     if histfile:
         return histfile
 
-    python_home = os.path.join(os.path.expanduser("~"), ".python")
-    return os.path.join(python_home, ".python_history")
+    state_home = os.environ.get("XDG_STATE_HOME") or os.path.join(os.path.expanduser("~"), ".local", "state")
+    return os.path.join(state_home, "python", "python_history")
 
 
 def _enable_completion() -> None:

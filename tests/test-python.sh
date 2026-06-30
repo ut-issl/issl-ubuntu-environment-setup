@@ -5,7 +5,7 @@ home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
-pythonrc_path="${home_dir}/.python/.pythonrc.py"
+pythonrc_path="${config_dir}/python/pythonrc.py"
 issl_python_home="${config_dir}/issl/python"
 issl_pythonrc_path="${issl_python_home}/pythonrc.py"
 

@@ -30,9 +30,9 @@ prepend_path "${CARGO_HOME}/bin"
 # ===== Python ===== #
 
 if [ -z "${PYTHONSTARTUP:-}" ]; then
-  export PYTHONSTARTUP="${HOME}/.python/.pythonrc.py"
+  export PYTHONSTARTUP="${XDG_CONFIG_HOME:-$HOME/.config}/python/pythonrc.py"
 fi
 
 if [ -z "${PYTHONHISTFILE:-}" ]; then
-  export PYTHONHISTFILE="${HOME}/.python/.python_history"
+  export PYTHONHISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/python/python_history"
 fi

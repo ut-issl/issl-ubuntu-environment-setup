@@ -457,7 +457,7 @@ PYTHON_EOF
 
 ensure_python_startup_file() {
   prepend_block_once \
-    "${HOME}/.python/.pythonrc.py" \
+    "${XDG_CONFIG_HOME:-$HOME/.config}/python/pythonrc.py" \
     "# >>> ISSL python startup >>>" \
     "# <<< ISSL python startup <<<" \
     "$(pythonrc_block)"
