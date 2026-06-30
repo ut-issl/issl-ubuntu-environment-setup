@@ -5,7 +5,10 @@ if [ "${ISSL_ENV_SH_LOADED:-0}" = "1" ]; then
 fi
 export ISSL_ENV_SH_LOADED=1
 
-export ISSL_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+export ISSL_CONFIG_HOME="${XDG_CONFIG_HOME}/issl"
 export ISSL_SHELL_HOME="${ISSL_CONFIG_HOME}/shell"
 export ISSL_PYTHON_HOME="${ISSL_CONFIG_HOME}/python"
 export ISSL_RUST_HOME="${ISSL_CONFIG_HOME}/rust"
@@ -30,9 +33,9 @@ prepend_path "${CARGO_HOME}/bin"
 # ===== Python ===== #
 
 if [ -z "${PYTHONSTARTUP:-}" ]; then
-  export PYTHONSTARTUP="${XDG_CONFIG_HOME:-$HOME/.config}/python/pythonrc.py"
+  export PYTHONSTARTUP="${XDG_CONFIG_HOME}/python/pythonrc.py"
 fi
 
 if [ -z "${PYTHONHISTFILE:-}" ]; then
-  export PYTHONHISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/python/python_history"
+  export PYTHONHISTFILE="${XDG_STATE_HOME}/python/python_history"
 fi

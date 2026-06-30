@@ -3,7 +3,11 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-issl_config_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl"
+
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+
+issl_config_home="${XDG_CONFIG_HOME}/issl"
 shared_nix_config_path="${issl_config_home}/nix/nix.conf"
 shared_bash_profile_path="${issl_config_home}/bash/.bash_profile"
 shared_bashrc_path="${issl_config_home}/bash/.bashrc"
@@ -15,7 +19,7 @@ git_user_name="${GIT_USER_NAME-}"
 git_user_email="${GIT_USER_EMAIL-}"
 issl_enable_zsh="${ISSL_ENABLE_ZSH-}"
 nix_feature_config="experimental-features = nix-command flakes"
-hm_profile_dir="${XDG_STATE_HOME:-$HOME/.local/state}/nix/profiles"
+hm_profile_dir="${XDG_STATE_HOME}/nix/profiles"
 
 # ===== Common ===== #
 
@@ -73,7 +77,7 @@ nix_conf_include_block() {
 }
 
 ensure_nix_conf_include() {
-  local nix_config_dir="${XDG_CONFIG_HOME:-$HOME/.config}/nix"
+  local nix_config_dir="${XDG_CONFIG_HOME}/nix"
   local nix_config_path="${nix_config_dir}/nix.conf"
 
   mkdir -p "${nix_config_dir}"
@@ -233,7 +237,7 @@ resolve_zdotdir_from_zshenv() {
   resolved_value="$(
     env -i \
       HOME="${HOME}" \
-      XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}" \
+      XDG_CONFIG_HOME="${XDG_CONFIG_HOME}" \
       ZDOTDIR=""
     # shellcheck disable=SC2016
     "${zsh_bin}" -c '
@@ -284,7 +288,7 @@ ensure_zsh_startup_files() {
       "# >>> ISSL zsh env >>>" \
       "# <<< ISSL zsh env <<<" \
       "$(zshenv_default_block)"
-    zdotdir_path="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
+    zdotdir_path="${XDG_CONFIG_HOME}/zsh"
   fi
 
   mkdir -p "${zdotdir_path}"
@@ -457,7 +461,7 @@ PYTHON_EOF
 
 ensure_python_startup_file() {
   prepend_block_once \
-    "${XDG_CONFIG_HOME:-$HOME/.config}/python/pythonrc.py" \
+    "${XDG_CONFIG_HOME}/python/pythonrc.py" \
     "# >>> ISSL python startup >>>" \
     "# <<< ISSL python startup <<<" \
     "$(pythonrc_block)"
