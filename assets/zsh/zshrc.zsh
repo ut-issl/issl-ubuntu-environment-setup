@@ -11,7 +11,13 @@ fi
 
 # ===== History ===== #
 
-export HISTFILE="${ZDOTDIR}/.zsh_history" # Store history under the active ZDOTDIR.
+export HISTFILE="${XDG_STATE_HOME:-$HOME/.local/state}/zsh/history" # Persist history under the XDG state directory.
+
+# zsh does not create the history file's parent directory on its own.
+issl_zsh_histfile_dir="${HISTFILE:h}"
+if [ ! -d "${issl_zsh_histfile_dir}" ]; then
+  mkdir -p "${issl_zsh_histfile_dir}" 2>/dev/null || true
+fi
 
 export HISTSIZE=10000 # Keep up to 10000 commands in memory.
 export SAVEHIST=10000 # Persist up to 10000 commands to HISTFILE.
