@@ -6,7 +6,7 @@ config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 nix_profile_share="${home_dir}/.nix-profile/share"
-default_zdotdir="${home_dir}/.zsh"
+default_zdotdir="${config_dir}/zsh"
 issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 
 # shellcheck source=tests/lib.sh

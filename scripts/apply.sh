@@ -250,7 +250,7 @@ resolve_zdotdir_from_zshenv() {
 zshenv_default_block() {
   cat <<'ZSHENV_EOF'
 if [ -z "${ZDOTDIR:-}" ]; then
-  export ZDOTDIR="$HOME/.zsh"
+  export ZDOTDIR="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
 fi
 ZSHENV_EOF
 }
@@ -284,7 +284,7 @@ ensure_zsh_startup_files() {
       "# >>> ISSL zsh env >>>" \
       "# <<< ISSL zsh env <<<" \
       "$(zshenv_default_block)"
-    zdotdir_path="${HOME}/.zsh"
+    zdotdir_path="${XDG_CONFIG_HOME:-$HOME/.config}/zsh"
   fi
 
   mkdir -p "${zdotdir_path}"
