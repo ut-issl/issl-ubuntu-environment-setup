@@ -26,6 +26,10 @@ on:
         required: false
         type: boolean
         default: false
+      timeout-minutes:
+        required: false
+        type: number
+        default: 10
 
 permissions:
   contents: read
@@ -34,7 +38,7 @@ jobs:
   test:
     name: Test (${{ matrix.enable_zsh_name }})
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     permissions:
       contents: read
     strategy:
