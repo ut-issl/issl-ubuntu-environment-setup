@@ -19,6 +19,7 @@ jobs:
   determine-changes:
     name: Determine changed files
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       github_actions: ${{ steps.changed-files.outputs.github_actions_any_changed }}
       github_actions_ci: ${{ steps.changed-files.outputs.github_actions_ci_any_changed }}
@@ -85,6 +86,7 @@ jobs:
     needs: determine-changes
     if: ${{ needs.determine-changes.outputs.github_actions == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
@@ -137,6 +139,7 @@ jobs:
       ${{ needs.determine-changes.outputs.renovate_config == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
@@ -163,6 +166,7 @@ jobs:
       ${{ needs.determine-changes.outputs.nix == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
@@ -219,6 +223,7 @@ jobs:
       ${{ needs.determine-changes.outputs.sh_bash == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       checks: write
@@ -290,6 +295,7 @@ jobs:
       ${{ needs.determine-changes.outputs.zsh == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
@@ -343,6 +349,7 @@ jobs:
       ${{ needs.determine-changes.outputs.md == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
@@ -390,6 +397,7 @@ jobs:
       ${{ needs.determine-changes.outputs.json5 == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
 
@@ -428,6 +436,7 @@ jobs:
       ${{ needs.determine-changes.outputs.toml == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
@@ -503,6 +512,7 @@ jobs:
       ${{ needs.determine-changes.outputs.yaml == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
@@ -539,6 +549,7 @@ jobs:
       ${{ needs.determine-changes.outputs.python == 'true' ||
       needs.determine-changes.outputs.github_actions_ci == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       checks: write
@@ -606,6 +617,7 @@ jobs:
   check-prek:
     name: Check prek
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout the main repository
@@ -627,6 +639,7 @@ jobs:
   check-typos:
     name: Check typos
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
       checks: write
@@ -654,6 +667,7 @@ jobs:
   lint-commit-messages:
     name: Lint commit messages
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout the main repository
