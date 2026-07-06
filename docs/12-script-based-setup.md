@@ -10,10 +10,10 @@ Run:
 bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
 ```
 
-To pin setup to a fixed release, replace `latest` with a tag such as `v0.2.7`:
+To pin setup to a fixed release, replace `latest` with a tag such as `v0.2.8`:
 
 ```bash
-bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/v0.2.7/setup.sh)
+bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/v0.2.8/setup.sh)
 ```
 
 Each release's `setup.sh` defaults to installing that same release,
