@@ -2,3 +2,8 @@
 current_version = "0.2.7"
 commit = false
 tag = false
+
+[[tool.bumpversion.files]]
+filename = "scripts/setup.sh"
+search = "default_repo_ref=\"v{current_version}\""
+replace = "default_repo_ref=\"v{new_version}\""

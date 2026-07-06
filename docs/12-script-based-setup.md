@@ -10,11 +10,15 @@ Run:
 bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
 ```
 
-To pin setup to a fixed release, replace `latest` with a tag such as `v0.1.2`:
+To pin setup to a fixed release, replace `latest` with a tag such as `v0.2.7`:
 
 ```bash
-bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/v0.1.2/setup.sh)
+bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/v0.2.7/setup.sh)
 ```
+
+Each release's `setup.sh` defaults to installing that same release,
+so pinning the download tag also pins the installed environment.
+Set the `REPO_REF` (and `REPO_URL`) environment variables to override this default, e.g. `REPO_REF=main` for development.
 
 To override setup variables, set them before running the command. For example:
 
