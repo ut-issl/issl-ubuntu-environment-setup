@@ -128,21 +128,16 @@ start_nix_daemon_without_systemd() {
   fi
 
   if [ "$(id -u)" = "0" ]; then
-    if ! "${nix_daemon_path}" --daemon >/dev/null 2>&1; then
-      echo "warning: failed to start nix-daemon as root. Nix commands may fail." >&2
-      return
-    fi
+    setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   elif command -v sudo >/dev/null 2>&1; then
     if [ -t 0 ]; then
-      if ! sudo "${nix_daemon_path}" --daemon >/dev/null 2>&1; then
-        echo "warning: failed to start nix-daemon via sudo. Nix commands may fail." >&2
+      if ! sudo -v; then
+        echo "warning: failed to authenticate via sudo. Nix commands may fail." >&2
         return
       fi
+      sudo setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
     elif sudo -n true >/dev/null 2>&1; then
-      if ! sudo "${nix_daemon_path}" --daemon >/dev/null 2>&1; then
-        echo "warning: failed to start nix-daemon via passwordless sudo. Nix commands may fail." >&2
-        return
-      fi
+      sudo -n setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
     else
       echo "warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode)." >&2
       return
