@@ -18,9 +18,9 @@ bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/relea
 
 Each release's `setup.sh` defaults to installing that same release,
 so pinning the download tag also pins the installed environment.
-Set the `REPO_REF` (and `REPO_URL`) environment variables to override this default, e.g. `REPO_REF=main` for development.
 
-To override setup variables, set them before running the command. For example:
+To override setup variables, set environment variables before running the command.
+For example, set `REPO_REF=main` for development, or set `INSTALL_DIR` to choose another install location:
 
 ```bash
 INSTALL_DIR="$HOME/.issl-ubuntu-environment-setup" \
