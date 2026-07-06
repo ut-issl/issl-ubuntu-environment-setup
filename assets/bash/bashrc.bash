@@ -4,7 +4,7 @@
 if [[ ${ISSL_BASHRC_LOADED:-0} == "1" ]]; then
   return 0
 fi
-export ISSL_BASHRC_LOADED=1
+ISSL_BASHRC_LOADED=1
 
 issl_bootstrap_shell_home="${XDG_CONFIG_HOME:-$HOME/.config}/issl/shell"
 
