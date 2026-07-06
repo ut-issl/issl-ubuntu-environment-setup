@@ -234,13 +234,14 @@ resolve_zdotdir_from_zshenv() {
     return 1
   fi
 
+  # shellcheck disable=SC2016
   resolved_value="$(
     env -i \
       HOME="${HOME}" \
       XDG_CONFIG_HOME="${XDG_CONFIG_HOME}" \
-      ZDOTDIR=""
-    # shellcheck disable=SC2016
-    "${zsh_bin}" -c '
+      ZDOTDIR="" \
+      PATH=/usr/bin:/bin \
+      "${zsh_bin}" -c '
         . "$1"
         if [ -n "${ZDOTDIR:-}" ]; then
           print -r -- "${ZDOTDIR:A}"
