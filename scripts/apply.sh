@@ -393,18 +393,19 @@ revert_login_shell_to_bash() {
 
   if [ ! -x "${bash_path}" ] && ! bash_path="$(command -v bash)"; then
     echo "warning: could not locate a bash binary to revert the login shell. Set it manually with: chsh -s /bin/bash" >&2
-    return
+    return 1
   fi
 
   if ! ensure_shell_listed_in_etc_shells "${bash_path}"; then
-    return
+    return 1
   fi
 
-  if chsh -s "${bash_path}"; then
-    echo "Reverted login shell to ${bash_path}. This will apply to new login sessions."
-  else
+  if ! chsh -s "${bash_path}"; then
     echo "warning: failed to run chsh. You can retry manually with: chsh -s ${bash_path}" >&2
+    return 1
   fi
+
+  echo "Reverted login shell to ${bash_path}. This will apply to new login sessions."
 }
 
 guard_login_shell_before_disabling_zsh() {
@@ -436,7 +437,11 @@ guard_login_shell_before_disabling_zsh() {
     fi
   fi
 
-  revert_login_shell_to_bash
+  if ! revert_login_shell_to_bash; then
+    echo "error: could not revert the login shell to bash; aborting before disabling zsh to avoid stranding your login shell." >&2
+    echo "Fix the login shell manually (e.g. chsh -s /bin/bash) and re-run." >&2
+    exit 1
+  fi
 }
 
 # ===== Git ===== #
