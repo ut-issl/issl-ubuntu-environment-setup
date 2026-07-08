@@ -146,13 +146,13 @@ start_nix_daemon_without_systemd() {
   fi
 
   for _ in {1..10}; do
-    if pgrep -x nix-daemon >/dev/null 2>&1; then
+    if nix --extra-experimental-features "nix-command flakes" store info >/dev/null 2>&1; then
       return
     fi
     sleep 1
   done
 
-  echo "warning: attempted to start nix-daemon, but it is not running yet. Nix commands may fail." >&2
+  echo "warning: attempted to start nix-daemon, but it is not responding yet. Nix commands may fail." >&2
 }
 
 # ===== Bash ===== #
