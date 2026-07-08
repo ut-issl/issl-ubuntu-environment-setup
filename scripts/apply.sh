@@ -388,6 +388,57 @@ maybe_switch_login_shell_to_zsh() {
   fi
 }
 
+revert_login_shell_to_bash() {
+  local bash_path="/bin/bash"
+
+  if [ ! -x "${bash_path}" ] && ! bash_path="$(command -v bash)"; then
+    echo "warning: could not locate a bash binary to revert the login shell. Set it manually with: chsh -s /bin/bash" >&2
+    return
+  fi
+
+  if ! ensure_shell_listed_in_etc_shells "${bash_path}"; then
+    return
+  fi
+
+  if chsh -s "${bash_path}"; then
+    echo "Reverted login shell to ${bash_path}. This will apply to new login sessions."
+  else
+    echo "warning: failed to run chsh. You can retry manually with: chsh -s ${bash_path}" >&2
+  fi
+}
+
+guard_login_shell_before_disabling_zsh() {
+  local nix_zsh_path="${HOME}/.nix-profile/bin/zsh"
+  local active_login_shell=""
+  local response=""
+
+  active_login_shell="$(current_login_shell || true)"
+  if [ "${active_login_shell}" != "${nix_zsh_path}" ]; then
+    return
+  fi
+
+  if [ -n "${issl_enable_zsh}" ] && is_no "${issl_enable_zsh}"; then
+    # zsh was explicitly disabled; proceed straight to the bash fallback.
+    :
+  elif [ ! -t 0 ]; then
+    echo "error: your login shell is the Nix-provided zsh (${nix_zsh_path}), but this non-interactive run would disable zsh and strand it." >&2
+    echo "Re-run with ISSL_ENABLE_ZSH=yes to keep zsh, or ISSL_ENABLE_ZSH=no to disable it and revert the login shell to bash." >&2
+    exit 1
+  else
+    echo "Your login shell is currently the Nix-provided zsh (${nix_zsh_path})."
+    echo "Continuing without zsh will remove it and revert your login shell to bash."
+    read -r -p "Continue and disable zsh? [y/N] " response
+    if ! is_yes "${response}"; then
+      echo "Aborted without changes. To keep zsh, re-run with it enabled:"
+      echo "  ISSL_ENABLE_ZSH=yes bash ${repo_root}/scripts/apply.sh"
+      echo "or answer yes when prompted to enable the shared zsh configuration."
+      exit 1
+    fi
+  fi
+
+  revert_login_shell_to_bash
+}
+
 # ===== Git ===== #
 
 ensure_git_include() {
@@ -518,6 +569,10 @@ if should_enable_zsh; then
 else
   home_configuration_name="issl-common-${current_system}"
   zsh_enabled=0
+fi
+
+if [ "${zsh_enabled}" = "0" ]; then
+  guard_login_shell_before_disabling_zsh
 fi
 
 nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
