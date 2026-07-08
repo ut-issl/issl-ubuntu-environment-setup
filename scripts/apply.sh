@@ -135,7 +135,7 @@ start_nix_daemon_without_systemd() {
         echo "warning: failed to authenticate via sudo. Nix commands may fail." >&2
         return
       fi
-      sudo setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+      sudo -n setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
     elif sudo -n true >/dev/null 2>&1; then
       sudo -n setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
     else
