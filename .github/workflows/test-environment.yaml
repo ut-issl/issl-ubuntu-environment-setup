@@ -80,11 +80,17 @@ jobs:
         shell: bash
         run: |
           tmpdir="$(mktemp -d)"
+          home_dir="${tmpdir}/home"
+
+          # Seed the test HOME with the default Ubuntu skeleton dotfiles (~/.bashrc, ~/.profile, ~/.bash_logout).
+          mkdir -p "${home_dir}"
+          cp -a /etc/skel/. "${home_dir}/"
+
           {
-            echo "home_dir=${tmpdir}/home"
-            echo "config_dir=${tmpdir}/home/.config"
-            echo "data_dir=${tmpdir}/home/.local/share"
-            echo "state_dir=${tmpdir}/home/.local/state"
+            echo "home_dir=${home_dir}"
+            echo "config_dir=${home_dir}/.config"
+            echo "data_dir=${home_dir}/.local/share"
+            echo "state_dir=${home_dir}/.local/state"
           } >> "$GITHUB_OUTPUT"
 
       - name: Run apply.sh
