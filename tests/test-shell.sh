@@ -43,18 +43,19 @@ assert_bash_startup_files() {
 }
 
 assert_bash_startup_is_loaded() {
-  # Drive a login + interactive bash and confirm the shared startup files ran,
-  # observed through their load guards.
+  # Drive a login + interactive bash and confirm the shared startup files ran (observed through their load guards)
+  # and that env.sh put the Nix profile bin on PATH by itself, without the Nix installer's system-wide shell hooks.
   # shellcheck disable=SC2016  # ${...} inside the single-quoted -c argument expand in the subshell.
   env -i \
     HOME="${home_dir}" \
     XDG_CONFIG_HOME="${config_dir}" \
-    PATH="${nix_profile_bin}:/usr/bin:/bin" \
+    PATH="/usr/bin:/bin" \
     TERM=dumb \
     bash -lic '
       ok=1
       [ "${ISSL_ENV_SH_LOADED:-0}" = "1" ] || { echo "login shell did not load the shared env.sh" >&2; ok=0; }
       [ "${ISSL_BASHRC_LOADED:-0}" = "1" ] || { echo "interactive shell did not load the shared bashrc" >&2; ok=0; }
+      [ "$(command -v colordiff)" = "${HOME}/.nix-profile/bin/colordiff" ] || { echo "env.sh did not add the Nix profile bin to PATH" >&2; ok=0; }
       [ "${ok}" = "1" ]
     '
 }
@@ -93,12 +94,13 @@ assert_zsh_startup_is_loaded() {
   env -i \
     HOME="${home_dir}" \
     XDG_CONFIG_HOME="${config_dir}" \
-    PATH="${nix_profile_bin}:/usr/bin:/bin" \
+    PATH="/usr/bin:/bin" \
     TERM=dumb \
-    zsh -lic '
+    "${nix_profile_bin}/zsh" -lic '
       ok=1
       [ "${ISSL_ENV_SH_LOADED:-0}" = "1" ] || { echo "login shell did not load the shared env.sh" >&2; ok=0; }
       [ "${ISSL_ZSHRC_LOADED:-0}" = "1" ] || { echo "interactive shell did not load the shared zshrc" >&2; ok=0; }
+      [ "$(command -v colordiff)" = "${HOME}/.nix-profile/bin/colordiff" ] || { echo "env.sh did not add the Nix profile bin to PATH" >&2; ok=0; }
       [ "${ok}" = "1" ]
     '
 }
