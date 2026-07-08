@@ -155,7 +155,7 @@ ensure_github_ssh_config() {
   ensure_ssh_directory
 
   if [ -f "${ssh_config_path}" ] &&
-    grep -Eq '^[[:space:]]*Host[[:space:]]+github\.com([[:space:]]|$)' "${ssh_config_path}"; then
+    grep -Eiq '^[[:space:]]*Host[[:space:]]+github\.com([[:space:]]|$)' "${ssh_config_path}"; then
     return
   fi
 
