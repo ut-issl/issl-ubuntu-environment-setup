@@ -41,13 +41,13 @@ jobs:
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
 
-  # user-repo:
-  #   name: Test config-repository-based setup
-  #   uses: ./.github/workflows/test-environment.yaml
-  #   with:
-  #     setup-mode: repository-based
-  #     common-repository: ${{ github.repository }}
-  #     common-ref: ${{ github.sha }}
-  #     user-repository: ut-issl/personal-nix-config-template
-  #     user-ref: main
-  #     override-issl-input: true
+  user-repo:
+    name: Test config-repository-based setup
+    uses: ./.github/workflows/test-environment.yaml
+    with:
+      setup-mode: repository-based
+      common-repository: ${{ github.repository }}
+      common-ref: ${{ github.sha }}
+      user-repository: ut-issl/personal-nix-config-template
+      user-ref: main
+      override-issl-input: true
