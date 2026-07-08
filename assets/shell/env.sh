@@ -29,6 +29,16 @@ prepend_path() {
 
 prepend_path "$HOME/.local/bin"
 prepend_path "${CARGO_HOME}/bin"
+prepend_path "${ISSL_NIX_PROFILE_PATH}/bin"
+prepend_path "/nix/var/nix/profiles/default/bin"
+if [ -n "${USER:-}" ]; then
+  prepend_path "/nix/var/nix/profiles/per-user/${USER}/profile/bin"
+fi
+
+if [ -r "${ISSL_NIX_PROFILE_PATH}/etc/profile.d/hm-session-vars.sh" ]; then
+  # shellcheck source=/dev/null
+  . "${ISSL_NIX_PROFILE_PATH}/etc/profile.d/hm-session-vars.sh"
+fi
 
 # ===== Python ===== #
 
