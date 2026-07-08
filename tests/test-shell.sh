@@ -16,7 +16,6 @@ assert_shared_shell_assets() {
   cmp "${common_dir}/assets/shell/env.sh" "${config_dir}/issl/shell/env.sh"
   cmp "${common_dir}/assets/shell/rc.sh" "${config_dir}/issl/shell/rc.sh"
   cmp "${common_dir}/assets/shell/.dircolors" "${config_dir}/issl/shell/.dircolors"
-  cmp "${common_dir}/assets/bash/bash_profile.bash" "${config_dir}/issl/bash/.bash_profile"
   cmp "${common_dir}/assets/bash/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
 }
 
@@ -38,8 +37,21 @@ EOF
 }
 
 assert_bash_startup_files() {
+  test -f "${home_dir}/.profile"
   test -f "${home_dir}/.bash_profile"
   test -f "${home_dir}/.bashrc"
+}
+
+assert_profile_not_shadowed_by_bash_profile() {
+  # Regression guard: creating ~/.bash_profile must not hide ~/.profile.
+  printf '\nexport ISSL_PROFILE_MARKER=kept\n' >>"${home_dir}/.profile"
+  # shellcheck disable=SC2016  # ${...} inside the single-quoted -c argument expand in the subshell.
+  env -i \
+    HOME="${home_dir}" \
+    XDG_CONFIG_HOME="${config_dir}" \
+    PATH="/usr/bin:/bin" \
+    TERM=dumb \
+    bash -lic '[ "${ISSL_PROFILE_MARKER:-}" = "kept" ]'
 }
 
 assert_bash_startup_is_loaded() {
@@ -117,6 +129,7 @@ main() {
   run_assert assert_shell_env_can_be_sourced
   run_assert assert_bash_startup_files
   run_assert assert_bash_startup_is_loaded
+  run_assert assert_profile_not_shadowed_by_bash_profile
   run_assert assert_shared_shell_tools
 
   if [ "${issl_enable_zsh}" = "1" ]; then

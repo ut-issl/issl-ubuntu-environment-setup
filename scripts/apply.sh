@@ -9,7 +9,7 @@ export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
 issl_config_home="${XDG_CONFIG_HOME}/issl"
 shared_nix_config_path="${issl_config_home}/nix/nix.conf"
-shared_bash_profile_path="${issl_config_home}/bash/.bash_profile"
+shared_shell_env_path="${issl_config_home}/shell/env.sh"
 shared_bashrc_path="${issl_config_home}/bash/.bashrc"
 shared_zprofile_path="${issl_config_home}/zsh/.zprofile"
 shared_zshrc_path="${issl_config_home}/zsh/.zshrc"
@@ -157,11 +157,26 @@ start_nix_daemon_without_systemd() {
 
 # ===== Bash ===== #
 
-bash_profile_block() {
+profile_env_block() {
   printf '%s\n' \
-    "if [ -f \"${shared_bash_profile_path}\" ]; then" \
-    "  . \"${shared_bash_profile_path}\"" \
+    "if [ -f \"${shared_shell_env_path}\" ]; then" \
+    "  . \"${shared_shell_env_path}\"" \
     "fi"
+}
+
+bash_profile_block() {
+  # shellcheck disable=SC2016  # the block is emitted verbatim; $HOME, $-, and ${...} must stay literal.
+  printf '%s\n' \
+    'if [ -f "$HOME/.profile" ]; then' \
+    '  . "$HOME/.profile"' \
+    "fi" \
+    'case $- in' \
+    "*i*)" \
+    '  if [ "${ISSL_BASHRC_LOADED:-0}" != "1" ] && [ -f "$HOME/.bashrc" ]; then' \
+    '    . "$HOME/.bashrc"' \
+    "  fi" \
+    "  ;;" \
+    "esac"
 }
 
 bashrc_block() {
@@ -172,6 +187,11 @@ bashrc_block() {
 }
 
 ensure_bash_startup_files() {
+  prepend_block_once \
+    "${HOME}/.profile" \
+    "# >>> ISSL shell env >>>" \
+    "# <<< ISSL shell env <<<" \
+    "$(profile_env_block)"
   prepend_block_once \
     "${HOME}/.bash_profile" \
     "# >>> ISSL bash profile >>>" \
