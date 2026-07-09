@@ -6,6 +6,10 @@ on:
       setup-mode:
         required: true
         type: string
+      os:
+        required: false
+        type: string
+        default: ubuntu-latest
       common-repository:
         required: false
         type: string
@@ -37,7 +41,7 @@ permissions:
 jobs:
   test:
     name: Test (${{ matrix.enable_zsh_name }})
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.os }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     permissions:
       contents: read
