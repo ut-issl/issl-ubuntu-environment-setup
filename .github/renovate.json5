@@ -284,6 +284,7 @@
       matchDepNames: [
         'ut-issl/personal-nix-config-template',
       ],
+      minimumReleaseAge: '0 days',
       automerge: true,
     },
   ],
