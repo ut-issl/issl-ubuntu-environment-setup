@@ -33,7 +33,7 @@ permissions:
   contents: read
 
 jobs:
-  apply:
+  script-based:
     name: Test script-based setup
     uses: ./.github/workflows/test-environment.yaml
     with:
@@ -41,7 +41,7 @@ jobs:
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
 
-  user-repo:
+  repository-based:
     name: Test config-repository-based setup
     uses: ./.github/workflows/test-environment.yaml
     with:
