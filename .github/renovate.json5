@@ -145,6 +145,19 @@
       datasourceTemplate: 'github-releases',
       depNameTemplate: 'j178/prek',
     },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows/test\\.ya?ml$/',
+      ],
+      matchStrings: [
+        'user-ref: (?<currentDigest>[a-f0-9]{40}) # (?<currentValue>\\S+)',
+      ],
+      autoReplaceStringTemplate: 'user-ref: {{{newDigest}}} # {{{currentValue}}}',
+      datasourceTemplate: 'git-refs',
+      depNameTemplate: 'ut-issl/personal-nix-config-template',
+      packageNameTemplate: 'https://github.com/ut-issl/personal-nix-config-template',
+    },
   ],
   packageRules: [
     {
@@ -264,6 +277,12 @@
       ],
       matchUpdateTypes: [
         'patch',
+      ],
+      automerge: true,
+    },
+    {
+      matchDepNames: [
+        'ut-issl/personal-nix-config-template',
       ],
       automerge: true,
     },
