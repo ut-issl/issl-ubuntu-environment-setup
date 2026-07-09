@@ -35,17 +35,33 @@ permissions:
 jobs:
   script-based:
     name: Test script-based setup
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - ubuntu-26.04
     uses: ./.github/workflows/test-environment.yaml
     with:
       setup-mode: script-based
+      os: ${{ matrix.os }}
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
 
   repository-based:
     name: Test config-repository-based setup
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-22.04
+          - ubuntu-24.04
+          - ubuntu-26.04
     uses: ./.github/workflows/test-environment.yaml
     with:
       setup-mode: repository-based
+      os: ${{ matrix.os }}
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
       user-repository: ut-issl/personal-nix-config-template
