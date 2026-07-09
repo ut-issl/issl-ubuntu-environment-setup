@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-default_repo_ref="v0.2.10"
+default_repo_ref="v0.3.0"
 repo_url="${REPO_URL:-https://github.com/ut-issl/issl-ubuntu-environment-setup.git}"
 repo_ref="${REPO_REF:-${default_repo_ref}}"
 data_root="${XDG_DATA_HOME:-$HOME/.local/share}"
