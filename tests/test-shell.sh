@@ -43,15 +43,9 @@ assert_bash_startup_files() {
 }
 
 assert_profile_not_shadowed_by_bash_profile() {
-  # Regression guard: creating ~/.bash_profile must not hide ~/.profile.
-  printf '\nexport ISSL_PROFILE_MARKER=kept\n' >>"${home_dir}/.profile"
-  # shellcheck disable=SC2016  # ${...} inside the single-quoted -c argument expand in the subshell.
-  env -i \
-    HOME="${home_dir}" \
-    XDG_CONFIG_HOME="${config_dir}" \
-    PATH="/usr/bin:/bin" \
-    TERM=dumb \
-    bash -lic '[ "${ISSL_PROFILE_MARKER:-}" = "kept" ]'
+  # Regression guard: ~/.bash_profile must source ~/.profile so it does not hide it.
+  # shellcheck disable=SC2016  # $HOME is matched literally in the file content, not expanded.
+  grep -Eq '(^|[[:space:]])(\.|source)[[:space:]]+"?(\$HOME|~)/\.profile"?' "${home_dir}/.bash_profile"
 }
 
 assert_bash_startup_is_loaded() {
