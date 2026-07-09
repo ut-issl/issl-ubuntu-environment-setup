@@ -1,6 +1,6 @@
 # issl-ubuntu-environment-setup
 
-[![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420.svg?style=flat&logo=ubuntu&logoColor=white)](https://ubuntu.com)
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-22.04%20%7C%2024.04%20%7C%2026.04-E95420.svg?style=flat&logo=ubuntu&logoColor=white)](https://ubuntu.com)
 [![Built with Nix](https://img.shields.io/badge/Built_with_Nix-41439a.svg?style=flat&logo=nixos&logoColor=white)](https://nixos.org)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg?style=flat)](#license)
 [![prek](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/j178/prek/master/docs/assets/badge-v0.json)](https://github.com/j178/prek)
