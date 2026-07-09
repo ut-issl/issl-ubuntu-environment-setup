@@ -27,9 +27,18 @@ jobs:
       pull-requests: write
 
     steps:
-      - id: bump-version
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.GH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Bump version
+        id: bump-version
         uses: conjikidow/bump-version-action@f3a9763279155551196c80dab1c1891cbc51df9f # v4.0.2
         with:
+          github-token: ${{ steps.app-token.outputs.token }}
           label-major: 'update::major'
           label-minor: 'update::minor'
           label-patch: 'update::patch'
