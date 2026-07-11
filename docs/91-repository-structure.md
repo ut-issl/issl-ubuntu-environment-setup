@@ -60,8 +60,10 @@ When a module installs a tool and also wants to provide a default shared config,
 
 This directory contains imperative shell entry points.
 
-- `scripts/setup.sh` is the bootstrap-oriented entry point.
-  - It prepares prerequisites such as Nix and Git when needed.
+- `scripts/bootstrap-host.sh` prepares the host for setup by installing Nix and offering optional GitHub SSH access
+  and Docker Engine setup.
+- `scripts/setup.sh` is the script-based setup entry point.
+  - It prepares the host for setup through `scripts/bootstrap-host.sh`.
   - It clones this repository into the install location.
   - It is designed for users who start from a plain Ubuntu environment.
 - `scripts/apply.sh` applies this repository's shared configuration into the current user environment.

@@ -29,6 +29,19 @@ bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/relea
 
 After setup, open a new shell.
 
+### Optional Docker Engine Setup
+
+The shared Home Manager configuration installs the Docker CLI tools.
+Interactive setup prompts to install the host Docker Engine with yes as the default answer.
+Non-interactive setup skips Docker Engine unless you opt in explicitly:
+
+```bash
+ISSL_INSTALL_DOCKER=yes \
+bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
+```
+
+Set `ISSL_INSTALL_DOCKER=no` to skip the prompt explicitly.
+
 ## If You Need Additional Tools or Settings
 
 This workflow assumes the shared setup is usually sufficient.
