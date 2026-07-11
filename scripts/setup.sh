@@ -8,13 +8,56 @@ repo_ref="${REPO_REF:-${default_repo_ref}}"
 data_root="${XDG_DATA_HOME:-$HOME/.local/share}"
 install_dir="${INSTALL_DIR:-$data_root/issl/ubuntu-environment-setup}"
 
-default_bootstrap_url() {
-  case "${repo_ref}" in
-  v*)
-    printf 'https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/download/%s/bootstrap-host.sh\n' "${repo_ref}"
+github_repository_path() {
+  local path=""
+  local owner=""
+  local repo=""
+
+  case "${repo_url}" in
+  https://github.com/*)
+    path="${repo_url#https://github.com/}"
+    ;;
+  git@github.com:*)
+    path="${repo_url#git@github.com:}"
+    ;;
+  ssh://git@github.com/*)
+    path="${repo_url#ssh://git@github.com/}"
     ;;
   *)
-    printf 'https://raw.githubusercontent.com/ut-issl/issl-ubuntu-environment-setup/%s/scripts/bootstrap-host.sh\n' "${repo_ref}"
+    echo "unsupported GitHub repository URL for bootstrap download: ${repo_url}" >&2
+    exit 1
+    ;;
+  esac
+
+  path="${path%.git}"
+  if [ "${path}" = "${path#*/}" ]; then
+    echo "unsupported GitHub repository URL for bootstrap download: ${repo_url}" >&2
+    exit 1
+  fi
+
+  owner="${path%%/*}"
+  repo="${path#*/}"
+  repo="${repo%%/*}"
+
+  if [ -z "${owner}" ] || [ -z "${repo}" ]; then
+    echo "unsupported GitHub repository URL for bootstrap download: ${repo_url}" >&2
+    exit 1
+  fi
+
+  printf '%s/%s\n' "${owner}" "${repo}"
+}
+
+default_bootstrap_url() {
+  local repository_path
+
+  repository_path="$(github_repository_path)"
+
+  case "${repo_ref}" in
+  v*)
+    printf 'https://github.com/%s/releases/download/%s/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
+    ;;
+  *)
+    printf 'https://raw.githubusercontent.com/%s/%s/scripts/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
     ;;
   esac
 }
