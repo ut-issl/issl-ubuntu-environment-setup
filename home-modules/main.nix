@@ -8,6 +8,7 @@
     ./shell.nix
     ./git.nix
     ./dev.nix
+    ./codex.nix
     ./cpp.nix
     ./node.nix
     ./python.nix
