@@ -9,6 +9,7 @@
     ./git.nix
     ./dev.nix
     ./codex.nix
+    ./docker.nix
     ./cpp.nix
     ./node.nix
     ./python.nix
