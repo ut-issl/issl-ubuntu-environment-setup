@@ -29,6 +29,12 @@ Use project-local package managers for dependencies that belong to a specific re
 - `uv` is available through this environment.
 - Manage project-local Python environments with `uv`, and define them in `pyproject.toml` in each repository.
 
+### Node.js
+
+- `node`, `npm`, and `npx` are available through this environment.
+- Manage project-local JavaScript dependencies with `npm`, and define them with `package.json` in each repository.
+- Install globally available user-environment tools with Nix/Home Manager instead of `npm install -g`.
+
 ## 3. System-Level Packages
 
 Use `apt` only when system-level integration is required, such as services, drivers, or low-level OS packages.
