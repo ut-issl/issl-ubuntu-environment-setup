@@ -24,7 +24,7 @@ When updating or adding an asset:
 1. Update an existing file under `assets/`, or create a new one if needed.
 2. Update the relevant module under `home-modules/` so the asset is deployed.
 3. Update `scripts/apply.sh` if the asset must also be connected to user-managed files.
-4. Add or extend tests under `tests/`, and update `.github/workflows/test.yaml` if you add a new test script.
+4. Add or extend tests under `tests/`, and update `tests/run.sh` if you add a new test script.
 
 For how to reflect the asset in Home Manager, see [Updating or Adding a Module](#updating-or-adding-a-module).
 
@@ -67,7 +67,7 @@ When updating or adding a module:
 2. Update `home-modules/main.nix` if you added a new module.
 3. Add or update assets under `assets/` if the module needs them.
 4. Update `scripts/apply.sh` if imperative wiring is required.
-5. Add or extend tests under `tests/`, and update `.github/workflows/test.yaml` if you add a new test script.
+5. Add or extend tests under `tests/`, and update `tests/run.sh` if you add a new test script.
 
 If you add a new module, import it from `home-modules/main.nix`.
 Add it conditionally if it should only be enabled in specific situations, similar to `zsh.nix`.
