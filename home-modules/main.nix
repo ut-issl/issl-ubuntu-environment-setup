@@ -12,6 +12,7 @@
     ./node.nix
     ./python.nix
     ./rust.nix
+    ./typst.nix
     ./vim.nix
   ]
   ++ lib.optional enableZsh ./zsh.nix;
