@@ -23,11 +23,14 @@ Use project-local package managers for dependencies that belong to a specific re
 
 - `rustup` is available through this environment.
 - Manage project-local Rust toolchains with `rustup`, and define them with `rust-toolchain.toml` in each repository.
+- Install globally available Rust tools with Nix/Home Manager instead of `cargo install` or `cargo binstall`.
 
 ### Python
 
 - `uv` is available through this environment.
 - Manage project-local Python environments with `uv`, and define them in `pyproject.toml` in each repository.
+- Do not use other Python package and tool managers such as `pip`, `pipx`, or `poetry`.
+- Install globally available Python tools with Nix/Home Manager instead of `uv tool install`.
 
 ### Node.js
 
