@@ -47,23 +47,37 @@ github_repository_path() {
   printf '%s/%s\n' "${owner}" "${repo}"
 }
 
-default_bootstrap_url() {
+raw_bootstrap_url() {
   local repository_path
 
   repository_path="$(github_repository_path)"
 
+  printf 'https://raw.githubusercontent.com/%s/%s/scripts/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
+}
+
+release_bootstrap_url() {
+  local repository_path
+
+  repository_path="$(github_repository_path)"
+
+  printf 'https://github.com/%s/releases/download/%s/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
+}
+
+default_bootstrap_urls() {
   case "${repo_ref}" in
   v*)
-    printf 'https://github.com/%s/releases/download/%s/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
+    release_bootstrap_url
+    raw_bootstrap_url
     ;;
   *)
-    printf 'https://raw.githubusercontent.com/%s/%s/scripts/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
+    raw_bootstrap_url
     ;;
   esac
 }
 
 load_bootstrap_host() {
-  local bootstrap_url="${BOOTSTRAP_URL:-$(default_bootstrap_url)}"
+  local bootstrap_url=""
+  local bootstrap_urls="${BOOTSTRAP_URL:-$(default_bootstrap_urls)}"
   local script_dir=""
   local temporary_bootstrap=""
 
@@ -81,9 +95,18 @@ load_bootstrap_host() {
   fi
 
   temporary_bootstrap="$(mktemp)"
-  curl -fsSL "${bootstrap_url}" -o "${temporary_bootstrap}"
-  # shellcheck source=/dev/null
-  . "${temporary_bootstrap}"
+  while IFS= read -r bootstrap_url; do
+    [ -n "${bootstrap_url}" ] || continue
+
+    if curl -fsSL "${bootstrap_url}" -o "${temporary_bootstrap}"; then
+      # shellcheck source=/dev/null
+      . "${temporary_bootstrap}"
+      return
+    fi
+  done <<<"${bootstrap_urls}"
+
+  echo "failed to download bootstrap-host.sh." >&2
+  exit 1
 }
 
 nix_git() {
