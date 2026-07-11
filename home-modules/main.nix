@@ -9,6 +9,7 @@
     ./git.nix
     ./dev.nix
     ./cpp.nix
+    ./node.nix
     ./python.nix
     ./rust.nix
     ./vim.nix
