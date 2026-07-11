@@ -15,6 +15,12 @@ assert_git_installation() {
   git --version
 }
 
+assert_gh_installation() {
+  test -x "${nix_profile_bin}/gh"
+  test "$(command -v gh)" = "${nix_profile_bin}/gh"
+  gh --version
+}
+
 assert_shared_git_config() {
   cmp "${common_dir}/assets/git/.gitconfig" "${config_dir}/issl/git/.gitconfig"
 }
@@ -48,6 +54,7 @@ assert_git_identity() {
 
 main() {
   run_assert assert_git_installation
+  run_assert assert_gh_installation
   run_assert assert_shared_git_config
   run_assert assert_global_git_include
   run_assert assert_git_identity
