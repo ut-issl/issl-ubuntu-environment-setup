@@ -4,6 +4,9 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# shellcheck source=scripts/bootstrap-host.sh
+. "${repo_root}/scripts/bootstrap-host.sh"
+
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
 
@@ -91,68 +94,6 @@ ensure_nix_conf_include() {
     "# >>> ISSL nix config >>>" \
     "# <<< ISSL nix config <<<" \
     "$(nix_conf_include_block)"
-}
-
-is_systemd_available() {
-  [ -d /run/systemd/system ] && command -v systemctl >/dev/null 2>&1
-}
-
-resolve_nix_daemon_path() {
-  if command -v nix-daemon >/dev/null 2>&1; then
-    command -v nix-daemon
-    return 0
-  fi
-
-  if [ -x /nix/var/nix/profiles/default/bin/nix-daemon ]; then
-    printf '%s\n' "/nix/var/nix/profiles/default/bin/nix-daemon"
-    return 0
-  fi
-
-  return 1
-}
-
-start_nix_daemon_without_systemd() {
-  local nix_daemon_path=""
-
-  if is_systemd_available; then
-    return
-  fi
-
-  if pgrep -x nix-daemon >/dev/null 2>&1; then
-    return
-  fi
-
-  if ! nix_daemon_path="$(resolve_nix_daemon_path)"; then
-    echo "warning: nix-daemon binary was not found. Nix commands may fail in no-systemd environments." >&2
-    return
-  fi
-
-  if [ "$(id -u)" = "0" ]; then
-    setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
-  elif command -v sudo >/dev/null 2>&1; then
-    if [ -t 0 ]; then
-      if ! sudo -v; then
-        echo "warning: failed to authenticate via sudo. Nix commands may fail." >&2
-        return
-      fi
-    elif ! sudo -n true >/dev/null 2>&1; then
-      echo "warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode)." >&2
-      return
-    fi
-    sudo -n setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
-  else
-    echo "warning: cannot start nix-daemon automatically (sudo is unavailable in a no-systemd environment)." >&2
-    return
-  fi
-
-  for _ in {1..10}; do
-    if nix --extra-experimental-features "nix-command flakes" store info >/dev/null 2>&1; then
-      return
-    fi
-    sleep 1
-  done
-
-  echo "warning: attempted to start nix-daemon, but it is not responding yet. Nix commands may fail." >&2
 }
 
 # ===== Bash ===== #
