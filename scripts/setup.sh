@@ -109,7 +109,7 @@ default_bootstrap_urls() {
 
 load_bootstrap_host() {
   local bootstrap_url=""
-  local bootstrap_urls="${BOOTSTRAP_URL:-$(default_bootstrap_urls)}"
+  local bootstrap_urls=""
   local script_dir=""
   local temporary_bootstrap=""
 
@@ -120,6 +120,8 @@ load_bootstrap_host() {
     . "${script_dir}/bootstrap-host.sh"
     return
   fi
+
+  bootstrap_urls="${BOOTSTRAP_URL:-$(default_bootstrap_urls)}"
 
   if ! command -v curl >/dev/null 2>&1; then
     echo "required command not found: curl" >&2
