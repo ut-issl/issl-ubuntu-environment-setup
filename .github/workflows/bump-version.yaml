@@ -50,6 +50,7 @@ jobs:
         if: steps.bump-version.outputs.version-bumped == 'true'
         run: |
           mkdir -p release-assets
+          cp scripts/bootstrap-host.sh release-assets/bootstrap-host.sh
           cp scripts/setup.sh release-assets/setup.sh
 
       - name: Create GitHub release
@@ -58,6 +59,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: v${{ steps.bump-version.outputs.new-version }}
         run: |
-          gh release create "${RELEASE_TAG}" release-assets/setup.sh \
+          gh release create "${RELEASE_TAG}" release-assets/bootstrap-host.sh release-assets/setup.sh \
             --title "${RELEASE_TAG}" \
             --generate-notes
