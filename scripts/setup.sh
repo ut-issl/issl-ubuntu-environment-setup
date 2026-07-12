@@ -3,6 +3,7 @@
 set -euo pipefail
 
 default_repo_ref="v0.3.1"
+default_bootstrap_repository_path="ut-issl/issl-ubuntu-environment-setup"
 repo_url="${REPO_URL:-https://github.com/ut-issl/issl-ubuntu-environment-setup.git}"
 repo_ref="${REPO_REF:-${default_repo_ref}}"
 data_root="${XDG_DATA_HOME:-$HOME/.local/share}"
@@ -47,10 +48,21 @@ github_repository_path() {
   printf '%s/%s\n' "${owner}" "${repo}"
 }
 
+bootstrap_repository_path() {
+  case "${repo_url}" in
+  git@github.com:* | ssh://git@github.com/*)
+    printf '%s\n' "${default_bootstrap_repository_path}"
+    ;;
+  *)
+    github_repository_path
+    ;;
+  esac
+}
+
 raw_bootstrap_url() {
   local repository_path
 
-  repository_path="$(github_repository_path)"
+  repository_path="$(bootstrap_repository_path)"
 
   printf 'https://raw.githubusercontent.com/%s/%s/scripts/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
 }
@@ -58,7 +70,7 @@ raw_bootstrap_url() {
 release_bootstrap_url() {
   local repository_path
 
-  repository_path="$(github_repository_path)"
+  repository_path="$(bootstrap_repository_path)"
 
   printf 'https://github.com/%s/releases/download/%s/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
 }

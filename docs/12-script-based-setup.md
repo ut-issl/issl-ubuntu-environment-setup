@@ -29,6 +29,17 @@ bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/relea
 
 After setup, open a new shell.
 
+### Repository Overrides
+
+Set `REPO_URL` and `REPO_REF` to install from another GitHub repository or ref.
+For streamed setup, bootstrap script selection has the following limits:
+
+- HTTPS public forks and mirrors are supported.
+- SSH private repositories can be used as the install target,
+  but `bootstrap-host.sh` is downloaded from the public shared repository.
+- Private fork-specific `bootstrap-host.sh` files are not supported by streamed setup.
+- To use a private fork-specific bootstrap script, clone the repository first and run its local `scripts/setup.sh`.
+
 ### Optional Docker Engine Setup
 
 The shared Home Manager configuration installs the Docker CLI tools.
