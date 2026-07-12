@@ -510,49 +510,53 @@ ensure_cargo_config_include() {
     "$(cargo_config_include_block)"
 }
 
-if ! command -v nix >/dev/null 2>&1; then
-  echo "nix is required before running scripts/apply.sh." >&2
-  exit 1
-fi
+main() {
+  if ! command -v nix >/dev/null 2>&1; then
+    echo "nix is required before running scripts/apply.sh." >&2
+    exit 1
+  fi
 
-if [ -n "${NIX_CONFIG-}" ]; then
-  export NIX_CONFIG="${NIX_CONFIG}"$'\n'"${nix_feature_config}"
-else
-  export NIX_CONFIG="${nix_feature_config}"
-fi
+  if [ -n "${NIX_CONFIG-}" ]; then
+    export NIX_CONFIG="${NIX_CONFIG}"$'\n'"${nix_feature_config}"
+  else
+    export NIX_CONFIG="${nix_feature_config}"
+  fi
 
-start_nix_daemon_without_systemd
+  start_nix_daemon_without_systemd
 
-current_system="$(
-  nix --accept-flake-config --extra-experimental-features "nix-command flakes" \
-    eval --impure --raw --expr builtins.currentSystem
-)"
+  current_system="$(
+    nix --accept-flake-config --extra-experimental-features "nix-command flakes" \
+      eval --impure --raw --expr builtins.currentSystem
+  )"
 
-ensure_home_manager_profile_dir
-if should_enable_zsh; then
-  home_configuration_name="issl-common-zsh-${current_system}"
-  zsh_enabled=1
-else
-  home_configuration_name="issl-common-${current_system}"
-  zsh_enabled=0
-fi
+  ensure_home_manager_profile_dir
+  if should_enable_zsh; then
+    home_configuration_name="issl-common-zsh-${current_system}"
+    zsh_enabled=1
+  else
+    home_configuration_name="issl-common-${current_system}"
+    zsh_enabled=0
+  fi
 
-if [ "${zsh_enabled}" = "0" ]; then
-  guard_login_shell_before_disabling_zsh
-fi
+  if [ "${zsh_enabled}" = "0" ]; then
+    guard_login_shell_before_disabling_zsh
+  fi
 
-nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
-  switch --flake "${repo_root}#${home_configuration_name}" --impure
+  nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
+    switch --flake "${repo_root}#${home_configuration_name}" --impure
 
-ensure_nix_conf_include
-ensure_bash_startup_files
-if [ "${zsh_enabled}" = "1" ]; then
-  ensure_zsh_startup_files
-  maybe_switch_login_shell_to_zsh
-fi
-ensure_git_include
-prompt_for_git_identity
-ensure_python_startup_file
-ensure_cargo_config_include
+  ensure_nix_conf_include
+  ensure_bash_startup_files
+  if [ "${zsh_enabled}" = "1" ]; then
+    ensure_zsh_startup_files
+    maybe_switch_login_shell_to_zsh
+  fi
+  ensure_git_include
+  prompt_for_git_identity
+  ensure_python_startup_file
+  ensure_cargo_config_include
 
-echo "Applied the shared Home Manager configuration."
+  echo "Applied the shared Home Manager configuration."
+}
+
+main "$@"
