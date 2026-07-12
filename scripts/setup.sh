@@ -59,24 +59,44 @@ bootstrap_repository_path() {
   esac
 }
 
+bootstrap_ref() {
+  if [ -n "${BOOTSTRAP_REF-}" ]; then
+    printf '%s\n' "${BOOTSTRAP_REF}"
+    return
+  fi
+
+  case "${repo_url}" in
+  git@github.com:* | ssh://git@github.com/*)
+    printf '%s\n' "${default_repo_ref}"
+    ;;
+  *)
+    printf '%s\n' "${repo_ref}"
+    ;;
+  esac
+}
+
 raw_bootstrap_url() {
+  local bootstrap_ref_value
   local repository_path
 
+  bootstrap_ref_value="$(bootstrap_ref)"
   repository_path="$(bootstrap_repository_path)"
 
-  printf 'https://raw.githubusercontent.com/%s/%s/scripts/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
+  printf 'https://raw.githubusercontent.com/%s/%s/scripts/bootstrap-host.sh\n' "${repository_path}" "${bootstrap_ref_value}"
 }
 
 release_bootstrap_url() {
+  local bootstrap_ref_value
   local repository_path
 
+  bootstrap_ref_value="$(bootstrap_ref)"
   repository_path="$(bootstrap_repository_path)"
 
-  printf 'https://github.com/%s/releases/download/%s/bootstrap-host.sh\n' "${repository_path}" "${repo_ref}"
+  printf 'https://github.com/%s/releases/download/%s/bootstrap-host.sh\n' "${repository_path}" "${bootstrap_ref_value}"
 }
 
 default_bootstrap_urls() {
-  case "${repo_ref}" in
+  case "$(bootstrap_ref)" in
   v*)
     release_bootstrap_url
     raw_bootstrap_url
