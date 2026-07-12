@@ -155,15 +155,15 @@ start_nix_daemon_without_systemd() {
   echo "warning: attempted to start nix-daemon, but it is not responding yet. Nix commands may fail." >&2
 }
 
+nix_with_openssh() {
+  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#openssh --command "$@"
+}
+
 has_github_ssh_auth() {
   local ssh_output
   local ssh_status
 
-  if ! command -v ssh >/dev/null 2>&1; then
-    return 1
-  fi
-
-  ssh_output="$(ssh -T git@github.com 2>&1)" || ssh_status=$?
+  ssh_output="$(nix_with_openssh ssh -T git@github.com 2>&1)" || ssh_status=$?
   ssh_status="${ssh_status:-0}"
 
   if [ "${ssh_status}" -eq 1 ] &&
@@ -187,14 +187,13 @@ create_github_ssh_key() {
   local key_comment=""
 
   ensure_ssh_directory
-  require_command ssh-keygen
 
   read -r -p "Enter an email/comment for the GitHub SSH key (optional): " key_comment
 
   if [ -n "${key_comment}" ]; then
-    ssh-keygen -t ed25519 -C "${key_comment}" -f "${github_key_path}"
+    nix_with_openssh ssh-keygen -t ed25519 -C "${key_comment}" -f "${github_key_path}"
   else
-    ssh-keygen -t ed25519 -f "${github_key_path}"
+    nix_with_openssh ssh-keygen -t ed25519 -f "${github_key_path}"
   fi
 }
 
