@@ -141,8 +141,12 @@ load_bootstrap_host() {
   exit 1
 }
 
+nix_with_git() {
+  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#git --command "$@"
+}
+
 nix_git() {
-  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#git --command git "$@"
+  nix_with_git git "$@"
 }
 
 can_access_repo() {
@@ -207,7 +211,7 @@ clone_repo() {
 }
 
 run_install() {
-  bash "${install_dir}/scripts/apply.sh"
+  nix_with_git bash "${install_dir}/scripts/apply.sh"
 }
 
 main() {
