@@ -36,8 +36,6 @@ def main() -> None:
         os.execvp(argv[0], argv)
 
     _read_until(fd, b">>>")
-    os.write(fd, b"1+1\n")
-    _read_until(fd, b">>>")
     os.write(fd, b"exit()\n")
 
     while True:

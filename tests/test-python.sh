@@ -85,7 +85,7 @@ assert_python_startup_pyrepl_history() {
     uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
   test -f "${hist_dir}/history"
-  grep -q "1+1" "${hist_dir}/history"
+  grep -q "exit()" "${hist_dir}/history"
 
   if _is_libedit; then
     test ! -f "${hist_dir}/history.editline"
@@ -114,7 +114,7 @@ assert_python_startup_basic_repl_libedit_history() {
     uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
   test -f "${hist_dir}/history.editline"
-  grep -q "1+1" "${hist_dir}/history.editline"
+  grep -q "exit()" "${hist_dir}/history.editline"
   test ! -f "${hist_dir}/history"
 }
 
