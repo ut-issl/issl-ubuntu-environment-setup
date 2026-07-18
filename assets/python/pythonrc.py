@@ -2,38 +2,81 @@
 
 from __future__ import annotations
 
-import atexit
 import builtins
 import os
-import readline
 import sys
 from pprint import pprint
 
 
-def _history_path() -> str:
-    histfile = os.environ.get("PYTHONHISTFILE")
-    if histfile:
-        return histfile
+def _will_use_pyrepl() -> bool:
+    if sys.version_info < (3, 13):
+        return False
+    if os.environ.get("PYTHON_BASIC_REPL"):
+        return False
+    if not sys.stdin.isatty():
+        return False
+    try:
+        from _pyrepl.main import CAN_USE_PYREPL  # type: ignore[import-not-found]
 
+        return CAN_USE_PYREPL
+    except (ImportError, AttributeError):  # fmt: skip
+        return False
+
+
+def _is_libedit() -> bool:
+    try:
+        import readline
+    except ImportError:
+        return False
+    if sys.version_info >= (3, 13):
+        return getattr(readline, "backend", "") == "editline"
+    return "libedit" in getattr(readline, "__doc__", "")
+
+
+def _history_base_path() -> str:
+    path = os.environ.get("PYTHON_HISTORY")
+    if path:
+        return path
     state_home = os.environ.get("XDG_STATE_HOME") or os.path.join(os.path.expanduser("~"), ".local", "state")
     return os.path.join(state_home, "python", "python_history")
 
 
+def _history_path() -> str:
+    base = _history_base_path()
+    if _is_libedit():
+        return base + ".editline"
+    return base
+
+
 def _enable_completion() -> None:
-    readline.parse_and_bind("tab: complete")
+    import readline
+
+    if _is_libedit():
+        readline.parse_and_bind("bind ^I rl_complete")
+    else:
+        readline.parse_and_bind("tab: complete")
+
+
+def _ensure_history_dir() -> None:
+    base = _history_base_path()
+    if "PYTHON_HISTORY" not in os.environ:
+        os.environ["PYTHON_HISTORY"] = base
+    histdir = os.path.dirname(base)
+    if histdir:
+        os.makedirs(histdir, exist_ok=True)
 
 
 def _enable_history() -> None:
+    import atexit
+    import readline
+
     histfile = _history_path()
-    histdir = os.path.dirname(histfile)
-    if histdir:
-        os.makedirs(histdir, exist_ok=True)
 
     if os.path.exists(histfile):
         try:
             readline.read_history_file(histfile)
         except Exception:
-            pass
+            return
 
     readline.set_history_length(10_000)
 
@@ -44,6 +87,10 @@ def _enable_history() -> None:
             pass
 
     atexit.register(save_history)
+
+
+def _redirect_history_for_libedit() -> None:
+    os.environ["PYTHON_HISTORY"] = _history_path()
 
 
 def _enable_pretty_display() -> None:
@@ -66,7 +113,13 @@ def _set_colored_prompts() -> None:
         sys.ps2 = f"{brown}...{normal} "
 
 
-_enable_completion()
-_enable_history()
 _enable_pretty_display()
-_set_colored_prompts()
+_ensure_history_dir()
+
+if not _will_use_pyrepl():
+    _enable_completion()
+    _set_colored_prompts()
+    if sys.version_info < (3, 13):
+        _enable_history()
+    elif _is_libedit():
+        _redirect_history_for_libedit()
