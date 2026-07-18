@@ -213,7 +213,7 @@ clone_repo() {
 }
 
 run_install() {
-  nix_with_git bash "${install_dir}/scripts/apply.sh"
+  bash "${install_dir}/scripts/apply.sh"
 }
 
 main() {
