@@ -330,7 +330,7 @@ install_docker_engine() {
     sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   sudo apt-get update
-  sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  sudo apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io pigz
 
   if should_add_user_to_docker_group; then
     docker_user="$(target_docker_user)"
