@@ -57,14 +57,17 @@ def _enable_completion() -> None:
         readline.parse_and_bind("tab: complete")
 
 
+def _ensure_history_dir() -> None:
+    histdir = os.path.dirname(_history_base_path())
+    if histdir:
+        os.makedirs(histdir, exist_ok=True)
+
+
 def _enable_history() -> None:
     import atexit
     import readline
 
     histfile = _history_path()
-    histdir = os.path.dirname(histfile)
-    if histdir:
-        os.makedirs(histdir, exist_ok=True)
 
     if os.path.exists(histfile):
         try:
@@ -84,11 +87,7 @@ def _enable_history() -> None:
 
 
 def _redirect_history_for_libedit() -> None:
-    path = _history_path()
-    histdir = os.path.dirname(path)
-    if histdir:
-        os.makedirs(histdir, exist_ok=True)
-    os.environ["PYTHON_HISTORY"] = path
+    os.environ["PYTHON_HISTORY"] = _history_path()
 
 
 def _enable_pretty_display() -> None:
@@ -112,6 +111,7 @@ def _set_colored_prompts() -> None:
 
 
 _enable_pretty_display()
+_ensure_history_dir()
 
 if not _will_use_pyrepl():
     _enable_completion()

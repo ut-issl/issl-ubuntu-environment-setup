@@ -74,21 +74,21 @@ assert_python_startup_pyrepl_history() {
     return 0
   fi
 
-  local hist_dir python_exe
-  hist_dir="$(mktemp -d)"
+  local hist_base python_exe
+  hist_base="$(mktemp -d)/state/python"
   python_exe="$(_python_exe)"
 
   ISSL_PYTHON_HOME="${issl_python_home}" \
     PYTHONSTARTUP="${pythonrc_path}" \
-    PYTHON_HISTORY="${hist_dir}/history" \
+    PYTHON_HISTORY="${hist_base}/history" \
     TERM=xterm \
     uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
-  test -f "${hist_dir}/history"
-  grep -q "exit()" "${hist_dir}/history"
+  test -f "${hist_base}/history"
+  grep -q "exit()" "${hist_base}/history"
 
   if _is_libedit; then
-    test ! -f "${hist_dir}/history.editline"
+    test ! -f "${hist_base}/history.editline"
   fi
 }
 
@@ -102,20 +102,20 @@ assert_python_startup_basic_repl_libedit_history() {
     return 0
   fi
 
-  local hist_dir python_exe
-  hist_dir="$(mktemp -d)"
+  local hist_base python_exe
+  hist_base="$(mktemp -d)/state/python"
   python_exe="$(_python_exe)"
 
   ISSL_PYTHON_HOME="${issl_python_home}" \
     PYTHONSTARTUP="${pythonrc_path}" \
-    PYTHON_HISTORY="${hist_dir}/history" \
+    PYTHON_HISTORY="${hist_base}/history" \
     PYTHON_BASIC_REPL=1 \
     TERM=xterm \
     uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
-  test -f "${hist_dir}/history.editline"
-  grep -q "exit()" "${hist_dir}/history.editline"
-  test ! -f "${hist_dir}/history"
+  test -f "${hist_base}/history.editline"
+  grep -q "exit()" "${hist_base}/history.editline"
+  test ! -f "${hist_base}/history"
 }
 
 main() {
