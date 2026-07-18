@@ -46,6 +46,6 @@ if [ -z "${PYTHONSTARTUP:-}" ]; then
   export PYTHONSTARTUP="${XDG_CONFIG_HOME}/python/pythonrc.py"
 fi
 
-if [ -z "${PYTHONHISTFILE:-}" ]; then
-  export PYTHONHISTFILE="${XDG_STATE_HOME}/python/python_history"
+if [ -z "${PYTHON_HISTORY:-}" ]; then
+  export PYTHON_HISTORY="${XDG_STATE_HOME}/python/python_history"
 fi

@@ -12,6 +12,33 @@ issl_pythonrc_path="${issl_python_home}/pythonrc.py"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
+_is_python_ge_3_13() {
+  local py_version major minor
+  py_version="$(uv run --no-project --python 3 python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+  IFS=. read -r major minor <<<"${py_version}"
+  [ "${major}" -gt 3 ] || { [ "${major}" -eq 3 ] && [ "${minor}" -ge 13 ]; }
+}
+
+_is_libedit() {
+  local result
+  result="$(uv run --no-project --python 3 python -c '
+import sys
+try:
+    import readline
+except ImportError:
+    print("no"); raise SystemExit
+if sys.version_info >= (3, 13):
+    print("yes" if getattr(readline, "backend", "") == "editline" else "no")
+else:
+    print("yes" if "libedit" in getattr(readline, "__doc__", "") else "no")
+')"
+  [ "${result}" = "yes" ]
+}
+
+_python_exe() {
+  uv run --no-project --python 3 python -c 'import sys; print(sys.executable)'
+}
+
 assert_uv_installation() {
   test -x "${nix_profile_bin}/uv"
   test "$(command -v uv)" = "${nix_profile_bin}/uv"
@@ -31,17 +58,64 @@ assert_python_startup_is_loaded() {
   local marker_dir
   marker_dir="$(mktemp -d)"
 
-  # Drive an interactive interpreter so PYTHONSTARTUP runs, then confirm it
-  # actually executed by observing the custom displayhook the startup installs.
   echo 'import sys; sys.exit(0 if sys.displayhook is not sys.__displayhook__ else 1)' |
     ISSL_PYTHON_HOME="${issl_python_home}" \
       PYTHONSTARTUP="${pythonrc_path}" \
-      PYTHONHISTFILE="${marker_dir}/history" \
+      PYTHON_HISTORY="${marker_dir}/history" \
       TERM=dumb \
       uv run --no-project --python 3 python -i
 
-  # The startup also wires up readline history persistence.
-  test -f "${marker_dir}/history"
+  test -f "${marker_dir}/history" || test -f "${marker_dir}/history.editline"
+}
+
+assert_python_startup_pyrepl_history() {
+  if ! _is_python_ge_3_13; then
+    echo "Skipping: Python < 3.13 (no pyrepl)"
+    return 0
+  fi
+
+  local hist_dir python_exe
+  hist_dir="$(mktemp -d)"
+  python_exe="$(_python_exe)"
+
+  ISSL_PYTHON_HOME="${issl_python_home}" \
+    PYTHONSTARTUP="${pythonrc_path}" \
+    PYTHON_HISTORY="${hist_dir}/history" \
+    TERM=xterm \
+    uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
+
+  test -f "${hist_dir}/history"
+  grep -q "1+1" "${hist_dir}/history"
+
+  if _is_libedit; then
+    test ! -f "${hist_dir}/history.editline"
+  fi
+}
+
+assert_python_startup_basic_repl_libedit_history() {
+  if ! _is_python_ge_3_13; then
+    echo "Skipping: Python < 3.13 (no basic REPL redirect needed)"
+    return 0
+  fi
+  if ! _is_libedit; then
+    echo "Skipping: readline backend is not libedit"
+    return 0
+  fi
+
+  local hist_dir python_exe
+  hist_dir="$(mktemp -d)"
+  python_exe="$(_python_exe)"
+
+  ISSL_PYTHON_HOME="${issl_python_home}" \
+    PYTHONSTARTUP="${pythonrc_path}" \
+    PYTHON_HISTORY="${hist_dir}/history" \
+    PYTHON_BASIC_REPL=1 \
+    TERM=xterm \
+    uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
+
+  test -f "${hist_dir}/history.editline"
+  grep -q "1+1" "${hist_dir}/history.editline"
+  test ! -f "${hist_dir}/history"
 }
 
 main() {
@@ -49,6 +123,8 @@ main() {
   run_assert assert_shared_pythonrc_asset
   run_assert assert_user_python_startup_file
   run_assert assert_python_startup_is_loaded
+  run_assert assert_python_startup_pyrepl_history
+  run_assert assert_python_startup_basic_repl_libedit_history
 }
 
 main "$@"

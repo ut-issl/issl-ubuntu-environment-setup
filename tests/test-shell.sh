@@ -32,7 +32,7 @@ test "${ISSL_PYTHON_HOME}" = "${XDG_CONFIG_HOME}/issl/python"
 test "${ISSL_RUST_HOME}" = "${XDG_CONFIG_HOME}/issl/rust"
 test "${CARGO_HOME}" = "${HOME}/.cargo"
 test "${PYTHONSTARTUP}" = "${XDG_CONFIG_HOME}/python/pythonrc.py"
-test "${PYTHONHISTFILE}" = "${XDG_STATE_HOME:-$HOME/.local/state}/python/python_history"
+test "${PYTHON_HISTORY}" = "${XDG_STATE_HOME:-$HOME/.local/state}/python/python_history"
 EOF
 }
 
