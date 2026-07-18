@@ -285,7 +285,7 @@ ensure_shell_listed_in_etc_shells() {
   return 1
 }
 
-resolve_desired_zsh_path() {
+resolve_zsh_bin() {
   if [ -x "${HOME}/.nix-profile/bin/zsh" ]; then
     printf '%s\n' "${HOME}/.nix-profile/bin/zsh"
     return 0
@@ -323,7 +323,7 @@ maybe_switch_login_shell_to_zsh() {
     return
   fi
 
-  if ! desired_zsh_path="$(resolve_desired_zsh_path)"; then
+  if ! desired_zsh_path="$(resolve_zsh_bin)"; then
     echo "warning: zsh binary not found while trying to switch login shell." >&2
     return
   fi
