@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-default_repo_ref="v0.4.0"
+default_repo_ref="v0.4.1"
 default_bootstrap_repository_path="ut-issl/issl-ubuntu-environment-setup"
 repo_url="${REPO_URL:-https://github.com/ut-issl/issl-ubuntu-environment-setup.git}"
 repo_ref="${REPO_REF:-${default_repo_ref}}"
