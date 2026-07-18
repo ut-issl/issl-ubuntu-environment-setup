@@ -14,10 +14,16 @@ assert_docker_client_installation() {
   docker --version
 }
 
+assert_docker_client_plugin_dirs_wrapper() {
+  grep -Fq "DOCKER_CLI_PLUGIN_DIRS" "${nix_profile_bin}/docker"
+  grep -Fq "docker-buildx" "${nix_profile_bin}/docker"
+}
+
 assert_docker_compose_installation() {
   test -x "${nix_profile_bin}/docker-compose"
   test "$(command -v docker-compose)" = "${nix_profile_bin}/docker-compose"
   docker-compose version
+  docker compose version
 }
 
 assert_docker_compose_plugin_dirs_wrapper() {
@@ -29,10 +35,12 @@ assert_docker_buildx_installation() {
   test -x "${nix_profile_bin}/docker-buildx"
   test "$(command -v docker-buildx)" = "${nix_profile_bin}/docker-buildx"
   docker-buildx version
+  docker buildx version
 }
 
 main() {
   run_assert assert_docker_client_installation
+  run_assert assert_docker_client_plugin_dirs_wrapper
   run_assert assert_docker_compose_installation
   run_assert assert_docker_compose_plugin_dirs_wrapper
   run_assert assert_docker_buildx_installation
