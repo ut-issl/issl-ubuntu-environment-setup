@@ -407,9 +407,23 @@ guard_login_shell_before_disabling_zsh() {
 
 # ===== Git ===== #
 
+resolve_git_bin() {
+  if [ -x "${HOME}/.nix-profile/bin/git" ]; then
+    printf '%s\n' "${HOME}/.nix-profile/bin/git"
+    return 0
+  fi
+
+  if command -v git >/dev/null 2>&1; then
+    command -v git
+    return 0
+  fi
+
+  return 1
+}
+
 ensure_git_include() {
-  if ! git config --global --get-all include.path | grep -Fxq "${shared_git_config_path}"; then
-    git config --global --add include.path "${shared_git_config_path}"
+  if ! "${git_bin}" config --global --get-all include.path | grep -Fxq "${shared_git_config_path}"; then
+    "${git_bin}" config --global --add include.path "${shared_git_config_path}"
   fi
 }
 
@@ -418,7 +432,7 @@ prompt_for_git_identity() {
   local git_email=""
   local missing_identity=0
 
-  if ! git_name="$(git config --global --get user.name 2>/dev/null)" || [ -z "${git_name}" ]; then
+  if ! git_name="$("${git_bin}" config --global --get user.name 2>/dev/null)" || [ -z "${git_name}" ]; then
     if [ -n "${git_user_name}" ]; then
       git_name="${git_user_name}"
     elif [ -t 0 ]; then
@@ -428,11 +442,11 @@ prompt_for_git_identity() {
       missing_identity=1
     fi
     if [ -n "${git_name}" ]; then
-      git config --global user.name "${git_name}"
+      "${git_bin}" config --global user.name "${git_name}"
     fi
   fi
 
-  if ! git_email="$(git config --global --get user.email 2>/dev/null)" || [ -z "${git_email}" ]; then
+  if ! git_email="$("${git_bin}" config --global --get user.email 2>/dev/null)" || [ -z "${git_email}" ]; then
     if [ -n "${git_user_email}" ]; then
       git_email="${git_user_email}"
     elif [ -t 0 ]; then
@@ -442,7 +456,7 @@ prompt_for_git_identity() {
       missing_identity=1
     fi
     if [ -n "${git_email}" ]; then
-      git config --global user.email "${git_email}"
+      "${git_bin}" config --global user.email "${git_email}"
     fi
   fi
 
@@ -550,6 +564,10 @@ main() {
   if [ "${zsh_enabled}" = "1" ]; then
     ensure_zsh_startup_files
     maybe_switch_login_shell_to_zsh
+  fi
+  if ! git_bin="$(resolve_git_bin)"; then
+    echo "git was not found after the Home Manager switch; cannot wire the shared Git configuration." >&2
+    exit 1
   fi
   ensure_git_include
   prompt_for_git_identity
