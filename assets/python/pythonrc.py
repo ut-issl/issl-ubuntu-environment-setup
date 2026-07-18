@@ -58,7 +58,10 @@ def _enable_completion() -> None:
 
 
 def _ensure_history_dir() -> None:
-    histdir = os.path.dirname(_history_base_path())
+    base = _history_base_path()
+    if "PYTHON_HISTORY" not in os.environ:
+        os.environ["PYTHON_HISTORY"] = base
+    histdir = os.path.dirname(base)
     if histdir:
         os.makedirs(histdir, exist_ok=True)
 
