@@ -46,6 +46,9 @@ prepend_block_once() {
     return
   fi
 
+  local original_mode=""
+  original_mode="$(stat -c %a "${file_path}")"
+
   temp_file="$(mktemp)"
   {
     printf '%s\n' "${begin_marker}"
@@ -56,6 +59,7 @@ prepend_block_once() {
       cat "${file_path}"
     fi
   } >"${temp_file}"
+  chmod "${original_mode}" "${temp_file}"
   mv "${temp_file}" "${file_path}"
 }
 
