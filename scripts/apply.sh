@@ -46,6 +46,9 @@ prepend_block_once() {
     return
   fi
 
+  local original_mode=""
+  original_mode="$(stat -L -c %a "${file_path}")"
+
   temp_file="$(mktemp)"
   {
     printf '%s\n' "${begin_marker}"
@@ -57,6 +60,7 @@ prepend_block_once() {
     fi
   } >"${temp_file}"
   mv "${temp_file}" "${file_path}"
+  chmod "${original_mode}" "${file_path}"
 }
 
 is_yes() {
