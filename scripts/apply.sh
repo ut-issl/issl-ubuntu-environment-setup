@@ -47,7 +47,7 @@ prepend_block_once() {
   fi
 
   local original_mode=""
-  original_mode="$(stat -c %a "${file_path}")"
+  original_mode="$(stat -L -c %a "${file_path}")"
 
   temp_file="$(mktemp)"
   {
