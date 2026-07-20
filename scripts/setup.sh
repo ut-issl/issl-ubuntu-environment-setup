@@ -129,12 +129,15 @@ load_bootstrap_host() {
   fi
 
   temporary_bootstrap="$(mktemp)"
+  trap 'rm -f "${temporary_bootstrap}"' EXIT
   while IFS= read -r bootstrap_url; do
     [ -n "${bootstrap_url}" ] || continue
 
     if curl -fsSL "${bootstrap_url}" -o "${temporary_bootstrap}"; then
       # shellcheck source=/dev/null
       . "${temporary_bootstrap}"
+      rm -f "${temporary_bootstrap}"
+      trap - EXIT
       return
     fi
   done <<<"${bootstrap_urls}"
