@@ -59,8 +59,8 @@ prepend_block_once() {
       cat "${file_path}"
     fi
   } >"${temp_file}"
-  chmod "${original_mode}" "${temp_file}"
   mv "${temp_file}" "${file_path}"
+  chmod "${original_mode}" "${file_path}"
 }
 
 is_yes() {
