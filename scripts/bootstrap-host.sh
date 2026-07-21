@@ -237,6 +237,13 @@ prompt_github_ssh_setup() {
   fi
 
   ensure_github_ssh_config
+
+  if ! is_interactive; then
+    echo "Register the following public key in GitHub and re-run:" >&2
+    echo "  ${github_key_path}.pub" >&2
+    return
+  fi
+
   prompt_github_ssh_registration
 }
 
