@@ -27,12 +27,12 @@ if command -v dircolors >/dev/null 2>&1; then
     eval "$(dircolors -b)"
   fi
 
-  alias ls='ls --color=auto'       # Colorize directory listings.
-  alias dir='dir --color=auto'     # Colorize dir output.
-  alias vdir='vdir --color=auto'   # Colorize verbose dir output.
-  alias grep='grep --color=auto'   # Highlight grep matches.
-  alias fgrep='fgrep --color=auto' # Highlight fixed-string grep matches.
-  alias egrep='egrep --color=auto' # Highlight extended-regex grep matches.
+  alias ls='ls --color=auto'         # Colorize directory listings.
+  alias dir='dir --color=auto'       # Colorize dir output.
+  alias vdir='vdir --color=auto'     # Colorize verbose dir output.
+  alias grep='grep --color=auto'     # Highlight grep matches.
+  alias fgrep='grep -F --color=auto' # Highlight fixed-string grep matches.
+  alias egrep='grep -E --color=auto' # Highlight extended-regex grep matches.
 fi
 
 alias rm='rm -i' # Ask before file removal.
