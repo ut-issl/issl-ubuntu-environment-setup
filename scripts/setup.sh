@@ -129,7 +129,8 @@ load_bootstrap_host() {
   fi
 
   temporary_bootstrap="$(mktemp)"
-  trap 'rm -f "${temporary_bootstrap}"' EXIT
+  # shellcheck disable=SC2064
+  trap "rm -f '${temporary_bootstrap}'" EXIT
   while IFS= read -r bootstrap_url; do
     [ -n "${bootstrap_url}" ] || continue
 
@@ -137,7 +138,6 @@ load_bootstrap_host() {
       # shellcheck source=/dev/null
       . "${temporary_bootstrap}"
       rm -f "${temporary_bootstrap}"
-      trap - EXIT
       return
     fi
   done <<<"${bootstrap_urls}"
