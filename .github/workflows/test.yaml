@@ -12,6 +12,8 @@ on:
       - flake.lock
       - home-modules/**
       - scripts/apply.sh
+      - scripts/bootstrap-host.sh
+      - scripts/setup.sh
       - tests/**
   pull_request:
     types: [opened, synchronize, reopened]
@@ -23,6 +25,8 @@ on:
       - flake.lock
       - home-modules/**
       - scripts/apply.sh
+      - scripts/bootstrap-host.sh
+      - scripts/setup.sh
       - tests/**
 
 concurrency:
@@ -42,12 +46,17 @@ jobs:
           - ubuntu-22.04
           - ubuntu-24.04
           - ubuntu-26.04
+        entry-point:
+          - apply
+          - setup
     uses: ./.github/workflows/test-environment.yaml
     with:
       setup-mode: script-based
+      entry-point: ${{ matrix.entry-point }}
       os: ${{ matrix.os }}
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
+      timeout-minutes: 15
 
   repository-based:
     name: Test config-repository-based setup
@@ -67,3 +76,4 @@ jobs:
       user-repository: ut-issl/personal-nix-config-template
       user-ref: 710819df83c6984834f82ae9dde7603a00416ef8 # main
       override-issl-input: true
+      timeout-minutes: 15
