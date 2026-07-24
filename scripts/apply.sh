@@ -279,7 +279,7 @@ resolve_zdotdir_from_zshenv() {
         if [ -n "${ZDOTDIR:-}" ]; then
           print -r -- "${ZDOTDIR:A}"
         fi
-      ' _ "${zshenv_path}"
+      ' _ "${zshenv_path}" </dev/null
   )"
   [ -n "${resolved_value}" ] || return 1
   printf '%s\n' "${resolved_value}"
