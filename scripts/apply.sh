@@ -44,8 +44,16 @@ resolves_into_nix_store() {
 guard_against_existing_home_manager_files() {
   local zdotdir_path="${ZDOTDIR:-${XDG_CONFIG_HOME}/zsh}"
   local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
+  local zshenv_path="${HOME}/.zshenv"
+  local resolved_zdotdir=""
   local candidate_path=""
   local managed_paths=()
+
+  if zshenv_defines_zdotdir "${zshenv_path}" &&
+    resolved_zdotdir="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
+    zdotdir_path="${resolved_zdotdir}"
+  fi
+
   local candidate_paths=(
     "${XDG_CONFIG_HOME}/nix/nix.conf"
     "${HOME}/.profile"
@@ -235,6 +243,12 @@ should_enable_zsh() {
   is_yes "${response}"
 }
 
+zshenv_defines_zdotdir() {
+  local zshenv_path="$1"
+
+  [ -f "${zshenv_path}" ] && grep -Eq '^[[:space:]]*(export[[:space:]]+)?ZDOTDIR[[:space:]]*=' "${zshenv_path}"
+}
+
 resolve_zdotdir_from_zshenv() {
   local zshenv_path="$1"
   local zsh_bin=""
@@ -292,7 +306,7 @@ ensure_zsh_startup_files() {
   local zshenv_path="${HOME}/.zshenv"
   local zdotdir_path=""
 
-  if [ -f "${zshenv_path}" ] && grep -Eq '^[[:space:]]*(export[[:space:]]+)?ZDOTDIR[[:space:]]*=' "${zshenv_path}"; then
+  if zshenv_defines_zdotdir "${zshenv_path}"; then
     if ! zdotdir_path="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
       echo "Could not determine ZDOTDIR from ${zshenv_path}." >&2
       exit 1
