@@ -53,8 +53,9 @@ guard_against_existing_home_manager_files() {
   if zshenv_defines_zdotdir "${zshenv_path}"; then
     if resolved_zdotdir="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
       zdotdir_path="${resolved_zdotdir}"
-    elif [ "${zsh_enabled}" = "1" ]; then
-      echo "Could not determine ZDOTDIR from ${zshenv_path}." >&2
+    elif [ "${zsh_enabled}" = "1" ] && resolve_zsh_bin >/dev/null; then
+      echo "error: ${zshenv_path} defines ZDOTDIR, but it could not be resolved before the Home Manager switch." >&2
+      echo "Fix ${zshenv_path} so that zsh can evaluate it, or re-run with ISSL_ENABLE_ZSH=no to skip the zsh setup." >&2
       exit 1
     fi
   fi
