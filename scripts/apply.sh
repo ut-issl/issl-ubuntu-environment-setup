@@ -30,6 +30,70 @@ ensure_home_manager_profile_dir() {
   mkdir -p "${hm_profile_dir}"
 }
 
+resolves_into_nix_store() {
+  local path="$1"
+  local resolved_path=""
+
+  resolved_path="$(readlink -m "${path}")" || return 1
+  case "${resolved_path}" in
+  /nix/store/*) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+guard_against_existing_home_manager_files() {
+  local zsh_enabled="$1"
+  local zdotdir_path="${XDG_CONFIG_HOME}/zsh"
+  local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
+  local zshenv_path="${HOME}/.zshenv"
+  local resolved_zdotdir=""
+  local candidate_path=""
+  local managed_paths=()
+
+  if zshenv_defines_zdotdir "${zshenv_path}"; then
+    if resolved_zdotdir="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
+      zdotdir_path="${resolved_zdotdir}"
+    elif [ "${zsh_enabled}" = "1" ] && resolve_zsh_bin >/dev/null; then
+      echo "error: ${zshenv_path} defines ZDOTDIR, but it could not be resolved before the Home Manager switch." >&2
+      echo "Fix ${zshenv_path} so that zsh can evaluate it, or re-run with ISSL_ENABLE_ZSH=no to skip the zsh setup." >&2
+      exit 1
+    fi
+  fi
+
+  local candidate_paths=(
+    "${XDG_CONFIG_HOME}/nix/nix.conf"
+    "${HOME}/.profile"
+    "${HOME}/.bash_profile"
+    "${HOME}/.bashrc"
+    "${HOME}/.zshenv"
+    "${zdotdir_path}/.zprofile"
+    "${zdotdir_path}/.zshrc"
+    "${HOME}/.gitconfig"
+    "${XDG_CONFIG_HOME}/git/config"
+    "${XDG_CONFIG_HOME}/python/pythonrc.py"
+    "${cargo_home_path}/config.toml"
+  )
+
+  for candidate_path in "${candidate_paths[@]}"; do
+    if resolves_into_nix_store "${candidate_path}"; then
+      managed_paths+=("${candidate_path}")
+    fi
+  done
+
+  if [ "${#managed_paths[@]}" -eq 0 ]; then
+    return
+  fi
+
+  {
+    echo "error: the following files resolve into the Nix store, so this machine already appears to be managed by an existing Home Manager configuration:"
+    printf '  %s\n' "${managed_paths[@]}"
+    echo "Running the script-based setup here would replace that configuration's Home Manager profile and detach these files from its control."
+    echo "Keep managing this machine with your existing Home Manager configuration (e.g. your personal config repository) instead."
+    echo "If you really want to switch to the script-based setup, remove the existing Home Manager configuration first and re-run this script."
+  } >&2
+  exit 1
+}
+
 prepend_block_once() {
   local file_path="$1"
   local begin_marker="$2"
@@ -40,11 +104,17 @@ prepend_block_once() {
 
   file_dir="$(dirname "${file_path}")"
   mkdir -p "${file_dir}"
-  touch "${file_path}"
 
-  if grep -Fq "${begin_marker}" "${file_path}"; then
+  if [ -f "${file_path}" ] && grep -Fq "${begin_marker}" "${file_path}"; then
     return
   fi
+
+  if resolves_into_nix_store "${file_path}"; then
+    echo "error: refusing to modify ${file_path} because it resolves into the Nix store (likely managed by Home Manager)." >&2
+    exit 1
+  fi
+
+  touch "${file_path}"
 
   local original_mode=""
   original_mode="$(stat -L -c %a "${file_path}")"
@@ -179,6 +249,12 @@ should_enable_zsh() {
   is_yes "${response}"
 }
 
+zshenv_defines_zdotdir() {
+  local zshenv_path="$1"
+
+  [ -f "${zshenv_path}" ] && grep -Eq '^[[:space:]]*(export[[:space:]]+)?ZDOTDIR[[:space:]]*=' "${zshenv_path}"
+}
+
 resolve_zdotdir_from_zshenv() {
   local zshenv_path="$1"
   local zsh_bin=""
@@ -204,7 +280,7 @@ resolve_zdotdir_from_zshenv() {
         if [ -n "${ZDOTDIR:-}" ]; then
           print -r -- "${ZDOTDIR:A}"
         fi
-      ' _ "${zshenv_path}"
+      ' _ "${zshenv_path}" </dev/null
   )"
   [ -n "${resolved_value}" ] || return 1
   printf '%s\n' "${resolved_value}"
@@ -236,7 +312,7 @@ ensure_zsh_startup_files() {
   local zshenv_path="${HOME}/.zshenv"
   local zdotdir_path=""
 
-  if [ -f "${zshenv_path}" ] && grep -Eq '^[[:space:]]*(export[[:space:]]+)?ZDOTDIR[[:space:]]*=' "${zshenv_path}"; then
+  if zshenv_defines_zdotdir "${zshenv_path}"; then
     if ! zdotdir_path="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
       echo "Could not determine ZDOTDIR from ${zshenv_path}." >&2
       exit 1
@@ -534,6 +610,14 @@ main() {
     exit 1
   fi
 
+  if should_enable_zsh; then
+    zsh_enabled=1
+  else
+    zsh_enabled=0
+  fi
+
+  guard_against_existing_home_manager_files "${zsh_enabled}"
+
   if [ -n "${NIX_CONFIG-}" ]; then
     export NIX_CONFIG="${NIX_CONFIG}"$'\n'"${nix_feature_config}"
   else
@@ -548,12 +632,10 @@ main() {
   )"
 
   ensure_home_manager_profile_dir
-  if should_enable_zsh; then
+  if [ "${zsh_enabled}" = "1" ]; then
     home_configuration_name="issl-common-zsh-${current_system}"
-    zsh_enabled=1
   else
     home_configuration_name="issl-common-${current_system}"
-    zsh_enabled=0
   fi
 
   if [ "${zsh_enabled}" = "0" ]; then
