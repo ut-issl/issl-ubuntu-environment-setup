@@ -30,6 +30,57 @@ ensure_home_manager_profile_dir() {
   mkdir -p "${hm_profile_dir}"
 }
 
+is_nix_store_symlink() {
+  local path="$1"
+  local resolved_path=""
+
+  [ -L "${path}" ] || return 1
+  resolved_path="$(readlink -f "${path}")" || return 1
+  case "${resolved_path}" in
+  /nix/store/*) return 0 ;;
+  *) return 1 ;;
+  esac
+}
+
+guard_against_existing_home_manager_files() {
+  local zdotdir_path="${ZDOTDIR:-${XDG_CONFIG_HOME}/zsh}"
+  local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
+  local candidate_path=""
+  local managed_paths=()
+  local candidate_paths=(
+    "${XDG_CONFIG_HOME}/nix/nix.conf"
+    "${HOME}/.profile"
+    "${HOME}/.bash_profile"
+    "${HOME}/.bashrc"
+    "${HOME}/.zshenv"
+    "${zdotdir_path}/.zprofile"
+    "${zdotdir_path}/.zshrc"
+    "${HOME}/.gitconfig"
+    "${XDG_CONFIG_HOME}/git/config"
+    "${XDG_CONFIG_HOME}/python/pythonrc.py"
+    "${cargo_home_path}/config.toml"
+  )
+
+  for candidate_path in "${candidate_paths[@]}"; do
+    if is_nix_store_symlink "${candidate_path}"; then
+      managed_paths+=("${candidate_path}")
+    fi
+  done
+
+  if [ "${#managed_paths[@]}" -eq 0 ]; then
+    return
+  fi
+
+  {
+    echo "error: the following files are symlinks into the Nix store, so this machine already appears to be managed by an existing Home Manager configuration:"
+    printf '  %s\n' "${managed_paths[@]}"
+    echo "Running the script-based setup here would replace that configuration's Home Manager profile and detach these files from its control."
+    echo "Keep managing this machine with your existing Home Manager configuration (e.g. your personal config repository) instead."
+    echo "If you really want to switch to the script-based setup, remove the existing Home Manager configuration first and re-run this script."
+  } >&2
+  exit 1
+}
+
 prepend_block_once() {
   local file_path="$1"
   local begin_marker="$2"
@@ -533,6 +584,8 @@ main() {
     echo "nix is required before running scripts/apply.sh." >&2
     exit 1
   fi
+
+  guard_against_existing_home_manager_files
 
   if [ -n "${NIX_CONFIG-}" ]; then
     export NIX_CONFIG="${NIX_CONFIG}"$'\n'"${nix_feature_config}"
