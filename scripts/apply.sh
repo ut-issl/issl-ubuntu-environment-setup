@@ -91,11 +91,17 @@ prepend_block_once() {
 
   file_dir="$(dirname "${file_path}")"
   mkdir -p "${file_dir}"
-  touch "${file_path}"
 
-  if grep -Fq "${begin_marker}" "${file_path}"; then
+  if [ -f "${file_path}" ] && grep -Fq "${begin_marker}" "${file_path}"; then
     return
   fi
+
+  if is_nix_store_symlink "${file_path}"; then
+    echo "error: refusing to modify ${file_path} because it is a symlink into the Nix store (likely managed by Home Manager)." >&2
+    exit 1
+  fi
+
+  touch "${file_path}"
 
   local original_mode=""
   original_mode="$(stat -L -c %a "${file_path}")"
