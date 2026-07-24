@@ -30,12 +30,11 @@ ensure_home_manager_profile_dir() {
   mkdir -p "${hm_profile_dir}"
 }
 
-is_nix_store_symlink() {
+resolves_into_nix_store() {
   local path="$1"
   local resolved_path=""
 
-  [ -L "${path}" ] || return 1
-  resolved_path="$(readlink -f "${path}")" || return 1
+  resolved_path="$(readlink -m "${path}")" || return 1
   case "${resolved_path}" in
   /nix/store/*) return 0 ;;
   *) return 1 ;;
@@ -62,7 +61,7 @@ guard_against_existing_home_manager_files() {
   )
 
   for candidate_path in "${candidate_paths[@]}"; do
-    if is_nix_store_symlink "${candidate_path}"; then
+    if resolves_into_nix_store "${candidate_path}"; then
       managed_paths+=("${candidate_path}")
     fi
   done
@@ -72,7 +71,7 @@ guard_against_existing_home_manager_files() {
   fi
 
   {
-    echo "error: the following files are symlinks into the Nix store, so this machine already appears to be managed by an existing Home Manager configuration:"
+    echo "error: the following files resolve into the Nix store, so this machine already appears to be managed by an existing Home Manager configuration:"
     printf '  %s\n' "${managed_paths[@]}"
     echo "Running the script-based setup here would replace that configuration's Home Manager profile and detach these files from its control."
     echo "Keep managing this machine with your existing Home Manager configuration (e.g. your personal config repository) instead."
@@ -96,8 +95,8 @@ prepend_block_once() {
     return
   fi
 
-  if is_nix_store_symlink "${file_path}"; then
-    echo "error: refusing to modify ${file_path} because it is a symlink into the Nix store (likely managed by Home Manager)." >&2
+  if resolves_into_nix_store "${file_path}"; then
+    echo "error: refusing to modify ${file_path} because it resolves into the Nix store (likely managed by Home Manager)." >&2
     exit 1
   fi
 
