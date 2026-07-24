@@ -42,16 +42,21 @@ resolves_into_nix_store() {
 }
 
 guard_against_existing_home_manager_files() {
-  local zdotdir_path="${ZDOTDIR:-${XDG_CONFIG_HOME}/zsh}"
+  local zsh_enabled="$1"
+  local zdotdir_path="${XDG_CONFIG_HOME}/zsh"
   local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
   local zshenv_path="${HOME}/.zshenv"
   local resolved_zdotdir=""
   local candidate_path=""
   local managed_paths=()
 
-  if zshenv_defines_zdotdir "${zshenv_path}" &&
-    resolved_zdotdir="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
-    zdotdir_path="${resolved_zdotdir}"
+  if zshenv_defines_zdotdir "${zshenv_path}"; then
+    if resolved_zdotdir="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
+      zdotdir_path="${resolved_zdotdir}"
+    elif [ "${zsh_enabled}" = "1" ]; then
+      echo "Could not determine ZDOTDIR from ${zshenv_path}." >&2
+      exit 1
+    fi
   fi
 
   local candidate_paths=(
@@ -604,7 +609,13 @@ main() {
     exit 1
   fi
 
-  guard_against_existing_home_manager_files
+  if should_enable_zsh; then
+    zsh_enabled=1
+  else
+    zsh_enabled=0
+  fi
+
+  guard_against_existing_home_manager_files "${zsh_enabled}"
 
   if [ -n "${NIX_CONFIG-}" ]; then
     export NIX_CONFIG="${NIX_CONFIG}"$'\n'"${nix_feature_config}"
@@ -620,12 +631,10 @@ main() {
   )"
 
   ensure_home_manager_profile_dir
-  if should_enable_zsh; then
+  if [ "${zsh_enabled}" = "1" ]; then
     home_configuration_name="issl-common-zsh-${current_system}"
-    zsh_enabled=1
   else
     home_configuration_name="issl-common-${current_system}"
-    zsh_enabled=0
   fi
 
   if [ "${zsh_enabled}" = "0" ]; then
