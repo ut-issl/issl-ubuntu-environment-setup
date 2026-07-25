@@ -15,6 +15,18 @@ Use Nix with Home Manager for tools that should be available across your user en
 - For a personal reproducible setup, see [setup with a personal config repository](11-setup-with-a-personal-config-repository.md).
 - For the script-based setup workflow, see [script-based setup](12-script-based-setup.md#if-you-need-additional-tools-or-settings).
 
+### Unfree Packages
+
+This environment sets `nixpkgs.config.allowUnfree = true`, so packages with an unfree license install without extra setup.
+This applies both to the shared packages of this repository
+and to the packages you add in a personal config repository that imports it.
+
+Installing such a package means accepting its license, which is not the same as the license of this repository.
+Check the terms of the package before you install it, and before you propose adding one to the shared environment.
+
+The setting only covers Home Manager.
+`nix profile` evaluates Nixpkgs on its own and still refuses unfree packages, as described in [script-based setup](12-script-based-setup.md#3-if-it-is-personal-and-reproducibility-is-not-necessary).
+
 ## 2. Project-Local Dependencies
 
 Use project-local package managers for dependencies that belong to a specific repository.

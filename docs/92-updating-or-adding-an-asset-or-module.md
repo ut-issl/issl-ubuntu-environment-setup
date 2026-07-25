@@ -61,6 +61,11 @@ For example:
 }
 ```
 
+`home-modules/nix.nix` sets `nixpkgs.config.allowUnfree = true` for the whole configuration,
+so a module may add a package with an unfree license.
+Because that setting also applies to everyone who imports this repository,
+state in the pull request why the package is worth distributing to all users under its license terms.
+
 When updating or adding a module:
 
 1. Update an existing file under `home-modules/`, or create a new one if needed.
