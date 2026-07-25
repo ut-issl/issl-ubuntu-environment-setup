@@ -53,13 +53,7 @@ If there is already a related module or asset, update it rather than creating a 
 For a new tool:
 
 - Look the package up in nixpkgs at the pinned revision:
-  read the `nixpkgs` entry's `locked.rev` from `flake.lock`
-  and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
-- Check whether Home Manager has a matching module (`programs.<tool>` or `services.<tool>`)
-  to understand available options — but see step 4 for why this repo does not use them directly.
-  On a machine with the environment applied,
-  `man home-configuration.nix` documents the installed version and is the source of truth;
-  otherwise use the Home Manager manual for the matching release.
+  read the `nixpkgs` entry's `locked.rev` from `flake.lock` and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
 - Unfree packages are not enabled in this flake.
   Adding one requires a flake change and an explicit yes from the user.
 - If the package is not in nixpkgs, report honestly and let the user decide.
