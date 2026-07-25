@@ -103,3 +103,12 @@ Upgrade installed profile packages:
 ```bash
 nix profile upgrade --all
 ```
+
+`nix profile` refuses packages with an unfree license, even though the shared Home Manager configuration allows them.
+Allow it for every invocation that evaluates such a package, including a later `nix profile upgrade`:
+
+```bash
+NIXPKGS_ALLOW_UNFREE=1 nix profile install --impure nixpkgs#claude-code
+```
+
+See [package management practices](13-package-management-practices.md#unfree-packages).
