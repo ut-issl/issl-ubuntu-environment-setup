@@ -111,8 +111,9 @@ In practice, this usually means adding include blocks or source commands to user
 
 ## Validating Changes
 
-Validate a change with Nix in two steps:
-first confirm that it evaluates and builds, then inspect what it actually produces.
+Validate a change in three steps:
+first run the pre-commit hooks, then confirm that it evaluates and builds,
+and finally inspect what it actually produces.
 
 Nix reads this repository through Git, so stage a new file before you validate:
 
@@ -124,7 +125,17 @@ This records an intent to add and creates no commit.
 Without it, a new module fails to evaluate because Nix does not see the file,
 and a new test is silently left out.
 
-1. Run the checks:
+1. Run the pre-commit hooks:
+
+   ```console
+   prek run --files <changed files>
+   ```
+
+   This applies the formatters and the linters to the changed files.
+   For Nix files, nixfmt formats the changed files, while deadnix and statix check the whole repository.
+   See [Contribution Guidelines](93-contribution-guidelines.md) for how to install the hooks.
+
+2. Run the checks:
 
    ```console
    nix flake check --show-trace
@@ -133,7 +144,7 @@ and a new test is silently left out.
    This builds the activation packages for both the Bash-only and the Zsh configuration,
    and catches Nix evaluation errors and build failures.
 
-2. Build the activation packages to inspect the result:
+3. Build the activation packages to inspect the result:
 
    ```console
    nix build .#checks.x86_64-linux.home --out-link result-home

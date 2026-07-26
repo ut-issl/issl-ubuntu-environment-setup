@@ -2,10 +2,27 @@
 default_stages: [pre-commit]
 
 repos:
-  - repo: https://github.com/NixOS/nixfmt
-    rev: 7cad8663932db4519d4c5b623becdcda655cef7c  # frozen: v1.4.0
+  - repo: local
     hooks:
-      - id: nixfmt-nix
+      - id: nixfmt
+        name: nixfmt
+        entry: nix fmt --
+        language: system
+        files: \.nix$
+
+      - id: deadnix
+        name: deadnix
+        entry: nix run --inputs-from . nixpkgs#deadnix -- --fail .
+        language: system
+        files: \.nix$
+        pass_filenames: false
+
+      - id: statix
+        name: statix
+        entry: nix run --inputs-from . nixpkgs#statix -- check .
+        language: system
+        files: \.nix$
+        pass_filenames: false
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: 2700fd5671c633760d912769c041bfcde2b9a01b  # frozen: v0.15.22
