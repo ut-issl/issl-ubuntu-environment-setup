@@ -2,13 +2,14 @@
 default_stages: [pre-commit]
 
 repos:
-  - repo: https://github.com/NixOS/nixfmt
-    rev: 7cad8663932db4519d4c5b623becdcda655cef7c  # frozen: v1.4.0
-    hooks:
-      - id: nixfmt-nix
-
   - repo: local
     hooks:
+      - id: nixfmt
+        name: nixfmt
+        entry: nix fmt --
+        language: system
+        files: \.nix$
+
       - id: deadnix
         name: deadnix
         entry: nix run --inputs-from . nixpkgs#deadnix -- --fail .
