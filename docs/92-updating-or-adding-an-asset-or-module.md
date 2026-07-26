@@ -2,6 +2,19 @@
 
 This page explains the usual workflow for updating or adding a shared asset or module in this repository.
 
+## Agent Skill
+
+This repository ships a `develop` skill for coding agents that support [Agent Skills](https://agentskills.io)
+(e.g. Codex or Claude Code).
+Invoke it with `$develop` in Codex or `/develop` in Claude Code.
+
+It assists the workflow on this page interactively —
+from checking what already exists and researching nixpkgs
+to editing the modules and assets, extending the tests, and validating the result.
+State what you want when invoking it (e.g. `$develop add lazygit`).
+
+It leaves every change uncommitted, so you review the result before committing it yourself.
+
 ## Updating or Adding an Asset
 
 Changes to `assets/` are needed when the shared configuration files themselves should change.
