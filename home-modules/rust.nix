@@ -2,8 +2,13 @@
 
 {
   home.packages = [
-    pkgs.cargo-about
     pkgs.rustup
+    pkgs.cargo-about
+    pkgs.cargo-deny
+    pkgs.cargo-hack
+    pkgs.cargo-llvm-cov
+    pkgs.cargo-nextest
+    pkgs.cargo-dist
   ];
 
   xdg.configFile."issl/rust/config.toml".source = ../assets/rust/config.toml;
