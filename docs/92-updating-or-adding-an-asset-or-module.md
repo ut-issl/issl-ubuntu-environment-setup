@@ -96,6 +96,39 @@ In practice, this usually means adding include blocks or source commands to user
 - `~/.cargo/config.toml`
 - `~/.config/nix/nix.conf`
 
+## Validating Changes
+
+Validate a change with Nix in two steps:
+first confirm that it evaluates and builds, then inspect what it actually produces.
+
+1. Run the checks:
+
+   ```console
+   nix flake check --show-trace
+   ```
+
+   This builds the activation packages for both the Bash-only and the Zsh configuration,
+   and catches Nix evaluation errors and build failures.
+
+2. Build the activation packages to inspect the result:
+
+   ```console
+   nix build .#checks.x86_64-linux.home --out-link result-home
+   nix build .#checks.x86_64-linux.home-zsh --out-link result-home-zsh
+   ```
+
+   Replace `x86_64-linux` with `aarch64-linux` to inspect the result for that architecture.
+
+   Each build result contains what users receive:
+
+   - `result-home/home-path/bin` holds the binaries the configuration installs.
+   - `result-home/home-files` holds the files deployed through `home.file` and `xdg.configFile`,
+     so a deployed asset can be compared against its source under `assets/` with `cmp`.
+   - `result-home/activate` is the activation script that Home Manager runs on `switch`.
+
+   The checks use the fixed username `issl` and home directory `/tmp/issl-home`,
+   so paths under the build result refer to that home directory rather than yours.
+
 ## Documentation Updates
 
 After updating or adding an asset or module:
