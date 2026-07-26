@@ -114,7 +114,8 @@ Every module should have corresponding test coverage under `tests/`.
 Tests run in CI against a freshly applied environment
 (`.github/workflows/test-environment.yaml` sets `HOME_DIR`/`CONFIG_DIR` and runs `tests/run.sh`).
 Do not try to run them locally unless this machine has the shared environment applied;
-local validation is prek plus `nix flake check` (step 7).
+local validation is prek plus the Nix validation in step 7,
+which can confirm installed binaries and deployed files without applying anything.
 
 If a test file for this area already exists (e.g. `tests/test-<tool>.sh`), extend it.
 If not, create a new `tests/test-<tool>.sh` following the existing pattern:
@@ -148,8 +149,20 @@ Run validation in this order:
 
 1. Run `prek run --files <changed files> --skip no-commit-to-branch` and fix what it reports.
    If `prek` is not on PATH, use `uvx prek` instead.
-2. With Nix, run `nix flake check --show-trace`.
-   This builds the activation packages and catches both Nix evaluation errors and build failures.
+2. Run `nix flake check --show-trace`.
+   This builds the activation packages for both the Bash-only and the Zsh configuration,
+   and catches Nix evaluation errors and build failures.
+3. Build the activation packages to inspect the installed binaries and deployed files:
+
+   ```console
+   nix build .#checks.x86_64-linux.home --out-link result-home
+   nix build .#checks.x86_64-linux.home-zsh --out-link result-home-zsh
+   ```
+
+   Remove the `result-*` symlinks when done.
+
+See `docs/92-updating-or-adding-an-asset-or-module.md` § "Validating Changes"
+for what the build result contains and how to inspect it.
 
 ## 8. Wrap up
 
