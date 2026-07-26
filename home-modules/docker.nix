@@ -26,5 +26,6 @@ in
     dockerClient
     dockerCompose
     pkgs.docker-buildx
+    pkgs.hadolint
   ];
 }

@@ -1,5 +1,8 @@
 { pkgs, ... }:
 
 {
-  home.packages = [ pkgs.typst ];
+  home.packages = [
+    pkgs.typst
+    pkgs.typstyle
+  ];
 }

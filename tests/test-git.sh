@@ -21,6 +21,18 @@ assert_gh_installation() {
   gh --version
 }
 
+assert_actionlint_installation() {
+  test -x "${nix_profile_bin}/actionlint"
+  test "$(command -v actionlint)" = "${nix_profile_bin}/actionlint"
+  actionlint --version
+}
+
+assert_zizmor_installation() {
+  test -x "${nix_profile_bin}/zizmor"
+  test "$(command -v zizmor)" = "${nix_profile_bin}/zizmor"
+  zizmor --version
+}
+
 assert_shared_git_config() {
   cmp "${common_dir}/assets/git/.gitconfig" "${config_dir}/issl/git/.gitconfig"
 }
@@ -55,6 +67,8 @@ assert_git_identity() {
 main() {
   run_assert assert_git_installation
   run_assert assert_gh_installation
+  run_assert assert_actionlint_installation
+  run_assert assert_zizmor_installation
   run_assert assert_shared_git_config
   run_assert assert_global_git_include
   run_assert assert_git_identity

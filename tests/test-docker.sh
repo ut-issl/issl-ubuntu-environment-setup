@@ -38,12 +38,19 @@ assert_docker_buildx_installation() {
   docker buildx version
 }
 
+assert_hadolint_installation() {
+  test -x "${nix_profile_bin}/hadolint"
+  test "$(command -v hadolint)" = "${nix_profile_bin}/hadolint"
+  hadolint --version
+}
+
 main() {
   run_assert assert_docker_client_installation
   run_assert assert_docker_client_plugin_dirs_wrapper
   run_assert assert_docker_compose_installation
   run_assert assert_docker_compose_plugin_dirs_wrapper
   run_assert assert_docker_buildx_installation
+  run_assert assert_hadolint_installation
 }
 
 main "$@"
