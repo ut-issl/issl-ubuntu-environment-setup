@@ -54,8 +54,11 @@ For a new tool:
 
 - Look the package up in nixpkgs at the pinned revision:
   read the `nixpkgs` entry's `locked.rev` from `flake.lock` and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
-- Unfree packages are not enabled in this flake.
-  Adding one requires a flake change and an explicit yes from the user.
+- `home-modules/nix.nix` sets `nixpkgs.config.allowUnfree = true`,
+  so an unfree package can be added without a flake change.
+  Because that setting also applies to every personal config repository importing this one,
+  check the package's license terms and get an explicit yes from the user before adding one,
+  and state in the pull request why it is worth distributing to all users under those terms.
 - If the package is not in nixpkgs, report honestly and let the user decide.
   Never add flake inputs or overlays without an explicit yes.
 
@@ -137,8 +140,7 @@ Common assertion patterns:
 - **Tool installation**: check `test -x "${nix_profile_bin}/<binary>"`
   and verify `command -v` resolves to the Nix profile path.
 - **Asset deployment**: use `cmp` to verify the deployed file matches the source under `assets/`.
-- **Config wiring**: use `grep -Fq` to check that include or source lines
-  are present in user-managed files.
+- **Config wiring**: use `grep -Fq` to check that include or source lines are present in user-managed files.
 
 ## 7. Validate
 
