@@ -203,10 +203,10 @@ jobs:
         run: xargs -0 nix fmt -- --check < "${NIX_FILES}"
 
       - name: Run deadnix
-        run: nix run nixpkgs#deadnix -- --fail .
+        run: nix run --inputs-from . nixpkgs#deadnix -- --fail .
 
       - name: Run statix
-        run: nix run nixpkgs#statix -- check .
+        run: nix run --inputs-from . nixpkgs#statix -- check .
 
       - name: Run flake check
         run: |
