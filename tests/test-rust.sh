@@ -10,16 +10,15 @@ export RUSTUP_HOME="${home_dir}/.rustup"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_cargo_about_installation() {
-  test -x "${nix_profile_bin}/cargo-about"
-  test "$(command -v cargo-about)" = "${nix_profile_bin}/cargo-about"
-  cargo-about --version
-}
-
 assert_rustup_installation() {
   test -x "${nix_profile_bin}/rustup"
   test "$(command -v rustup)" = "${nix_profile_bin}/rustup"
   rustup --version
+}
+
+assert_rustc_installation() {
+  command -v rustc >/dev/null 2>&1
+  rustc --version
 }
 
 assert_cargo_installation() {
@@ -27,9 +26,40 @@ assert_cargo_installation() {
   cargo --version
 }
 
-assert_rustc_installation() {
-  command -v rustc >/dev/null 2>&1
-  rustc --version
+assert_cargo_about_installation() {
+  test -x "${nix_profile_bin}/cargo-about"
+  test "$(command -v cargo-about)" = "${nix_profile_bin}/cargo-about"
+  cargo about --version
+}
+
+assert_cargo_deny_installation() {
+  test -x "${nix_profile_bin}/cargo-deny"
+  test "$(command -v cargo-deny)" = "${nix_profile_bin}/cargo-deny"
+  cargo deny --version
+}
+
+assert_cargo_hack_installation() {
+  test -x "${nix_profile_bin}/cargo-hack"
+  test "$(command -v cargo-hack)" = "${nix_profile_bin}/cargo-hack"
+  cargo hack --version
+}
+
+assert_cargo_llvm_cov_installation() {
+  test -x "${nix_profile_bin}/cargo-llvm-cov"
+  test "$(command -v cargo-llvm-cov)" = "${nix_profile_bin}/cargo-llvm-cov"
+  cargo llvm-cov --version
+}
+
+assert_cargo_nextest_installation() {
+  test -x "${nix_profile_bin}/cargo-nextest"
+  test "$(command -v cargo-nextest)" = "${nix_profile_bin}/cargo-nextest"
+  cargo nextest --version
+}
+
+assert_dist_installation() {
+  test -x "${nix_profile_bin}/dist"
+  test "$(command -v dist)" = "${nix_profile_bin}/dist"
+  dist --version
 }
 
 assert_default_toolchain_stable() {
@@ -48,10 +78,15 @@ assert_cargo_config_include() {
 }
 
 main() {
-  run_assert assert_cargo_about_installation
   run_assert assert_rustup_installation
-  run_assert assert_cargo_installation
   run_assert assert_rustc_installation
+  run_assert assert_cargo_installation
+  run_assert assert_cargo_about_installation
+  run_assert assert_cargo_deny_installation
+  run_assert assert_cargo_hack_installation
+  run_assert assert_cargo_llvm_cov_installation
+  run_assert assert_cargo_nextest_installation
+  run_assert assert_dist_installation
   run_assert assert_default_toolchain_stable
   run_assert assert_shared_rust_config_asset
   run_assert assert_cargo_config_include
