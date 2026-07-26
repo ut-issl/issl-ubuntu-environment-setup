@@ -47,7 +47,7 @@ assert_nixfmt_installation() {
 assert_statix_installation() {
   test -x "${nix_profile_bin}/statix"
   test "$(command -v statix)" = "${nix_profile_bin}/statix"
-  statix --version
+  statix --help
 }
 
 assert_deadnix_installation() {
