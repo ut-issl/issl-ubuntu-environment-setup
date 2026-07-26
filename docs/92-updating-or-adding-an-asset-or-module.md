@@ -114,6 +114,16 @@ In practice, this usually means adding include blocks or source commands to user
 Validate a change with Nix in two steps:
 first confirm that it evaluates and builds, then inspect what it actually produces.
 
+Nix reads this repository through Git, so stage a new file before you validate:
+
+```console
+git add -N <new files>
+```
+
+This records an intent to add and creates no commit.
+Without it, a new module fails to evaluate because Nix does not see the file,
+and a new test is silently left out.
+
 1. Run the checks:
 
    ```console

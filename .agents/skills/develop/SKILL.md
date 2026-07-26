@@ -149,20 +149,11 @@ Run validation in this order:
 
 1. Run `prek run --files <changed files> --skip no-commit-to-branch` and fix what it reports.
    If `prek` is not on PATH, use `uvx prek` instead.
-2. Run `nix flake check --show-trace`.
-   This builds the activation packages for both the Bash-only and the Zsh configuration,
-   and catches Nix evaluation errors and build failures.
-3. Build the activation packages to inspect the installed binaries and deployed files:
-
-   ```console
-   nix build .#checks.x86_64-linux.home --out-link result-home
-   nix build .#checks.x86_64-linux.home-zsh --out-link result-home-zsh
-   ```
-
+2. Run the Nix validation of `docs/92-updating-or-adding-an-asset-or-module.md` § "Validating Changes":
+   stage the new files, run the flake checks,
+   then build the activation packages and inspect the installed binaries and deployed files.
+   Build for the system of this machine, not the one in the example command.
    Remove the `result-*` symlinks when done.
-
-See `docs/92-updating-or-adding-an-asset-or-module.md` § "Validating Changes"
-for what the build result contains and how to inspect it.
 
 ## 8. Wrap up
 
