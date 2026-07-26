@@ -78,6 +78,18 @@ assert_shared_shell_tools() {
   dircolors --version
 }
 
+assert_shellcheck_installation() {
+  test -x "${nix_profile_bin}/shellcheck"
+  test "$(command -v shellcheck)" = "${nix_profile_bin}/shellcheck"
+  shellcheck --version
+}
+
+assert_shfmt_installation() {
+  test -x "${nix_profile_bin}/shfmt"
+  test "$(command -v shfmt)" = "${nix_profile_bin}/shfmt"
+  shfmt --version
+}
+
 assert_zsh_enabled() {
   test -x "${nix_profile_bin}/zsh"
   test "$(command -v zsh)" = "${nix_profile_bin}/zsh"
@@ -125,6 +137,8 @@ main() {
   run_assert assert_bash_startup_is_loaded
   run_assert assert_profile_not_shadowed_by_bash_profile
   run_assert assert_shared_shell_tools
+  run_assert assert_shellcheck_installation
+  run_assert assert_shfmt_installation
 
   if [ "${issl_enable_zsh}" = "1" ]; then
     run_assert assert_zsh_enabled

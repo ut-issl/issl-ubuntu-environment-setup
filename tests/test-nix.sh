@@ -38,12 +38,33 @@ assert_home_manager_installation() {
   home-manager --version
 }
 
+assert_nixfmt_installation() {
+  test -x "${nix_profile_bin}/nixfmt"
+  test "$(command -v nixfmt)" = "${nix_profile_bin}/nixfmt"
+  nixfmt --version
+}
+
+assert_statix_installation() {
+  test -x "${nix_profile_bin}/statix"
+  test "$(command -v statix)" = "${nix_profile_bin}/statix"
+  statix --help
+}
+
+assert_deadnix_installation() {
+  test -x "${nix_profile_bin}/deadnix"
+  test "$(command -v deadnix)" = "${nix_profile_bin}/deadnix"
+  deadnix --version
+}
+
 main() {
   run_assert assert_nix_installation
   run_assert assert_shared_nix_config
   run_assert assert_nix_conf_include
   run_assert assert_nix_command_available_without_extra_flags
   run_assert assert_home_manager_installation
+  run_assert assert_nixfmt_installation
+  run_assert assert_statix_installation
+  run_assert assert_deadnix_installation
 }
 
 main "$@"

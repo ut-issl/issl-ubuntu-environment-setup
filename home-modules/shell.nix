@@ -5,6 +5,8 @@
     pkgs.bash-completion
     pkgs.colordiff
     pkgs.coreutils
+    pkgs.shellcheck
+    pkgs.shfmt
   ];
 
   xdg.configFile = {

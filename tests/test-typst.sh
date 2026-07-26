@@ -14,8 +14,15 @@ assert_typst_installation() {
   typst --version
 }
 
+assert_typstyle_installation() {
+  test -x "${nix_profile_bin}/typstyle"
+  test "$(command -v typstyle)" = "${nix_profile_bin}/typstyle"
+  typstyle --version
+}
+
 main() {
   run_assert assert_typst_installation
+  run_assert assert_typstyle_installation
 }
 
 main "$@"
