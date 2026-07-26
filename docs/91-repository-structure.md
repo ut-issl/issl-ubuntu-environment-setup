@@ -23,7 +23,7 @@ At a high level:
 - It defines:
   - the upstream inputs such as `nixpkgs` and `home-manager`
   - supported systems
-  - Home Manager configurations such as `issl-common-x86_64-linux`
+  - Home Manager configurations such as `issl-common-x86_64-linux` and its Zsh variant `issl-common-zsh-x86_64-linux`
   - basic checks built from those configurations
 - `flake.lock` pins dependency revisions for reproducibility.
 
@@ -31,17 +31,14 @@ At a high level:
 
 This directory contains the Home Manager modules that define the shared environment.
 
-- `main.nix` is the aggregation point.
+- `main.nix` is the aggregation point that imports the other modules.
+  - `zsh.nix` is imported only when the Zsh variant of the configuration is selected.
 - Each `*.nix` file under this directory is responsible for one area of the environment, such as:
   - `nix.nix`
   - `shell.nix`
   - `git.nix`
   - `dev.nix`
-  - `cpp.nix`
   - `python.nix`
-  - `rust.nix`
-  - `vim.nix`
-  - `zsh.nix`
 
 ### `assets/`
 
@@ -74,16 +71,17 @@ This directory contains imperative shell entry points.
 
 This directory contains shell-based validation scripts for each area of the environment.
 
-Examples:
-
-- `test-shell.sh` checks shell assets and startup file integration.
-- `test-git.sh` checks Git installation and global include behavior.
-- `test-dev.sh` checks installation of the language-agnostic development tools.
-- `test-python.sh` and `test-rust.sh` check tool installation and shared config wiring.
-- `test-cpp.sh`, `test-vim.sh`, and `test-nix.sh` check the corresponding shared setup.
+- `lib.sh` provides the shared test helpers, such as assertion logging and failure reporting.
+  Every `test-*.sh` sources it.
+- `run.sh` runs all the test scripts in order.
+- Each `test-*.sh` corresponds to the module of the same name, such as:
+  - `test-shell.sh` checks shell assets and startup file integration.
+  - `test-git.sh` checks Git installation and global include behavior.
+  - `test-dev.sh` checks installation of the language-agnostic development tools.
+  - `test-python.sh` checks tool installation and shared config wiring.
+- `pty-driver.py` drives an interactive Python REPL under a PTY for `test-python.sh`.
 
 These tests verify that the expected tools are available and that the shared assets are deployed and referenced correctly.
-`tests/run.sh` runs all of them in order.
 In GitHub Actions they run through the reusable `.github/workflows/test-environment.yaml`,
 which validates both the script-based and personal-config-repository-based setups.
 
