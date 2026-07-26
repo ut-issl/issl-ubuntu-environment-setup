@@ -115,7 +115,7 @@ Validate a change in three steps:
 first run the pre-commit hooks, then confirm that it evaluates and builds,
 and finally inspect what it actually produces.
 
-Both the hooks and Nix read this repository through Git, so stage a new file before you validate:
+Nix reads this repository through Git, so stage a new file before you validate:
 
 ```console
 git add -N <new files>
@@ -131,8 +131,8 @@ and a new test is silently left out.
    prek run --files <changed files>
    ```
 
-   This formats the changed files and runs the linters on them.
-   For Nix files, that means nixfmt, deadnix, and statix.
+   This applies the formatters and the linters to the changed files.
+   For Nix files, nixfmt formats the changed files, while deadnix and statix check the whole repository.
    See [Contribution Guidelines](93-contribution-guidelines.md) for how to install the hooks.
 
 2. Run the checks:
