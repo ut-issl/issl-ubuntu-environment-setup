@@ -589,6 +589,7 @@ jobs:
               -f=rdjson \
               -name=ruff \
               -reporter=github-pr-review \
+              -filter-mode=nofilter \
               -fail-level=warning \
               -tee || reviewdog_rc=$?
           if [ $ruff_rc -ne 0 ] && [ ! -s /tmp/ruff-report.json ]; then
