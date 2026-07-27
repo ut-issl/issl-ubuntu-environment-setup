@@ -1,3 +1,4 @@
+required-version = ">=0.16"
 target-version = "py314"
 line-length = 120
 indent-width = 4
