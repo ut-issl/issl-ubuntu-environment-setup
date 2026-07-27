@@ -118,7 +118,7 @@ _ensure_history_dir()
 if not _will_use_pyrepl():
     _enable_completion()
     _set_colored_prompts()
-    if sys.version_info < (3, 13):  # noqa: UP036
+    if sys.version_info < (3, 13):
         _enable_history()
     elif _is_libedit():
         _redirect_history_for_libedit()
