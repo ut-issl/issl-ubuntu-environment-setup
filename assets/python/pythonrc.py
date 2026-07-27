@@ -9,11 +9,9 @@ from pprint import pprint
 
 
 def _will_use_pyrepl() -> bool:
-    if sys.version_info < (3, 13):
-        return False
     if os.environ.get("PYTHON_BASIC_REPL"):
         return False
-    if not sys.stdin.isatty():
+    if sys.stdin is None or not sys.stdin.isatty():
         return False
     try:
         from _pyrepl.main import CAN_USE_PYREPL  # type: ignore[import-not-found]
@@ -28,8 +26,9 @@ def _is_libedit() -> bool:
         import readline
     except ImportError:
         return False
-    if sys.version_info >= (3, 13):
-        return getattr(readline, "backend", "") == "editline"
+    backend = getattr(readline, "backend", None)
+    if backend is not None:
+        return backend == "editline"
     return "libedit" in getattr(readline, "__doc__", "")
 
 
@@ -75,7 +74,7 @@ def _enable_history() -> None:
     if os.path.exists(histfile):
         try:
             readline.read_history_file(histfile)
-        except Exception:
+        except OSError:
             return
 
     readline.set_history_length(10_000)
@@ -83,8 +82,8 @@ def _enable_history() -> None:
     def save_history() -> None:
         try:
             readline.write_history_file(histfile)
-        except Exception:
-            pass
+        except OSError:
+            return
 
     atexit.register(save_history)
 
@@ -119,7 +118,7 @@ _ensure_history_dir()
 if not _will_use_pyrepl():
     _enable_completion()
     _set_colored_prompts()
-    if sys.version_info < (3, 13):
+    if sys.version_info < (3, 13):  # noqa: UP036
         _enable_history()
     elif _is_libedit():
         _redirect_history_for_libedit()
