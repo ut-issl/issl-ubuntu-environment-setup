@@ -111,6 +111,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
+          filter_mode: nofilter
           fail_level: error
 
       - name: Run zizmor
@@ -284,6 +285,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
+          filter_mode: nofilter
           fail_level: error
           pattern: |
             *.sh
@@ -384,6 +386,7 @@ jobs:
               -efm="%f:%l %m" \
               -name=markdownlint \
               -reporter=github-pr-review \
+              -filter-mode=nofilter \
               -fail-level=error || reviewdog_rc=$?
           if [ $markdownlint_rc -ne 0 ] && ! grep -Eq '^[^:]+:[0-9]+(:[0-9]+)? ' /tmp/markdownlint-report.txt; then
             echo "::error title=markdownlint::markdownlint failed before producing parseable diagnostics"
@@ -484,6 +487,7 @@ jobs:
               -efm="%f:%l:%c: %t: %m" \
               -name=tombi-lint \
               -reporter=github-pr-review \
+              -filter-mode=nofilter \
               -fail-level=error || reviewdog_rc=$?
           if [ $lint_rc -ne 0 ] && [ ! -s /tmp/tombi-lint-report.efm.txt ]; then
             echo "::error title=tombi::tombi lint failed before producing parseable diagnostics"
@@ -540,6 +544,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
+          filter_mode: nofilter
           fail_level: error
           yamllint_flags: .
 
@@ -589,6 +594,7 @@ jobs:
               -f=rdjson \
               -name=ruff \
               -reporter=github-pr-review \
+              -filter-mode=nofilter \
               -fail-level=warning \
               -tee || reviewdog_rc=$?
           if [ $ruff_rc -ne 0 ] && [ ! -s /tmp/ruff-report.json ]; then
@@ -658,6 +664,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
+          filter_mode: nofilter
           fail_level: error
           typos_flags: .
 
