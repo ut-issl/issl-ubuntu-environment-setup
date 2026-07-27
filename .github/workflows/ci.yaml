@@ -582,33 +582,15 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           ruff_rc=0
-          uvx --from "ruff==0.16.0" ruff check . --output-format=json > /tmp/ruff-report.json || ruff_rc=$?
+          uvx --from "ruff==0.16.0" ruff check . --output-format=rdjson > /tmp/ruff-report.json || ruff_rc=$?
           reviewdog_rc=0
-          jq -c '
-            .[] |
-            {
-              source: {name: "ruff"},
-              severity: "ERROR",
-              message: (.message + " (" + .code + ")"),
-              location: {
-                path: .filename,
-                range: {
-                  start: {line: .location.row, column: .location.column},
-                  end: {
-                    line: (.end_location.row // .location.row),
-                    column: (.end_location.column // .location.column)
-                  }
-                }
-              }
-            }
-          ' /tmp/ruff-report.json > /tmp/ruff-rdjsonl.txt || true
-          reviewdog < /tmp/ruff-rdjsonl.txt \
-              -f=rdjsonl \
+          reviewdog < /tmp/ruff-report.json \
+              -f=rdjson \
               -name=ruff \
               -reporter=github-pr-review \
-              -fail-level=error \
+              -fail-level=warning \
               -tee || reviewdog_rc=$?
-          if [ $ruff_rc -ne 0 ] && [ ! -s /tmp/ruff-rdjsonl.txt ]; then
+          if [ $ruff_rc -ne 0 ] && [ ! -s /tmp/ruff-report.json ]; then
             echo "::error title=ruff::ruff failed before producing diagnostics for reviewdog"
             exit $ruff_rc
           fi
