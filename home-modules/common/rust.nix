@@ -11,7 +11,7 @@
     pkgs.cargo-dist
   ];
 
-  xdg.configFile."issl/rust/config.toml".source = ../assets/rust/config.toml;
+  xdg.configFile."issl/rust/config.toml".source = ../../assets/rust/config.toml;
 
   home.activation.rustupEnsureDefaultToolchain = lib.hm.dag.entryAfter [ "installPackages" ] ''
     rustup=${pkgs.rustup}/bin/rustup

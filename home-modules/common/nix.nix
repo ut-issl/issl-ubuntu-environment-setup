@@ -9,7 +9,7 @@
     pkgs.statix
   ];
 
-  xdg.configFile."issl/nix/nix.conf".source = ../assets/nix/nix.conf;
+  xdg.configFile."issl/nix/nix.conf".source = ../../assets/nix/nix.conf;
 
   programs.home-manager.enable = true;
 }

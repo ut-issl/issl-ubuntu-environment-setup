@@ -10,6 +10,6 @@
       pkgs.pkg-config
     ];
 
-    file.".clang-format".source = ../assets/cpp/clang-format.yaml;
+    file.".clang-format".source = ../../assets/cpp/clang-format.yaml;
   };
 }

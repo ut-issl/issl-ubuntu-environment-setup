@@ -22,6 +22,10 @@
       ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
       mkPkgs = system: import nixpkgs { inherit system; };
+      homeModules = rec {
+        issl-common = ./home-modules;
+        default = issl-common;
+      };
       requireEnv =
         name:
         let
@@ -43,14 +47,12 @@
         in
         home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          extraSpecialArgs = {
-            inherit enableZsh;
-          };
           modules = [
-            ./home-modules/main.nix
+            homeModules.default
           ]
           ++ [
             {
+              issl.zsh.enable = enableZsh;
               home = {
                 inherit username homeDirectory;
                 stateVersion = "26.05";
@@ -64,6 +66,8 @@
         default = home-manager.packages.${system}.home-manager;
         inherit (home-manager.packages.${system}) home-manager;
       });
+
+      inherit homeModules;
 
       homeConfigurations = {
         issl-common-x86_64-linux = mkHomeConfiguration {

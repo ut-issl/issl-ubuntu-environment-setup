@@ -8,5 +8,5 @@
     pkgs.zizmor
   ];
 
-  xdg.configFile."issl/git/.gitconfig".source = ../assets/git/.gitconfig;
+  xdg.configFile."issl/git/.gitconfig".source = ../../assets/git/.gitconfig;
 }

@@ -69,26 +69,27 @@ For example:
 {
   home.packages = [ pkgs.foo ];
 
-  home.file.".foo.rc".source = ../assets/foo/foo.rc;
-  xdg.configFile."issl/foo/config.toml".source = ../assets/foo/config.toml;
+  home.file.".foo.rc".source = ../../assets/foo/foo.rc;
+  xdg.configFile."issl/foo/config.toml".source = ../../assets/foo/config.toml;
 }
 ```
 
-`home-modules/nix.nix` sets `nixpkgs.config.allowUnfree = true` for the whole configuration,
+`home-modules/common/nix.nix` sets `nixpkgs.config.allowUnfree = true` for the whole configuration,
 so a module may add a package with an unfree license.
 Because that setting also applies to everyone who imports this repository,
 state in the pull request why the package is worth distributing to all users under its license terms.
 
 When updating or adding a module:
 
-1. Update an existing file under `home-modules/`, or create a new one if needed.
-2. Update `home-modules/main.nix` if you added a new module.
-3. Add or update assets under `assets/` if the module needs them.
-4. Update `scripts/apply.sh` if imperative wiring is required.
-5. Add or extend tests under `tests/`, and update `tests/run.sh` if you add a new test script.
+1. Update an existing file under `home-modules/common/`, or create a new one if needed.
+2. Add or update assets under `assets/` if the module needs them.
+3. Update `scripts/apply.sh` if imperative wiring is required.
+4. Add or extend tests under `tests/`, and update `tests/run.sh` if you add a new test script.
 
-If you add a new module, import it from `home-modules/main.nix`.
-Add it conditionally if it should only be enabled in specific situations, similar to `zsh.nix`.
+A new file under `home-modules/common/` is picked up automatically.
+It must be tracked by Git, because a flake only sees tracked files.
+If a module should only take effect in specific situations,
+declare an option for it and gate its `config` with `lib.mkIf`, following `common/zsh.nix`.
 
 ## When `apply.sh` Needs Changes
 
