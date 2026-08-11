@@ -74,6 +74,6 @@ jobs:
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
       user-repository: ut-issl/personal-nix-config-template
-      user-ref: 6de39ecacd7a7501c1420a44448d95494c707316 # refactor/adopt-shared-home-modules-output
+      user-ref: 31b736aef12a9fb34d78297b8e208df9ee496295 # main
       override-issl-input: true
       timeout-minutes: 15
