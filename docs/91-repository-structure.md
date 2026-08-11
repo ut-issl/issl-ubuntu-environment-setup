@@ -23,6 +23,7 @@ At a high level:
 - It defines:
   - the upstream inputs such as `nixpkgs` and `home-manager`
   - supported systems
+  - the shared Home Manager module exported as `homeModules.issl-common`, aliased as `homeModules.default`
   - Home Manager configurations such as `issl-common-x86_64-linux` and its Zsh variant `issl-common-zsh-x86_64-linux`
   - basic checks built from those configurations
 - `flake.lock` pins dependency revisions for reproducibility.
@@ -31,14 +32,14 @@ At a high level:
 
 This directory contains the Home Manager modules that define the shared environment.
 
-- `main.nix` is the aggregation point that imports the other modules.
-  - `zsh.nix` is imported only when the Zsh variant of the configuration is selected.
-- Each `*.nix` file under this directory is responsible for one area of the environment, such as:
+- `default.nix` is the aggregation point that imports every module under `common/` automatically.
+- Each `*.nix` file under `common/` is responsible for one area of the environment, such as:
   - `nix.nix`
   - `shell.nix`
   - `git.nix`
   - `dev.nix`
   - `python.nix`
+- `common/zsh.nix` takes effect only when the `issl.zsh.enable` option is set.
 
 ### `assets/`
 

@@ -39,9 +39,10 @@ Ask only if the request is ambiguous.
 
 Before adding anything, scan the actual repository state (not the docs, which may lag):
 
-- `home-modules/` for existing modules that already cover the tool or area.
-- `home-modules/main.nix` imports to understand how modules are organized
-  and whether they are unconditional or conditional (e.g. `lib.optional enableZsh`).
+- `home-modules/common/` for existing modules that already cover the tool or area.
+  Every file there is imported automatically by `home-modules/default.nix`.
+- `home-modules/common/zsh.nix` for how a module makes itself conditional
+  by declaring an option and gating its `config` with `lib.mkIf`.
 - `assets/` for existing configuration files.
 - `tests/` for existing test coverage.
 - `scripts/apply.sh` for existing imperative wiring.
@@ -54,7 +55,7 @@ For a new tool:
 
 - Look the package up in nixpkgs at the pinned revision:
   read the `nixpkgs` entry's `locked.rev` from `flake.lock` and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
-- `home-modules/nix.nix` sets `nixpkgs.config.allowUnfree = true`,
+- `home-modules/common/nix.nix` sets `nixpkgs.config.allowUnfree = true`,
   so an unfree package can be added without a flake change.
   Because that setting also applies to every personal config repository importing this one,
   check the package's license terms and get an explicit yes from the user before adding one,
@@ -74,17 +75,16 @@ to preserve user flexibility and avoid conflicts with both setup modes.
 - **Existing module covers this area**: update that module.
 - **New tool with no settings**: add to `home.packages` in an existing module
   that covers the same area, or create a new module if it represents a distinct area.
-- **New tool with shared configuration**: create a dedicated module `home-modules/<tool>.nix`
+- **New tool with shared configuration**: create a dedicated module `home-modules/common/<tool>.nix`
   and place the config file under `assets/<tool>/`.
   Use `xdg.configFile."issl/<tool>/..."` to deploy shared configuration
   under the ISSL config directory,
   or `home.file` when the config must live at a fixed path outside `~/.config/issl/`.
-- **New module**: import it from `home-modules/main.nix`.
-  Add it conditionally with `lib.optional` if it should only be enabled
-  in specific configurations, following the pattern of `zsh.nix`.
-  Reuse the existing `enableZsh` flag where it fits;
-  introducing a new condition also requires changes to `flake.nix`
-  (`extraSpecialArgs`, configurations, checks) and the CI test matrix —
+- **New module**: create the file under `home-modules/common/` and track it with Git.
+  It is imported automatically.
+  Reuse the existing `issl.zsh.enable` option where it fits;
+  introducing a new condition means declaring another option and gating `config` with `lib.mkIf`,
+  and it also requires changes to `flake.nix` (configurations, checks) and the CI test matrix —
   confirm with the user before going that route.
 
 If the change also requires imperative wiring
@@ -131,7 +131,7 @@ If not, create a new `tests/test-<tool>.sh` following the existing pattern:
 4. Make the script executable.
 5. Register the new test script in `tests/run.sh` by adding its name to the loop list.
 
-For a module imported conditionally (like `zsh.nix`),
+For a module that takes effect only in specific configurations (like `zsh.nix`),
 gate its assertions on the corresponding environment variable
 inside the relevant test script (see `ISSL_ENABLE_ZSH` in `test-shell.sh`)
 instead of adding a separate unconditional script.
