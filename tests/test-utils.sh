@@ -8,6 +8,12 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
+assert_fd_installation() {
+  test -x "${nix_profile_bin}/fd"
+  test "$(command -v fd)" = "${nix_profile_bin}/fd"
+  fd --version
+}
+
 assert_jq_installation() {
   test -x "${nix_profile_bin}/jq"
   test "$(command -v jq)" = "${nix_profile_bin}/jq"
@@ -26,6 +32,12 @@ assert_pdfinfo_installation() {
   pdfinfo -v
 }
 
+assert_ripgrep_installation() {
+  test -x "${nix_profile_bin}/rg"
+  test "$(command -v rg)" = "${nix_profile_bin}/rg"
+  rg --version
+}
+
 assert_tree_installation() {
   test -x "${nix_profile_bin}/tree"
   test "$(command -v tree)" = "${nix_profile_bin}/tree"
@@ -33,9 +45,11 @@ assert_tree_installation() {
 }
 
 main() {
+  run_assert assert_fd_installation
   run_assert assert_jq_installation
   run_assert assert_pdftotext_installation
   run_assert assert_pdfinfo_installation
+  run_assert assert_ripgrep_installation
   run_assert assert_tree_installation
 }
 
