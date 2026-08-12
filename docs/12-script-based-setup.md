@@ -77,13 +77,13 @@ If you just want to try additional tools without moving to a personal config rep
 Install a package:
 
 ```bash
-nix profile install nixpkgs#jq
+nix profile install nixpkgs#pandoc
 ```
 
 Install multiple packages:
 
 ```bash
-nix profile install nixpkgs#ripgrep nixpkgs#fd nixpkgs#bat
+nix profile install nixpkgs#elan nixpkgs#quint nixpkgs#z3
 ```
 
 List installed profile packages:
@@ -95,7 +95,7 @@ nix profile list
 Remove a package:
 
 ```bash
-nix profile remove nixpkgs#jq
+nix profile remove nixpkgs#pandoc
 ```
 
 Upgrade installed profile packages:
