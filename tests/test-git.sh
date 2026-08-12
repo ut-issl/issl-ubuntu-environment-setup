@@ -21,6 +21,12 @@ assert_gh_installation() {
   gh --version
 }
 
+assert_act_installation() {
+  test -x "${nix_profile_bin}/act"
+  test "$(command -v act)" = "${nix_profile_bin}/act"
+  act --version
+}
+
 assert_actionlint_installation() {
   test -x "${nix_profile_bin}/actionlint"
   test "$(command -v actionlint)" = "${nix_profile_bin}/actionlint"
@@ -67,6 +73,7 @@ assert_git_identity() {
 main() {
   run_assert assert_git_installation
   run_assert assert_gh_installation
+  run_assert assert_act_installation
   run_assert assert_actionlint_installation
   run_assert assert_zizmor_installation
   run_assert assert_shared_git_config
