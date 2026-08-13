@@ -89,8 +89,7 @@ to preserve user flexibility and avoid conflicts with both setup modes.
 - **A Home Manager option rather than a package**: a module may set options directly,
   as `common/platform.nix` does for `targets.genericLinux`.
   Use `lib.mkDefault` for an option a personal config repository should be able to override,
-  and a plain definition for one that has to hold for everyone,
-  since two plain definitions of the same option conflict instead of one overriding the other.
+  and a plain definition for one that has to hold for everyone.
   Choose a default that asks nothing of the user.
 - **New module**: create the file under `home-modules/common/` and track it with Git.
   It is imported automatically.
