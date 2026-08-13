@@ -74,10 +74,30 @@ For example:
 }
 ```
 
+A module may also set Home Manager options directly, as `common/platform.nix` does for `targets.genericLinux`.
+Use `lib.mkDefault` for an option a personal config repository should be able to override,
+and a plain definition for one that has to hold for everyone, as `programs.home-manager.enable` does in `common/nix.nix`.
+Two plain definitions of an option carry equal priority; a boolean then conflicts instead of one overriding the other.
+A mergeable option such as `nixpkgs.config` combines them instead, so a personal definition can still merge into it.
+
+Choose a default that asks nothing of the user:
+`targets.genericLinux.gpu.enable` is off because enabling it asks every machine for a privileged one-time setup.
+
 `home-modules/common/nix.nix` sets `nixpkgs.config.allowUnfree = true` for the whole configuration,
 so a module may add a package with an unfree license.
 Because that setting also applies to everyone who imports this repository,
 state in the pull request why the package is worth distributing to all users under its license terms.
+
+The shared environment installs no graphical application, and a new one does not belong here either.
+A Nix build often loses host integration that the package of the distribution keeps, in ways that vary by toolkit.
+An AppArmor profile attaches to an executable path.
+A Chromium- or Electron-based application built by Nix never matches the profile that grants it a user namespace,
+so it fails to start on Ubuntu 24.04 and later, where unprivileged user namespaces are restricted by default.
+The ibus input methods do not reach a Nix-built GTK3 application,
+and OpenGL rendering needs `targets.genericLinux.gpu.enable`, which is off here.
+Where such an application belongs instead depends on the host integration it needs.
+[Package management practices](13-package-management-practices.md) covers both cases:
+a personal config repository, and the distribution when that integration cannot be given up.
 
 When updating or adding a module:
 

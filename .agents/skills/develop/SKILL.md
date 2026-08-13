@@ -53,6 +53,12 @@ If there is already a related module or asset, update it rather than creating a 
 
 For a new tool:
 
+- Settle first whether the package is a graphical application, and stop there if it is:
+  say that it does not belong in the shared environment, and do not go on to the license check or to a placement.
+  `docs/92-updating-or-adding-an-asset-or-module.md` § "Updating or Adding a Module" has the reasons.
+  Point the user to `docs/13-package-management-practices.md` rather than to a particular alternative:
+  whether such an application can live in a personal config repository
+  or has to stay with the distribution depends on the host integration it needs.
 - Look the package up in nixpkgs at the pinned revision:
   read the `nixpkgs` entry's `locked.rev` from `flake.lock` and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
 - `home-modules/common/nix.nix` sets `nixpkgs.config.allowUnfree = true`,
@@ -80,6 +86,11 @@ to preserve user flexibility and avoid conflicts with both setup modes.
   Use `xdg.configFile."issl/<tool>/..."` to deploy shared configuration
   under the ISSL config directory,
   or `home.file` when the config must live at a fixed path outside `~/.config/issl/`.
+- **A Home Manager option rather than a package**: a module may set options directly,
+  as `common/platform.nix` does for `targets.genericLinux`.
+  Use `lib.mkDefault` for an option a personal config repository should be able to override,
+  and a plain definition for one that has to hold for everyone.
+  Choose a default that asks nothing of the user.
 - **New module**: create the file under `home-modules/common/` and track it with Git.
   It is imported automatically.
   Reuse the existing `issl.zsh.enable` option where it fits;
