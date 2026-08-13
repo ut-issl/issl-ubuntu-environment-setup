@@ -93,7 +93,7 @@ A Nix build often loses host integration that the package of the distribution ke
 An AppArmor profile attaches to an executable path.
 A Chromium- or Electron-based application built by Nix never matches the profile that grants it a user namespace,
 so it fails to start on Ubuntu 24.04 and later, where unprivileged user namespaces are restricted by default.
-The ibus input methods do not reach a Nix-built GTK3 or Qt application,
+The ibus input methods do not reach a Nix-built GTK3 application,
 and OpenGL rendering needs `targets.genericLinux.gpu.enable`, which is off here.
 Where such an application belongs instead depends on the host integration it needs.
 [Package management practices](13-package-management-practices.md) covers both cases:
