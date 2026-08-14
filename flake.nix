@@ -102,6 +102,18 @@
             homeDirectory = "/tmp/issl-home";
             enableZsh = true;
           }).activationPackage;
+        gpu-opt-in =
+          let
+            cfg =
+              (mkHomeConfiguration {
+                inherit system;
+                username = "issl";
+                homeDirectory = "/tmp/issl-home";
+              }).config;
+          in
+          assert nixpkgs.lib.assertMsg (!cfg.targets.genericLinux.gpu.enable)
+            "targets.genericLinux.gpu.enable must stay off in the shared environment: enabling it asks every host for a privileged one-time setup.";
+          (mkPkgs system).emptyFile;
       });
     };
 }
