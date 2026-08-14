@@ -123,7 +123,8 @@ For `scripts/apply.sh`, if changes are needed:
 Every module should have corresponding test coverage under `tests/`.
 
 Tests run in CI against a freshly applied environment
-(`.github/workflows/test-environment.yaml` sets `HOME_DIR`/`CONFIG_DIR` and runs `tests/run.sh`).
+(the `script-based` job of `.github/workflows/test.yaml` and the reusable
+`.github/workflows/test-config-repository.yaml` both set `HOME_DIR`/`CONFIG_DIR` and run `tests/run.sh`).
 Do not try to run them locally unless this machine has the shared environment applied;
 local validation is prek plus the Nix validation in step 7,
 which can confirm installed binaries and deployed files without applying anything.

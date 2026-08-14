@@ -83,8 +83,13 @@ This directory contains shell-based validation scripts for each area of the envi
 - `pty-driver.py` drives an interactive Python REPL under a PTY for `test-python.sh`.
 
 These tests verify that the expected tools are available and that the shared assets are deployed and referenced correctly.
-In GitHub Actions they run through the reusable `.github/workflows/test-environment.yaml`,
-which validates both the script-based and personal-config-repository-based setups.
+In GitHub Actions they run from two places.
+The script-based setup is exercised by the `script-based` job of `.github/workflows/test.yaml`,
+which has only this repository as its caller and therefore lives inline.
+The config-repository-based setup is exercised by the reusable `.github/workflows/test-config-repository.yaml`,
+which applies one flake target of one personal config repository and then runs these tests against the result.
+Every axis it is tested over — the OS, the flake target — belongs to the matrix of the calling workflow,
+so this repository, the template, and each personal config repository decide their own coverage.
 
 ### `docs/`
 
