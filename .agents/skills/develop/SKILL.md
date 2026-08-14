@@ -90,7 +90,7 @@ to preserve user flexibility and avoid conflicts with both setup modes.
   as `common/platform.nix` does for `targets.genericLinux`.
   Use `lib.mkDefault` for an option a personal config repository should be able to override,
   and a plain definition for one that has to hold for everyone.
-  Choose a default that asks nothing of the user.
+  Choose a default that asks nothing of the user, and within that constraint follow what most users want.
 - **New module**: create the file under `home-modules/common/` and track it with Git.
   It is imported automatically.
   Reuse the existing `issl.zsh.enable` option where it fits;

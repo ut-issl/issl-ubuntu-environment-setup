@@ -6,7 +6,16 @@
 }:
 
 {
-  options.issl.zsh.enable = lib.mkEnableOption "the shared zsh configuration";
+  options.issl.zsh.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    example = false;
+    description = ''
+      Whether to enable the shared zsh configuration.
+      Set it to `false` for a Bash-only environment;
+      the shared bash configuration applies either way.
+    '';
+  };
 
   config = lib.mkIf config.issl.zsh.enable {
     home.packages = [ pkgs.zsh ];

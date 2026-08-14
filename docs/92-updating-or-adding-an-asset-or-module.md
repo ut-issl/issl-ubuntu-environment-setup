@@ -82,6 +82,8 @@ A mergeable option such as `nixpkgs.config` combines them instead, so a personal
 
 Choose a default that asks nothing of the user:
 `targets.genericLinux.gpu.enable` is off because enabling it asks every machine for a privileged one-time setup.
+Within that constraint, follow what most users want:
+`issl.zsh.enable` is on because most users here use zsh, and turning it off costs a single option.
 
 `home-modules/common/nix.nix` sets `nixpkgs.config.allowUnfree = true` for the whole configuration,
 so a module may add a package with an unfree license.
@@ -162,14 +164,14 @@ and a new test is silently left out.
    nix flake check --show-trace
    ```
 
-   This builds the activation packages for both the Bash-only and the Zsh configuration,
+   This builds the activation packages for both the default and the Bash-only configuration,
    and catches Nix evaluation errors and build failures.
 
 3. Build the activation packages to inspect the result:
 
    ```console
    nix build .#checks.x86_64-linux.home --out-link result-home
-   nix build .#checks.x86_64-linux.home-zsh --out-link result-home-zsh
+   nix build .#checks.x86_64-linux.home-bash-only --out-link result-home-bash-only
    ```
 
    Replace `x86_64-linux` with `aarch64-linux` to inspect the result for that architecture.

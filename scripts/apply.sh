@@ -223,7 +223,6 @@ ensure_bash_startup_files() {
 
 should_enable_zsh() {
   local current_shell_name=""
-  local response=""
 
   if [ -n "${issl_enable_zsh}" ]; then
     if is_yes "${issl_enable_zsh}"; then
@@ -241,12 +240,11 @@ should_enable_zsh() {
     return 0
   fi
 
-  if [ ! -t 0 ]; then
+  if ! is_interactive; then
     return 1
   fi
 
-  read -r -p "Enable shared zsh configuration as well? [y/N] " response
-  is_yes "${response}"
+  prompt_yes_no "Enable shared zsh configuration as well? [Y/n]" yes
 }
 
 zshenv_defines_zdotdir() {
@@ -633,9 +631,9 @@ main() {
 
   ensure_home_manager_profile_dir
   if [ "${zsh_enabled}" = "1" ]; then
-    home_configuration_name="issl-common-zsh-${current_system}"
-  else
     home_configuration_name="issl-common-${current_system}"
+  else
+    home_configuration_name="issl-common-bash-only-${current_system}"
   fi
 
   if [ "${zsh_enabled}" = "0" ]; then

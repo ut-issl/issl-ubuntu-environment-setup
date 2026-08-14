@@ -53,6 +53,19 @@ bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/relea
 
 Set `ISSL_INSTALL_DOCKER=no` to skip the prompt explicitly.
 
+### Zsh in a Non-Interactive Setup
+
+Zsh is enabled without asking when it is already your login shell.
+Otherwise interactive setup asks, with yes as the default answer,
+so nothing has to be set and this section does not concern the usual setup.
+
+Non-interactive setup cannot ask, so it skips Zsh unless you say so:
+
+```bash
+ISSL_ENABLE_ZSH=yes \
+bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/releases/latest/download/setup.sh)
+```
+
 ## If You Need Additional Tools or Settings
 
 This workflow assumes the shared setup is usually sufficient.

@@ -24,7 +24,7 @@ At a high level:
   - the upstream inputs such as `nixpkgs` and `home-manager`
   - supported systems
   - the shared Home Manager module exported as `homeModules.issl-common`, aliased as `homeModules.default`
-  - Home Manager configurations such as `issl-common-x86_64-linux` and its Zsh variant `issl-common-zsh-x86_64-linux`
+  - Home Manager configurations such as `issl-common-x86_64-linux` and its Bash-only variant `issl-common-bash-only-x86_64-linux`
   - basic checks built from those configurations
 - `flake.lock` pins dependency revisions for reproducibility.
 
@@ -39,7 +39,7 @@ This directory contains the Home Manager modules that define the shared environm
   - `git.nix`
   - `dev.nix`
   - `python.nix`
-- `common/zsh.nix` takes effect only when the `issl.zsh.enable` option is set.
+- `common/zsh.nix` takes effect unless the `issl.zsh.enable` option is set to `false`.
 
 ### `assets/`
 
