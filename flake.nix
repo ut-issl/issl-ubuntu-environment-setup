@@ -40,7 +40,7 @@
           system,
           username ? requireEnv "USER",
           homeDirectory ? requireEnv "HOME",
-          enableZsh ? false,
+          enableZsh ? true,
         }:
         let
           pkgs = mkPkgs system;
@@ -72,17 +72,19 @@
       homeConfigurations = {
         issl-common-x86_64-linux = mkHomeConfiguration {
           system = "x86_64-linux";
+          enableZsh = true;
         };
         issl-common-aarch64-linux = mkHomeConfiguration {
           system = "aarch64-linux";
+          enableZsh = true;
         };
-        issl-common-zsh-x86_64-linux = mkHomeConfiguration {
+        issl-common-bash-only-x86_64-linux = mkHomeConfiguration {
           system = "x86_64-linux";
-          enableZsh = true;
+          enableZsh = false;
         };
-        issl-common-zsh-aarch64-linux = mkHomeConfiguration {
+        issl-common-bash-only-aarch64-linux = mkHomeConfiguration {
           system = "aarch64-linux";
-          enableZsh = true;
+          enableZsh = false;
         };
       };
 
@@ -94,13 +96,14 @@
             inherit system;
             username = "issl";
             homeDirectory = "/tmp/issl-home";
+            enableZsh = true;
           }).activationPackage;
-        home-zsh =
+        home-bash-only =
           (mkHomeConfiguration {
             inherit system;
             username = "issl";
             homeDirectory = "/tmp/issl-home";
-            enableZsh = true;
+            enableZsh = false;
           }).activationPackage;
         gpu-opt-in =
           let
