@@ -171,14 +171,14 @@ jobs:
           - ubuntu-26.04
         flake-target:
           - user
+          - user-desktop
     uses: ./.github/workflows/test-config-repository.yaml
     with:
       os: ${{ matrix.os }}
       flake-target: ${{ matrix.flake-target }}
-      zsh-enabled: false
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
       user-repository: ut-issl/personal-nix-config-template
-      user-ref: 653d28265b0a4b42f3a7b0eb80c183b22d9ae4ef # main
+      user-ref: 3e4b6295dffbc2d7ccf8419c5ae06aea6c962577 # main
       override-issl-input: true
       timeout-minutes: 15
