@@ -171,11 +171,11 @@ jobs:
           - ubuntu-26.04
         flake-target:
           - user
+          - user-desktop
     uses: ./.github/workflows/test-config-repository.yaml
     with:
       os: ${{ matrix.os }}
       flake-target: ${{ matrix.flake-target }}
-      zsh-enabled: false
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
       user-repository: ut-issl/personal-nix-config-template
