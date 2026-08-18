@@ -213,7 +213,7 @@ jobs:
       - name: Run flake check
         run: |
           if [ -f flake.nix ]; then
-            nix flake check --show-trace
+            nix flake check --all-systems --show-trace
           else
             echo "No flake.nix found. Skipping flake check."
           fi
