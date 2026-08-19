@@ -81,7 +81,8 @@ Open a pull request, or contact the maintainers if you are not going to prepare 
 If the tool or setting is only for your own use, but you still want to restore it across machines or after reinstallation,
 move to a personal Nix configuration repository with Home Manager.
 
-TBW
+Nix is already installed, and the packages you added with `nix profile` can be carried over.
+See [the migration steps](11-setup-with-a-personal-config-repository.md#migrating-from-the-script-based-setup).
 
 ### 3. If it is personal, and reproducibility is not necessary
 
@@ -108,7 +109,7 @@ nix profile list
 Remove a package:
 
 ```bash
-nix profile remove nixpkgs#pandoc
+nix profile remove pandoc
 ```
 
 Upgrade installed profile packages:
