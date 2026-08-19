@@ -109,7 +109,7 @@ nix profile list
 Remove a package:
 
 ```bash
-nix profile remove nixpkgs#pandoc
+nix profile remove pandoc
 ```
 
 Upgrade installed profile packages:
