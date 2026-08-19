@@ -1,8 +1,18 @@
 # Script-Based Setup
 
-This guide covers the quick-setup workflow using the setup script provided by this repository.
+This guide covers the workflow of setting up the shared environment with the setup script provided by this repository.
 
-## Initial Setup
+## What This Path Gives You
+
+The setup script applies the shared ISSL environment to your user account in one run.
+There is no repository of your own to create or maintain.
+This path assumes the shared environment is mostly sufficient, and that installing an extra tool is an occasional need.
+
+Choose this path for a shared PC, or when you do not need your personal customization to be reproducible.
+If you want your own tools and settings versioned and restored on any machine,
+[setup with a personal config repository](11-setup-with-a-personal-config-repository.md) is the better fit.
+
+## Getting Started
 
 Run:
 
@@ -68,12 +78,11 @@ bash <(curl -fsSL https://github.com/ut-issl/issl-ubuntu-environment-setup/relea
 
 ## If You Need Additional Tools or Settings
 
-This workflow assumes the shared setup is usually sufficient.
-If you later need something more, choose one of the following paths.
+If you later need something more than the shared environment provides, choose one of the following paths.
 
 ### 1. If it should be shared within ISSL
 
-If the tool or setting should be part of the standard ISSL environment, please reflect it in this repository.
+If the tool or setting should be part of the standard ISSL environment, reflect it in this repository.
 Open a pull request, or contact the maintainers if you are not going to prepare the change yourself.
 
 ### 2. If it is personal, but you want reproducibility
