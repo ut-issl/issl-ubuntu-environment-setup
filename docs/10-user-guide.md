@@ -11,5 +11,4 @@ This repository can be used in two ways:
 
 2. Use the setup script provided by this repository.
    - Recommended for shared PCs or users who do not need reproducible personal customization.
-   - This approach assumes the shared setup is mostly sufficient, and extra tool installation is occasional.
    - See [script-based setup](12-script-based-setup.md).
