@@ -188,7 +188,9 @@ create_github_ssh_key() {
 
   ensure_ssh_directory
 
-  read -r -p "Enter an email/comment for the GitHub SSH key (optional): " key_comment
+  if ! read -r -p "Enter an email/comment for the GitHub SSH key (optional): " key_comment; then
+    echo
+  fi
 
   if [ -n "${key_comment}" ]; then
     nix_with_openssh ssh-keygen -t ed25519 -C "${key_comment}" -f "${github_key_path}"
