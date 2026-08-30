@@ -74,6 +74,11 @@ For example:
 }
 ```
 
+`flake.nix` declares both `x86_64-linux` and `aarch64-linux`,
+so a package that is meaningful on only one of them needs a guard on the platform,
+as `common/cpp.nix` does with `pkgs.stdenv.hostPlatform.isx86_64` for the multilib GCC.
+An unguarded package that fails to evaluate on the other architecture breaks every output of that system.
+
 A module may also set Home Manager options directly, as `common/platform.nix` does for `targets.genericLinux`.
 Use `lib.mkDefault` for an option a personal config repository should be able to override,
 and a plain definition for one that has to hold for everyone, as `programs.home-manager.enable` does in `common/nix.nix`.
@@ -161,11 +166,14 @@ and a new test is silently left out.
 2. Run the checks:
 
    ```console
-   nix flake check --show-trace
+   nix flake check --all-systems --show-trace
    ```
 
-   This builds the activation packages for both the default and the Bash-only configuration,
+   This builds the checks of the system of this machine — the activation packages for the default
+   and the Bash-only configuration, and the assertion that the GPU option stays off —
    and catches Nix evaluation errors and build failures.
+   `--all-systems` widens the evaluation to every system declared in `flake.nix` without building more,
+   so a change that fails to evaluate on `aarch64-linux` is caught here rather than in CI.
 
 3. Build the activation packages to inspect the result:
 
