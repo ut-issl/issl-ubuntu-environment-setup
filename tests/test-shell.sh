@@ -133,7 +133,8 @@ assert_login_shell_link_targets() {
 }
 
 assert_shell_variable_is_corrected() {
-  local expected="$1"
+  local shell_bin="$1"
+  local expected="$2"
 
   env -i \
     HOME="${home_dir}" \
@@ -143,7 +144,7 @@ assert_shell_variable_is_corrected() {
     SHELL="${login_shell_link}" \
     EXPECTED_SHELL="${expected}" \
     PATH="/usr/bin:/bin" \
-    bash <<'EOF'
+    "${shell_bin}" <<'EOF'
 . "${SHELL_ENV_PATH}"
 test "${SHELL}" = "${EXPECTED_SHELL}"
 EOF
@@ -151,13 +152,14 @@ EOF
 
 assert_login_shell_is_managed_for_zsh() {
   assert_login_shell_link_targets "${nix_profile_bin}/zsh"
-  assert_shell_variable_is_corrected "${home_dir}/.nix-profile/bin/zsh"
+  assert_shell_variable_is_corrected bash "${home_dir}/.nix-profile/bin/zsh"
+  assert_shell_variable_is_corrected "${nix_profile_bin}/zsh" "${home_dir}/.nix-profile/bin/zsh"
   test -x "${nix_profile_bin}/issl-login-shell-setup"
 }
 
 assert_login_shell_is_managed_for_bash() {
   assert_login_shell_link_targets /bin/bash
-  assert_shell_variable_is_corrected /bin/bash
+  assert_shell_variable_is_corrected bash /bin/bash
   test ! -e "${nix_profile_bin}/issl-login-shell-setup"
 }
 
