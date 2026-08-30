@@ -228,7 +228,7 @@ maybe_register_login_shell() {
   fi
 
   if ! is_executable_file "${link}"; then
-    mkdir -p "$(dirname "${link}")"
+    mkdir -p "$(dirname "${link}")" || true
     ln -sfn /bin/bash "${link}" || true
   fi
 
