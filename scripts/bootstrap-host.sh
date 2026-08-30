@@ -233,7 +233,7 @@ maybe_register_login_shell() {
   fi
 
   if sudo chsh -s "${link}" "$(id -un)"; then
-    echo "Login shell set to ${link}. It resolves to bash until the first Home Manager switch."
+    echo "Login shell set to ${link}. This will apply to new login sessions."
   else
     echo "warning: failed to run chsh. You can retry manually with: sudo chsh -s ${link} $(id -un)" >&2
   fi
