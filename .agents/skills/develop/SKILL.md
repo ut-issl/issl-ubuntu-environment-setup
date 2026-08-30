@@ -41,8 +41,7 @@ Before adding anything, scan the actual repository state (not the docs, which ma
 
 - `home-modules/common/` for existing modules that already cover the tool or area.
   Every file there is imported automatically by `home-modules/default.nix`.
-- `home-modules/common/zsh.nix` for a conditional module:
-  it declares an option and gates `config` with `lib.mkIf`.
+- `home-modules/common/zsh.nix` for a conditional module: it declares an option and gates `config` with `lib.mkIf`.
   Read its `lib.mkMerge` and the forced link inside it as specific to the login shell, not as part of that pattern.
 - `assets/` for existing configuration files.
 - `tests/` for existing test coverage.
@@ -87,8 +86,7 @@ to preserve user flexibility and avoid conflicts with both setup modes.
   that covers the same area, or create a new module if it represents a distinct area.
 - **New tool with shared configuration**: create a dedicated module `home-modules/common/<tool>.nix`
   and place the config file under `assets/<tool>/`.
-  Use `xdg.configFile."issl/<tool>/..."` to deploy shared configuration
-  under the ISSL config directory,
+  Use `xdg.configFile."issl/<tool>/..."` to deploy shared configuration under the ISSL config directory,
   `xdg.stateFile."issl/..."` for a path the environment maintains rather than the user edits
   (`zsh.nix` deploys the login shell link that way),
   or `home.file` when the file must live at a fixed path outside those directories.

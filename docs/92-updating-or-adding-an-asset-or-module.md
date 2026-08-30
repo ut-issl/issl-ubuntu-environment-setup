@@ -200,9 +200,9 @@ and a new test is silently left out.
    nix flake check --all-systems --show-trace
    ```
 
-   This builds the checks of the system of this machine — the activation packages for the default
-   and the Bash-only configuration, and the assertion that the GPU option stays off —
-   and catches Nix evaluation errors and build failures.
+   This builds the checks of the system of this machine and catches Nix evaluation errors and build failures.
+   They are the activation packages for the default and the Bash-only configuration,
+   and the assertion that the GPU option stays off.
    `--all-systems` widens the evaluation to every system declared in `flake.nix` without building more,
    so a change that fails to evaluate on `aarch64-linux` is caught here rather than in CI.
 

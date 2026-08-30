@@ -59,8 +59,8 @@ When a module installs a tool and also wants to provide a default shared config,
 
 This directory contains imperative shell entry points.
 
-- `scripts/bootstrap-host.sh` prepares the host for setup by installing Nix and offering optional login shell
-  registration, GitHub SSH access, and Docker Engine setup.
+- `scripts/bootstrap-host.sh` prepares the host for setup: it installs Nix and offers optional login shell registration,
+  GitHub SSH access, and Docker Engine setup.
   - The login shell registration points `/etc/passwd` at `~/.local/state/issl/login-shell`,
     the link that `common/zsh.nix` deploys and retargets on every switch.
   - `scripts/apply.sh` sources this script and reuses that registration after the switch.
