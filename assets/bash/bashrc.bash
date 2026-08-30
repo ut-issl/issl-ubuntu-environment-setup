@@ -23,11 +23,13 @@ shopt -s histappend # Append history entries instead of overwriting the file.
 
 # ===== Prompt ===== #
 
-# Home Manager replaces the distribution .bashrc, which would otherwise set a prompt.
-if [[ -n ${TERM} && ${TERM} != "dumb" ]]; then
-  PS1='bash:\[\033[32m\]\w\[\033[0m\]\$ '
-else
-  PS1='bash:\w\$ '
+# Set the prompt for interactive shells only.
+if [[ $- == *i* ]]; then
+  if [[ -n ${TERM} && ${TERM} != "dumb" ]]; then
+    PS1='bash:\[\033[32m\]\w\[\033[0m\]\$ '
+  else
+    PS1='bash:\w\$ '
+  fi
 fi
 
 # ===== Completion ===== #

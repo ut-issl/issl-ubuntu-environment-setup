@@ -52,20 +52,27 @@ zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' formats '%b'
 zstyle ':vcs_info:git:*' actionformats '%b|%a'
 
+if [[ -n ${TERM} && ${TERM} != "dumb" ]]; then
+  PROMPT='zsh:%F{green}%~%f %F{magenta}${issl_prompt_vcs}%f$ '
+  RPROMPT='%F{yellow}%w %T%f'
+else
+  PROMPT='zsh:%~ ${issl_prompt_vcs}$ '
+  RPROMPT=''
+fi
+
 # Refresh the VCS information before every prompt.
-# The hook drops itself once anything else, such as starship, takes over PROMPT.
+# The hook unregisters itself once neither prompt references the VCS information.
 issl_prompt_precmd() {
-  if [[ ${PROMPT} != *vcs_info_msg_0_* ]]; then
+  if [[ ${PROMPT} != *'${issl_prompt_vcs}'* && ${RPROMPT} != *'${issl_prompt_vcs}'* ]]; then
     add-zsh-hook -d precmd issl_prompt_precmd
     return
   fi
 
   vcs_info
+  # Escape every '%' in the VCS information.
+  issl_prompt_vcs=${vcs_info_msg_0_//\%/%%}
 }
 add-zsh-hook precmd issl_prompt_precmd
-
-PROMPT='zsh:%F{green}%~%f %F{magenta}${vcs_info_msg_0_}%f$ '
-RPROMPT='%F{yellow}%w %T%f'
 
 # ===== Completion ===== #
 
