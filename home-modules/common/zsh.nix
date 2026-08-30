@@ -18,8 +18,8 @@ let
       link="${loginShellLink}"
       user="${config.home.username}"
 
-      if [ ! -e "$link" ]; then
-        echo "$link does not exist. Run a Home Manager switch first." >&2
+      if [ ! -f "$link" ] || [ ! -x "$link" ]; then
+        echo "$link is not an executable file. Run a Home Manager switch, or remove the path if it is in the way." >&2
         exit 1
       fi
 
