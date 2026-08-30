@@ -58,6 +58,10 @@ The shared module also decides the following for every configuration that import
   so unfree packages you add in your own repository install without extra setup.
   See [package management practices](13-package-management-practices.md#unfree-packages).
 - `targets.genericLinux` is enabled, so the desktop entries of the packages you install are visible to the desktop environment.
+- Your login shell follows `issl.zsh.enable`,
+  through the link `~/.local/state/issl/login-shell` that the shared module retargets on every switch.
+  `bootstrap-host.sh` registers that link in `/etc/passwd` once, because Home Manager cannot edit `/etc/passwd` itself.
+  If you decline that step, a switch with Zsh enabled tells you the command that hands the login shell over.
 
 This repository also exports the reusable workflow `.github/workflows/test-config-repository.yaml`.
 It applies one flake target of a personal config repository and runs the environment tests against the result.

@@ -16,6 +16,16 @@ export ISSL_RUST_HOME="${ISSL_CONFIG_HOME}/rust"
 export ISSL_NIX_PROFILE_PATH="${ISSL_NIX_PROFILE_PATH:-$HOME/.nix-profile}"
 export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
 
+# Replace $SHELL with the shell that the managed login shell link resolves to.
+issl_login_shell_link="${XDG_STATE_HOME}/issl/login-shell"
+if [ "${SHELL:-}" = "${issl_login_shell_link}" ]; then
+  case "$(readlink -f "${issl_login_shell_link}" 2>/dev/null)" in
+  */bin/zsh) export SHELL="${ISSL_NIX_PROFILE_PATH}/bin/zsh" ;;
+  */bin/bash) export SHELL="/bin/bash" ;;
+  esac
+fi
+unset issl_login_shell_link
+
 # Prepend one existing directory to PATH if it is not already present.
 prepend_path() {
   [ "$#" -eq 1 ] || return 0

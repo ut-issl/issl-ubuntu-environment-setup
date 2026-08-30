@@ -337,32 +337,6 @@ ensure_zsh_startup_files() {
     "$(zshrc_block)"
 }
 
-ensure_shell_listed_in_etc_shells() {
-  local shell_path="$1"
-
-  if grep -Fxq "${shell_path}" /etc/shells 2>/dev/null; then
-    return 0
-  fi
-
-  if [ -w /etc/shells ]; then
-    if printf '%s\n' "${shell_path}" >>/etc/shells; then
-      return 0
-    fi
-    echo "warning: failed to append ${shell_path} to /etc/shells directly." >&2
-  fi
-
-  if command -v sudo >/dev/null 2>&1; then
-    if printf '%s\n' "${shell_path}" | sudo tee -a /etc/shells >/dev/null; then
-      return 0
-    fi
-    echo "warning: failed to add ${shell_path} to /etc/shells via sudo. Skipping login shell switch." >&2
-    return 1
-  fi
-
-  echo "warning: /etc/shells is not writable and sudo is unavailable. Skipping login shell switch." >&2
-  return 1
-}
-
 resolve_zsh_bin() {
   if [ -x "${HOME}/.nix-profile/bin/zsh" ]; then
     printf '%s\n' "${HOME}/.nix-profile/bin/zsh"
@@ -375,112 +349,6 @@ resolve_zsh_bin() {
   fi
 
   return 1
-}
-
-current_login_shell() {
-  if command -v getent >/dev/null 2>&1; then
-    getent passwd "${USER}" | cut -d: -f7
-    return 0
-  fi
-
-  if [ -n "${SHELL-}" ]; then
-    printf '%s\n' "${SHELL}"
-    return 0
-  fi
-
-  return 1
-}
-
-maybe_switch_login_shell_to_zsh() {
-  local desired_zsh_path=""
-  local active_login_shell=""
-  local response=""
-
-  if [ ! -t 0 ]; then
-    echo "warning: skipping login shell switch prompt because this run is non-interactive." >&2
-    return
-  fi
-
-  if ! desired_zsh_path="$(resolve_zsh_bin)"; then
-    echo "warning: zsh binary not found while trying to switch login shell." >&2
-    return
-  fi
-
-  active_login_shell="$(current_login_shell || true)"
-  if [ -n "${active_login_shell}" ] && [ "${active_login_shell}" = "${desired_zsh_path}" ]; then
-    return
-  fi
-
-  read -r -p "Switch your login shell to ${desired_zsh_path}? [y/N] " response
-  if ! is_yes "${response}"; then
-    return
-  fi
-
-  if ! ensure_shell_listed_in_etc_shells "${desired_zsh_path}"; then
-    return
-  fi
-
-  if chsh -s "${desired_zsh_path}"; then
-    echo "Updated login shell to ${desired_zsh_path}. This will apply to new login sessions."
-  else
-    echo "warning: failed to run chsh. You can retry manually with: chsh -s ${desired_zsh_path}" >&2
-  fi
-}
-
-revert_login_shell_to_bash() {
-  local bash_path="/bin/bash"
-
-  if [ ! -x "${bash_path}" ] && ! bash_path="$(command -v bash)"; then
-    echo "warning: could not locate a bash binary to revert the login shell. Set it manually with: chsh -s /bin/bash" >&2
-    return 1
-  fi
-
-  if ! ensure_shell_listed_in_etc_shells "${bash_path}"; then
-    return 1
-  fi
-
-  if ! chsh -s "${bash_path}"; then
-    echo "warning: failed to run chsh. You can retry manually with: chsh -s ${bash_path}" >&2
-    return 1
-  fi
-
-  echo "Reverted login shell to ${bash_path}. This will apply to new login sessions."
-}
-
-guard_login_shell_before_disabling_zsh() {
-  local nix_zsh_path="${HOME}/.nix-profile/bin/zsh"
-  local active_login_shell=""
-  local response=""
-
-  active_login_shell="$(current_login_shell || true)"
-  if [ "${active_login_shell}" != "${nix_zsh_path}" ]; then
-    return
-  fi
-
-  if [ -n "${issl_enable_zsh}" ] && is_no "${issl_enable_zsh}"; then
-    # zsh was explicitly disabled; proceed straight to the bash fallback.
-    :
-  elif [ ! -t 0 ]; then
-    echo "error: your login shell is the Nix-provided zsh (${nix_zsh_path}), but this non-interactive run would disable zsh and strand it." >&2
-    echo "Re-run with ISSL_ENABLE_ZSH=yes to keep zsh, or ISSL_ENABLE_ZSH=no to disable it and revert the login shell to bash." >&2
-    exit 1
-  else
-    echo "Your login shell is currently the Nix-provided zsh (${nix_zsh_path})."
-    echo "Continuing without zsh will remove it and revert your login shell to bash."
-    read -r -p "Continue and disable zsh? [y/N] " response
-    if ! is_yes "${response}"; then
-      echo "Aborted without changes. To keep zsh, re-run with it enabled:"
-      echo "  ISSL_ENABLE_ZSH=yes bash ${repo_root}/scripts/apply.sh"
-      echo "or answer yes when prompted to enable the shared zsh configuration."
-      exit 1
-    fi
-  fi
-
-  if ! revert_login_shell_to_bash; then
-    echo "error: could not revert the login shell to bash; aborting before disabling zsh to avoid stranding your login shell." >&2
-    echo "Fix the login shell manually (e.g. chsh -s /bin/bash) and re-run." >&2
-    exit 1
-  fi
 }
 
 # ===== Git ===== #
@@ -636,10 +504,6 @@ main() {
     home_configuration_name="issl-common-bash-only-${current_system}"
   fi
 
-  if [ "${zsh_enabled}" = "0" ]; then
-    guard_login_shell_before_disabling_zsh
-  fi
-
   nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
     switch --flake "${repo_root}#${home_configuration_name}" --impure
 
@@ -647,7 +511,7 @@ main() {
   ensure_bash_startup_files
   if [ "${zsh_enabled}" = "1" ]; then
     ensure_zsh_startup_files
-    maybe_switch_login_shell_to_zsh
+    maybe_register_login_shell
   fi
   if ! git_bin="$(resolve_git_bin)"; then
     echo "git was not found after the Home Manager switch; cannot wire the shared Git configuration." >&2

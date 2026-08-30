@@ -136,5 +136,6 @@ jobs:
           COMMON_DIR: ${{ github.workspace }}/common
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
           ISSL_ENABLE_ZSH: ${{ case(inputs.zsh-enabled, '1', '0') }}
         run: ./common/tests/run.sh

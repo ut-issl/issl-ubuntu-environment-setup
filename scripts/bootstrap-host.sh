@@ -155,6 +155,99 @@ start_nix_daemon_without_systemd() {
   echo "warning: attempted to start nix-daemon, but it is not responding yet. Nix commands may fail." >&2
 }
 
+issl_login_shell_link() {
+  printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/issl/login-shell"
+}
+
+is_executable_file() {
+  [ -f "$1" ] && [ -x "$1" ]
+}
+
+current_login_shell() {
+  if command -v getent >/dev/null 2>&1; then
+    getent passwd "$(id -un)" | cut -d: -f7
+    return 0
+  fi
+
+  if [ -n "${SHELL-}" ]; then
+    printf '%s\n' "${SHELL}"
+    return 0
+  fi
+
+  return 1
+}
+
+etc_shells_entry() {
+  local shell_path="$1"
+
+  if [ -s /etc/shells ] && [ -n "$(tail -c1 /etc/shells)" ]; then
+    printf '\n%s\n' "${shell_path}"
+  else
+    printf '%s\n' "${shell_path}"
+  fi
+}
+
+ensure_shell_listed_in_etc_shells() {
+  local shell_path="$1"
+
+  if grep -Fxq "${shell_path}" /etc/shells 2>/dev/null; then
+    return 0
+  fi
+
+  if [ -w /etc/shells ]; then
+    if etc_shells_entry "${shell_path}" >>/etc/shells; then
+      return 0
+    fi
+    echo "warning: failed to append ${shell_path} to /etc/shells directly." >&2
+  fi
+
+  if command -v sudo >/dev/null 2>&1; then
+    if etc_shells_entry "${shell_path}" | sudo tee -a /etc/shells >/dev/null; then
+      return 0
+    fi
+    echo "warning: failed to add ${shell_path} to /etc/shells via sudo. Skipping login shell registration." >&2
+    return 1
+  fi
+
+  echo "warning: /etc/shells is not writable and sudo is unavailable. Skipping login shell registration." >&2
+  return 1
+}
+
+maybe_register_login_shell() {
+  local link=""
+  local active_login_shell=""
+
+  link="$(issl_login_shell_link)"
+  active_login_shell="$(current_login_shell || true)"
+  if [ "${active_login_shell}" = "${link}" ] && is_executable_file "${link}"; then
+    return
+  fi
+
+  if ! prompt_yes_no "Let Home Manager manage your login shell through ${link}? [Y/n]" yes; then
+    return
+  fi
+
+  if ! is_executable_file "${link}"; then
+    mkdir -p "$(dirname "${link}")" || true
+    ln -Tsf /bin/bash "${link}" || true
+  fi
+
+  if ! is_executable_file "${link}"; then
+    echo "warning: ${link} is not an executable file. Skipping the login shell registration." >&2
+    return
+  fi
+
+  if ! ensure_shell_listed_in_etc_shells "${link}"; then
+    return
+  fi
+
+  if sudo chsh -s "${link}" "$(id -un)"; then
+    echo "Login shell set to ${link}. This will apply to new login sessions."
+  else
+    echo "warning: failed to run chsh. You can retry manually with: sudo chsh -s ${link} $(id -un)" >&2
+  fi
+}
+
 nix_with_openssh() {
   nix --extra-experimental-features "nix-command flakes" shell nixpkgs#openssh_gssapi --command "$@"
 }
@@ -376,6 +469,7 @@ maybe_install_docker_engine() {
 bootstrap_host() {
   ensure_nix
   start_nix_daemon_without_systemd
+  maybe_register_login_shell
   maybe_offer_github_ssh_setup
   maybe_install_docker_engine
 }
