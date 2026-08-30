@@ -39,9 +39,8 @@ This directory contains the Home Manager modules that define the shared environm
   - `git.nix`
   - `dev.nix`
   - `python.nix`
-- `common/zsh.nix` takes effect unless the `issl.zsh.enable` option is set to `false`.
-  It deploys the login shell link under `~/.local/state/issl/` either way,
-  pointing it at zsh or at bash so that the login shell follows the option.
+  - `zsh.nix`, which takes effect unless the `issl.zsh.enable` option is set to `false`,
+    apart from the login shell link it deploys either way
 
 ### `assets/`
 
