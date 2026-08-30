@@ -67,7 +67,7 @@ in
       };
 
       home.activation.checkLoginShell = lib.hm.dag.entryAnywhere ''
-        current_login_shell="$(getent passwd "${config.home.username}" 2>/dev/null | cut -d: -f7)"
+        current_login_shell="$(${pkgs.getent}/bin/getent passwd "${config.home.username}" | cut -d: -f7 || true)"
         if [ -n "$current_login_shell" ] && [ "$current_login_shell" != "${loginShellLink}" ]; then
           warnEcho "Your login shell is $current_login_shell, which Home Manager does not manage."
           warnEcho "To hand it over so that it follows this configuration, run"
