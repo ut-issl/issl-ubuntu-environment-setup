@@ -24,6 +24,9 @@ let
       fi
 
       if ! grep -Fxq "$link" /etc/shells; then
+        if [ -s /etc/shells ] && [ -n "$(tail -c1 /etc/shells)" ]; then
+          printf '\n' >>/etc/shells
+        fi
         printf '%s\n' "$link" >>/etc/shells
       fi
 

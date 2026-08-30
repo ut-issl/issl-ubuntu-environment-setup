@@ -173,6 +173,16 @@ current_login_shell() {
   return 1
 }
 
+etc_shells_entry() {
+  local shell_path="$1"
+
+  if [ -s /etc/shells ] && [ -n "$(tail -c1 /etc/shells)" ]; then
+    printf '\n%s\n' "${shell_path}"
+  else
+    printf '%s\n' "${shell_path}"
+  fi
+}
+
 ensure_shell_listed_in_etc_shells() {
   local shell_path="$1"
 
@@ -181,14 +191,14 @@ ensure_shell_listed_in_etc_shells() {
   fi
 
   if [ -w /etc/shells ]; then
-    if printf '%s\n' "${shell_path}" >>/etc/shells; then
+    if etc_shells_entry "${shell_path}" >>/etc/shells; then
       return 0
     fi
     echo "warning: failed to append ${shell_path} to /etc/shells directly." >&2
   fi
 
   if command -v sudo >/dev/null 2>&1; then
-    if printf '%s\n' "${shell_path}" | sudo tee -a /etc/shells >/dev/null; then
+    if etc_shells_entry "${shell_path}" | sudo tee -a /etc/shells >/dev/null; then
       return 0
     fi
     echo "warning: failed to add ${shell_path} to /etc/shells via sudo. Skipping login shell registration." >&2
