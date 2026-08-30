@@ -3,10 +3,12 @@ set -Eeuo pipefail
 
 home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
+state_dir="${STATE_DIR:?STATE_DIR is required}"
 common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 nix_profile_bin="${home_dir}/.nix-profile/bin"
 nix_profile_share="${home_dir}/.nix-profile/share"
 default_zdotdir="${config_dir}/zsh"
+login_shell_link="${state_dir}/issl/login-shell"
 issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 
 # shellcheck source=tests/lib.sh
@@ -123,6 +125,42 @@ assert_zsh_startup_is_loaded() {
     '
 }
 
+assert_login_shell_link_targets() {
+  local expected="$1"
+
+  test -L "${login_shell_link}"
+  test "$(readlink -f "${login_shell_link}")" = "$(readlink -f "${expected}")"
+}
+
+assert_shell_variable_is_corrected() {
+  local expected="$1"
+
+  env -i \
+    HOME="${home_dir}" \
+    SHELL_ENV_PATH="${config_dir}/issl/shell/env.sh" \
+    XDG_CONFIG_HOME="${config_dir}" \
+    XDG_STATE_HOME="${state_dir}" \
+    SHELL="${login_shell_link}" \
+    EXPECTED_SHELL="${expected}" \
+    PATH="/usr/bin:/bin" \
+    bash <<'EOF'
+. "${SHELL_ENV_PATH}"
+test "${SHELL}" = "${EXPECTED_SHELL}"
+EOF
+}
+
+assert_login_shell_is_managed_for_zsh() {
+  assert_login_shell_link_targets "${nix_profile_bin}/zsh"
+  assert_shell_variable_is_corrected "${home_dir}/.nix-profile/bin/zsh"
+  test -x "${nix_profile_bin}/issl-login-shell-setup"
+}
+
+assert_login_shell_is_managed_for_bash() {
+  assert_login_shell_link_targets /bin/bash
+  assert_shell_variable_is_corrected /bin/bash
+  test ! -e "${nix_profile_bin}/issl-login-shell-setup"
+}
+
 assert_zsh_disabled() {
   test ! -x "${nix_profile_bin}/zsh"
   test ! -e "${home_dir}/.zshenv"
@@ -145,8 +183,10 @@ main() {
     run_assert assert_shared_zsh_assets
     run_assert assert_zsh_startup_files
     run_assert assert_zsh_startup_is_loaded
+    run_assert assert_login_shell_is_managed_for_zsh
   else
     run_assert assert_zsh_disabled
+    run_assert assert_login_shell_is_managed_for_bash
   fi
 }
 
