@@ -59,7 +59,7 @@ If there is no reasonable existing module for the change, add a new one.
 In most cases, the module should do one or both of the following:
 
 - add packages through `home.packages`
-- deploy shared files through `home.file` or `xdg.configFile`
+- deploy shared files through `xdg.configFile`, `xdg.stateFile`, or `home.file`
 
 For example:
 
@@ -73,6 +73,16 @@ For example:
   xdg.configFile."issl/foo/config.toml".source = ../../assets/foo/config.toml;
 }
 ```
+
+`xdg.configFile."issl/..."` is the usual destination, under `~/.config/issl/`.
+A path the environment maintains rather than the user edits belongs under `~/.local/state/issl/`,
+deployed through `xdg.stateFile` as `common/zsh.nix` does for the login shell link.
+Use `home.file` when the file must live at a fixed path outside both directories.
+
+Every system that `flake.nix` declares has to keep evaluating,
+so a package that is meaningful on only some of them needs a guard on the platform,
+as `common/cpp.nix` does with `pkgs.stdenv.hostPlatform.isx86_64` for the multilib GCC.
+An unguarded package that fails to evaluate on one of them breaks every output of that system.
 
 A module may also set Home Manager options directly, as `common/platform.nix` does for `targets.genericLinux`.
 Use `lib.mkDefault` for an option a personal config repository should be able to override,
@@ -110,8 +120,34 @@ When updating or adding a module:
 
 A new file under `home-modules/common/` is picked up automatically.
 It must be tracked by Git, because a flake only sees tracked files.
+
 If a module should only take effect in specific situations,
-declare an option for it and gate its `config` with `lib.mkIf`, following `common/zsh.nix`.
+declare an option for it and gate its `config` with `lib.mkIf`:
+
+```nix
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+
+{
+  options.issl.foo.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    example = false;
+    description = "Whether to enable the shared foo configuration.";
+  };
+
+  config = lib.mkIf config.issl.foo.enable {
+    home.packages = [ pkgs.foo ];
+  };
+}
+```
+
+`common/zsh.nix` is one such module.
+Its `lib.mkMerge` and the forced link inside it are specific to the login shell, not part of this pattern.
 
 ## When `apply.sh` Needs Changes
 
@@ -161,11 +197,14 @@ and a new test is silently left out.
 2. Run the checks:
 
    ```console
-   nix flake check --show-trace
+   nix flake check --all-systems --show-trace
    ```
 
-   This builds the activation packages for both the default and the Bash-only configuration,
-   and catches Nix evaluation errors and build failures.
+   This builds the checks of the system of this machine and catches Nix evaluation errors and build failures.
+   They include the activation packages for the default and the Bash-only configuration,
+   and the assertion that the GPU option stays off.
+   `--all-systems` widens the evaluation to every system declared in `flake.nix` without building more,
+   so a change that fails to evaluate on `aarch64-linux` is caught here rather than in CI.
 
 3. Build the activation packages to inspect the result:
 
@@ -179,7 +218,7 @@ and a new test is silently left out.
    Each build result contains what users receive:
 
    - `result-home/home-path/bin` holds the binaries the configuration installs.
-   - `result-home/home-files` holds the files deployed through `home.file` and `xdg.configFile`,
+   - `result-home/home-files` holds the files deployed through `xdg.configFile`, `xdg.stateFile`, and `home.file`,
      so a deployed asset can be compared against its source under `assets/` with `cmp`.
    - `result-home/activate` is the activation script that Home Manager runs on `switch`.
 

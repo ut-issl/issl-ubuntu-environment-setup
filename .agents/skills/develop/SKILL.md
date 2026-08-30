@@ -22,7 +22,7 @@ Never write secrets (tokens, private keys, credentials) into the repository;
 assets in this repository are deployed to every lab machine.
 Never run `scripts/apply.sh`, `scripts/setup.sh`, or `home-manager switch`
 against the user's real home environment without explicit approval;
-use prek and `nix flake check` for local validation instead.
+use prek and `nix flake check --all-systems` for local validation instead.
 
 Before starting, verify that `nix` is available (`command -v nix`).
 Nix is required for developing this repository;
@@ -41,8 +41,8 @@ Before adding anything, scan the actual repository state (not the docs, which ma
 
 - `home-modules/common/` for existing modules that already cover the tool or area.
   Every file there is imported automatically by `home-modules/default.nix`.
-- `home-modules/common/zsh.nix` for how a module makes itself conditional
-  by declaring an option and gating its `config` with `lib.mkIf`.
+- `home-modules/common/zsh.nix` for a conditional module: it declares an option and gates `config` with `lib.mkIf`.
+  Read its `lib.mkMerge` and the forced link inside it as specific to the login shell, not as part of that pattern.
 - `assets/` for existing configuration files.
 - `tests/` for existing test coverage.
 - `scripts/apply.sh` for existing imperative wiring.
@@ -61,6 +61,9 @@ For a new tool:
   or has to stay with the distribution depends on the host integration it needs.
 - Look the package up in nixpkgs at the pinned revision:
   read the `nixpkgs` entry's `locked.rev` from `flake.lock` and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
+- Every system that `flake.nix` declares has to keep evaluating.
+  Guard a package that is meaningful on only some of them on the platform,
+  as `common/cpp.nix` does with `pkgs.stdenv.hostPlatform.isx86_64` for the multilib GCC.
 - `home-modules/common/nix.nix` sets `nixpkgs.config.allowUnfree = true`,
   so an unfree package can be added without a flake change.
   Because that setting also applies to every personal config repository importing this one,
@@ -83,9 +86,10 @@ to preserve user flexibility and avoid conflicts with both setup modes.
   that covers the same area, or create a new module if it represents a distinct area.
 - **New tool with shared configuration**: create a dedicated module `home-modules/common/<tool>.nix`
   and place the config file under `assets/<tool>/`.
-  Use `xdg.configFile."issl/<tool>/..."` to deploy shared configuration
-  under the ISSL config directory,
-  or `home.file` when the config must live at a fixed path outside `~/.config/issl/`.
+  Use `xdg.configFile."issl/<tool>/..."` to deploy shared configuration under the ISSL config directory,
+  `xdg.stateFile."issl/..."` for a path the environment maintains rather than the user edits
+  (`zsh.nix` deploys the login shell link that way),
+  or `home.file` when the file must live at a fixed path outside those directories.
 - **A Home Manager option rather than a package**: a module may set options directly,
   as `common/platform.nix` does for `targets.genericLinux`.
   Use `lib.mkDefault` for an option a personal config repository should be able to override,
@@ -94,7 +98,8 @@ to preserve user flexibility and avoid conflicts with both setup modes.
 - **New module**: create the file under `home-modules/common/` and track it with Git.
   It is imported automatically.
   Reuse the existing `issl.zsh.enable` option where it fits;
-  introducing a new condition means declaring another option and gating `config` with `lib.mkIf`,
+  introducing a new condition means declaring another option and gating `config` with `lib.mkIf`
+  (`docs/92-updating-or-adding-an-asset-or-module.md` § "Updating or Adding a Module" shows the shape),
   and it also requires changes to `flake.nix` (configurations, checks) and the CI test matrix —
   confirm with the user before going that route.
 
@@ -124,7 +129,7 @@ Every module should have corresponding test coverage under `tests/`.
 
 Tests run in CI against a freshly applied environment
 (the `script-based` job of `.github/workflows/test.yaml` and the reusable
-`.github/workflows/test-config-repository.yaml` both set `HOME_DIR`/`CONFIG_DIR` and run `tests/run.sh`).
+`.github/workflows/test-config-repository.yaml` both set `HOME_DIR`/`CONFIG_DIR`/`STATE_DIR` and run `tests/run.sh`).
 Do not try to run them locally unless this machine has the shared environment applied;
 local validation is prek plus the Nix validation in step 7,
 which can confirm installed binaries and deployed files without applying anything.
@@ -134,7 +139,8 @@ If not, create a new `tests/test-<tool>.sh` following the existing pattern:
 
 1. Copy the header from the closest existing test:
    `set -Eeuo pipefail`, the required environment variable guards
-   (`HOME_DIR:?` always; `CONFIG_DIR:?` when inspecting deployed config or user-managed file wiring),
+   (`HOME_DIR:?` always; `CONFIG_DIR:?` when inspecting deployed config or user-managed file wiring;
+   `STATE_DIR:?` when inspecting what a module deploys under `~/.local/state/issl/`),
    the `COMMON_DIR` fallback, and `nix_profile_bin="${home_dir}/.nix-profile/bin"`.
    Then source `tests/lib.sh` for the `run_assert` helper
    and the failure-reporting ERR trap (which needs the `-E` in `set -Eeuo pipefail`).
