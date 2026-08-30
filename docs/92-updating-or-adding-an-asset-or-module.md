@@ -75,14 +75,14 @@ For example:
 ```
 
 `xdg.configFile."issl/..."` is the usual destination, under `~/.config/issl/`.
-A path the environment maintains rather than the user edits belongs under `~/.local/state/issl/` through `xdg.stateFile`,
-as `common/zsh.nix` deploys the login shell link.
+A path the environment maintains rather than the user edits belongs under `~/.local/state/issl/`,
+deployed through `xdg.stateFile` as `common/zsh.nix` does for the login shell link.
 Use `home.file` when the file must live at a fixed path outside both directories.
 
-`flake.nix` declares both `x86_64-linux` and `aarch64-linux`,
-so a package that is meaningful on only one of them needs a guard on the platform,
+Every system that `flake.nix` declares has to keep evaluating,
+so a package that is meaningful on only some of them needs a guard on the platform,
 as `common/cpp.nix` does with `pkgs.stdenv.hostPlatform.isx86_64` for the multilib GCC.
-An unguarded package that fails to evaluate on the other architecture breaks every output of that system.
+An unguarded package that fails to evaluate on one of them breaks every output of that system.
 
 A module may also set Home Manager options directly, as `common/platform.nix` does for `targets.genericLinux`.
 Use `lib.mkDefault` for an option a personal config repository should be able to override,
@@ -201,7 +201,7 @@ and a new test is silently left out.
    ```
 
    This builds the checks of the system of this machine and catches Nix evaluation errors and build failures.
-   They are the activation packages for the default and the Bash-only configuration,
+   They include the activation packages for the default and the Bash-only configuration,
    and the assertion that the GPU option stays off.
    `--all-systems` widens the evaluation to every system declared in `flake.nix` without building more,
    so a change that fails to evaluate on `aarch64-linux` is caught here rather than in CI.

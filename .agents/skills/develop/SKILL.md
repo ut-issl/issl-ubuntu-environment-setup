@@ -61,8 +61,8 @@ For a new tool:
   or has to stay with the distribution depends on the host integration it needs.
 - Look the package up in nixpkgs at the pinned revision:
   read the `nixpkgs` entry's `locked.rev` from `flake.lock` and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
-- `flake.nix` declares `x86_64-linux` and `aarch64-linux`, and both have to keep evaluating.
-  Guard a package that is meaningful on only one of them on the platform,
+- Every system that `flake.nix` declares has to keep evaluating.
+  Guard a package that is meaningful on only some of them on the platform,
   as `common/cpp.nix` does with `pkgs.stdenv.hostPlatform.isx86_64` for the multilib GCC.
 - `home-modules/common/nix.nix` sets `nixpkgs.config.allowUnfree = true`,
   so an unfree package can be added without a flake change.
