@@ -41,7 +41,31 @@ setopt interactive_comments # Allow comments in interactive commands.
 setopt magic_equal_subst    # Expand command arguments after '=' as file names where applicable.
 setopt mark_dirs            # Append a trailing slash to completed directory names.
 setopt no_beep              # Disable terminal beeps from Zsh.
+setopt prompt_subst         # Expand parameters and command substitutions in prompts.
 setopt rm_star_wait         # Add a short delay before confirming dangerous rm globs.
+
+# ===== Prompt ===== #
+
+autoload -Uz add-zsh-hook vcs_info
+
+zstyle ':vcs_info:*' enable git
+zstyle ':vcs_info:git:*' formats '%b'
+zstyle ':vcs_info:git:*' actionformats '%b|%a'
+
+# Refresh the VCS information before every prompt.
+# The hook drops itself once anything else, such as starship, takes over PROMPT.
+issl_prompt_precmd() {
+  if [[ ${PROMPT} != *vcs_info_msg_0_* ]]; then
+    add-zsh-hook -d precmd issl_prompt_precmd
+    return
+  fi
+
+  vcs_info
+}
+add-zsh-hook precmd issl_prompt_precmd
+
+PROMPT='zsh:%F{green}%~%f %F{magenta}${vcs_info_msg_0_}%f$ '
+RPROMPT='%F{yellow}%w %T%f'
 
 # ===== Completion ===== #
 
