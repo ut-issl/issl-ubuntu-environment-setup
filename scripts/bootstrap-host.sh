@@ -215,7 +215,7 @@ maybe_register_login_shell() {
 
   link="$(issl_login_shell_link)"
   active_login_shell="$(current_login_shell || true)"
-  if [ "${active_login_shell}" = "${link}" ]; then
+  if [ "${active_login_shell}" = "${link}" ] && [ -x "${link}" ]; then
     return
   fi
 
@@ -223,9 +223,9 @@ maybe_register_login_shell() {
     return
   fi
 
-  if [ ! -e "${link}" ]; then
+  if [ ! -x "${link}" ]; then
     mkdir -p "$(dirname "${link}")"
-    ln -s /bin/bash "${link}"
+    ln -sfn /bin/bash "${link}"
   fi
 
   if ! ensure_shell_listed_in_etc_shells "${link}"; then
