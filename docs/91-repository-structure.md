@@ -63,7 +63,7 @@ This directory contains imperative shell entry points.
   GitHub SSH access, and Docker Engine setup.
   - The login shell registration points `/etc/passwd` at `~/.local/state/issl/login-shell`,
     the link that `common/zsh.nix` deploys and retargets on every switch.
-  - `scripts/apply.sh` sources this script and reuses that registration after the switch.
+  - `scripts/apply.sh` sources this script and reuses that registration after the switch when zsh is enabled.
 - `scripts/setup.sh` is the script-based setup entry point.
   - It prepares the host for setup through `scripts/bootstrap-host.sh`.
   - It clones this repository into the install location.
