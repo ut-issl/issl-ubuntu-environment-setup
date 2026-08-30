@@ -70,7 +70,8 @@ That link is registered in `/etc/passwd` once and retargeted by every later swit
 so the login shell follows whether Zsh is enabled instead of needing `chsh` again.
 Non-interactive setup cannot ask and leaves the login shell alone.
 
-Declining leaves your login shell as it is; a later switch tells you the command that hands it over.
+Declining leaves your login shell as it is;
+while Zsh is enabled, a later switch tells you the command that hands it over.
 
 ### Zsh in a Non-Interactive Setup
 
