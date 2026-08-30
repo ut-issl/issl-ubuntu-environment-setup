@@ -120,8 +120,34 @@ When updating or adding a module:
 
 A new file under `home-modules/common/` is picked up automatically.
 It must be tracked by Git, because a flake only sees tracked files.
+
 If a module should only take effect in specific situations,
-declare an option for it and gate its `config` with `lib.mkIf`, following `common/zsh.nix`.
+declare an option for it and gate its `config` with `lib.mkIf`:
+
+```nix
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+
+{
+  options.issl.foo.enable = lib.mkOption {
+    type = lib.types.bool;
+    default = true;
+    example = false;
+    description = "Whether to enable the shared foo configuration.";
+  };
+
+  config = lib.mkIf config.issl.foo.enable {
+    home.packages = [ pkgs.foo ];
+  };
+}
+```
+
+`common/zsh.nix` is one such module.
+Its `lib.mkMerge` and the forced link inside it are specific to the login shell, not part of this pattern.
 
 ## When `apply.sh` Needs Changes
 

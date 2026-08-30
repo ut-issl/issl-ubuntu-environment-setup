@@ -41,8 +41,9 @@ Before adding anything, scan the actual repository state (not the docs, which ma
 
 - `home-modules/common/` for existing modules that already cover the tool or area.
   Every file there is imported automatically by `home-modules/default.nix`.
-- `home-modules/common/zsh.nix` for how a module makes itself conditional
-  by declaring an option and gating its `config` with `lib.mkIf`.
+- `home-modules/common/zsh.nix` for a conditional module:
+  it declares an option and gates `config` with `lib.mkIf`.
+  Read its `lib.mkMerge` and the forced link inside it as specific to the login shell, not as part of that pattern.
 - `assets/` for existing configuration files.
 - `tests/` for existing test coverage.
 - `scripts/apply.sh` for existing imperative wiring.
@@ -99,7 +100,8 @@ to preserve user flexibility and avoid conflicts with both setup modes.
 - **New module**: create the file under `home-modules/common/` and track it with Git.
   It is imported automatically.
   Reuse the existing `issl.zsh.enable` option where it fits;
-  introducing a new condition means declaring another option and gating `config` with `lib.mkIf`,
+  introducing a new condition means declaring another option and gating `config` with `lib.mkIf`
+  (`docs/92-updating-or-adding-an-asset-or-module.md` § "Updating or Adding a Module" shows the shape),
   and it also requires changes to `flake.nix` (configurations, checks) and the CI test matrix —
   confirm with the user before going that route.
 
