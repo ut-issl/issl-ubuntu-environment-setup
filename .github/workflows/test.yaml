@@ -155,6 +155,7 @@ jobs:
           COMMON_DIR: ${{ github.workspace }}/common
           HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
           CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
+          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
           ISSL_ENABLE_ZSH: ${{ matrix.enable_zsh }}
           EXPECTED_GIT_USER_NAME: ISSL Test User
           EXPECTED_GIT_USER_EMAIL: issl-test@example.com
