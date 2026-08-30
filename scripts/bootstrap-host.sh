@@ -163,7 +163,7 @@ has_github_ssh_auth() {
   local ssh_output
   local ssh_status
 
-  ssh_output="$(nix_with_openssh ssh -T git@github.com 2>&1)" || ssh_status=$?
+  ssh_output="$(nix_with_openssh ssh -o ConnectTimeout=10 -T git@github.com 2>&1)" || ssh_status=$?
   ssh_status="${ssh_status:-0}"
 
   if [ "${ssh_status}" -eq 1 ] &&
@@ -188,7 +188,9 @@ create_github_ssh_key() {
 
   ensure_ssh_directory
 
-  read -r -p "Enter an email/comment for the GitHub SSH key (optional): " key_comment
+  if ! read -r -p "Enter an email/comment for the GitHub SSH key (optional): " key_comment; then
+    echo
+  fi
 
   if [ -n "${key_comment}" ]; then
     nix_with_openssh ssh-keygen -t ed25519 -C "${key_comment}" -f "${github_key_path}"
@@ -221,10 +223,22 @@ prompt_github_ssh_registration() {
   cat "${github_key_path}.pub"
   echo
 
-  if ! prompt_yes_no "Type yes after the key has been registered in GitHub."; then
-    echo "GitHub SSH key registration was not confirmed." >&2
-    exit 1
-  fi
+  for _ in {1..3}; do
+    if ! prompt_yes_no "Have you registered the key in GitHub? Answer n to skip. [Y/n]" yes; then
+      echo "Skipping GitHub SSH setup. Re-run this script to set it up later."
+      return 0
+    fi
+
+    if has_github_ssh_auth; then
+      echo "GitHub SSH authentication succeeded."
+      return 0
+    fi
+
+    echo "Could not authenticate to GitHub with this key yet." >&2
+  done
+
+  echo "GitHub SSH access is not available. Re-run this script after registering the key or resolving the SSH connection." >&2
+  return 0
 }
 
 prompt_github_ssh_setup() {
