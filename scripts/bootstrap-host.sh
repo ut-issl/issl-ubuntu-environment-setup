@@ -159,6 +159,10 @@ issl_login_shell_link() {
   printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/issl/login-shell"
 }
 
+is_executable_file() {
+  [ -f "$1" ] && [ -x "$1" ]
+}
+
 current_login_shell() {
   if command -v getent >/dev/null 2>&1; then
     getent passwd "$(id -un)" | cut -d: -f7
@@ -215,7 +219,7 @@ maybe_register_login_shell() {
 
   link="$(issl_login_shell_link)"
   active_login_shell="$(current_login_shell || true)"
-  if [ "${active_login_shell}" = "${link}" ] && [ -x "${link}" ]; then
+  if [ "${active_login_shell}" = "${link}" ] && is_executable_file "${link}"; then
     return
   fi
 
@@ -223,9 +227,14 @@ maybe_register_login_shell() {
     return
   fi
 
-  if [ ! -x "${link}" ]; then
+  if ! is_executable_file "${link}"; then
     mkdir -p "$(dirname "${link}")"
-    ln -sfn /bin/bash "${link}"
+    ln -sfn /bin/bash "${link}" || true
+  fi
+
+  if ! is_executable_file "${link}"; then
+    echo "warning: ${link} is not an executable file. Skipping the login shell registration." >&2
+    return
   fi
 
   if ! ensure_shell_listed_in_etc_shells "${link}"; then
