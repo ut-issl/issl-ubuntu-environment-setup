@@ -88,7 +88,9 @@ to preserve user flexibility and avoid conflicts with both setup modes.
   and place the config file under `assets/<tool>/`.
   Use `xdg.configFile."issl/<tool>/..."` to deploy shared configuration
   under the ISSL config directory,
-  or `home.file` when the config must live at a fixed path outside `~/.config/issl/`.
+  `xdg.stateFile."issl/..."` for a path the environment maintains rather than the user edits
+  (`zsh.nix` deploys the login shell link that way),
+  or `home.file` when the file must live at a fixed path outside those directories.
 - **A Home Manager option rather than a package**: a module may set options directly,
   as `common/platform.nix` does for `targets.genericLinux`.
   Use `lib.mkDefault` for an option a personal config repository should be able to override,
@@ -127,7 +129,7 @@ Every module should have corresponding test coverage under `tests/`.
 
 Tests run in CI against a freshly applied environment
 (the `script-based` job of `.github/workflows/test.yaml` and the reusable
-`.github/workflows/test-config-repository.yaml` both set `HOME_DIR`/`CONFIG_DIR` and run `tests/run.sh`).
+`.github/workflows/test-config-repository.yaml` both set `HOME_DIR`/`CONFIG_DIR`/`STATE_DIR` and run `tests/run.sh`).
 Do not try to run them locally unless this machine has the shared environment applied;
 local validation is prek plus the Nix validation in step 7,
 which can confirm installed binaries and deployed files without applying anything.
@@ -137,7 +139,8 @@ If not, create a new `tests/test-<tool>.sh` following the existing pattern:
 
 1. Copy the header from the closest existing test:
    `set -Eeuo pipefail`, the required environment variable guards
-   (`HOME_DIR:?` always; `CONFIG_DIR:?` when inspecting deployed config or user-managed file wiring),
+   (`HOME_DIR:?` always; `CONFIG_DIR:?` when inspecting deployed config or user-managed file wiring;
+   `STATE_DIR:?` when inspecting what a module deploys under `~/.local/state/issl/`),
    the `COMMON_DIR` fallback, and `nix_profile_bin="${home_dir}/.nix-profile/bin"`.
    Then source `tests/lib.sh` for the `run_assert` helper
    and the failure-reporting ERR trap (which needs the `-E` in `set -Eeuo pipefail`).

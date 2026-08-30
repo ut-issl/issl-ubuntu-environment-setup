@@ -59,7 +59,7 @@ If there is no reasonable existing module for the change, add a new one.
 In most cases, the module should do one or both of the following:
 
 - add packages through `home.packages`
-- deploy shared files through `home.file` or `xdg.configFile`
+- deploy shared files through `xdg.configFile`, `xdg.stateFile`, or `home.file`
 
 For example:
 
@@ -73,6 +73,11 @@ For example:
   xdg.configFile."issl/foo/config.toml".source = ../../assets/foo/config.toml;
 }
 ```
+
+`xdg.configFile."issl/..."` is the usual destination, under `~/.config/issl/`.
+A path the environment maintains rather than the user edits belongs under `~/.local/state/issl/` through `xdg.stateFile`,
+as `common/zsh.nix` deploys the login shell link.
+Use `home.file` when the file must live at a fixed path outside both directories.
 
 `flake.nix` declares both `x86_64-linux` and `aarch64-linux`,
 so a package that is meaningful on only one of them needs a guard on the platform,
@@ -187,7 +192,7 @@ and a new test is silently left out.
    Each build result contains what users receive:
 
    - `result-home/home-path/bin` holds the binaries the configuration installs.
-   - `result-home/home-files` holds the files deployed through `home.file` and `xdg.configFile`,
+   - `result-home/home-files` holds the files deployed through `xdg.configFile`, `xdg.stateFile`, and `home.file`,
      so a deployed asset can be compared against its source under `assets/` with `cmp`.
    - `result-home/activate` is the activation script that Home Manager runs on `switch`.
 
