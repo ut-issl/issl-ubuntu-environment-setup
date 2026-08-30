@@ -156,7 +156,7 @@ start_nix_daemon_without_systemd() {
 }
 
 nix_with_openssh() {
-  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#openssh --command "$@"
+  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#openssh_gssapi --command "$@"
 }
 
 has_github_ssh_auth() {

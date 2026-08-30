@@ -147,7 +147,7 @@ load_bootstrap_host() {
 }
 
 nix_with_git() {
-  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#git nixpkgs#openssh --command "$@"
+  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#git nixpkgs#openssh_gssapi --command "$@"
 }
 
 nix_git() {
