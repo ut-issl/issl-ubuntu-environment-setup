@@ -55,3 +55,11 @@ if command -v rustup >/dev/null 2>&1; then
     eval "$(rustup completions bash cargo)"
   fi
 fi
+
+# ===== User Aliases ===== #
+
+# Load the user's own aliases from the file that Ubuntu's default bashrc points to,
+# for interactive shells only.
+if [[ $- == *i* && -f "${HOME}/.bash_aliases" ]]; then
+  source "${HOME}/.bash_aliases"
+fi

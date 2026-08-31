@@ -53,6 +53,11 @@ fi
 
 alias makej='make -j$(( $(nproc 2>/dev/null || echo 1) + 1 ))' # Build in parallel with CPU cores + 1 jobs.
 
+# Preprocess non-text input files for less when lesspipe is available.
+if [ -x /usr/bin/lesspipe ]; then
+  eval "$(SHELL=/bin/sh lesspipe)"
+fi
+
 man() {
   env \
     LESS_TERMCAP_md="$(printf '\033[01;36m')" \

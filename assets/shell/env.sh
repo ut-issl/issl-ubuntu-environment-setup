@@ -37,6 +37,7 @@ prepend_path() {
   esac
 }
 
+prepend_path "$HOME/bin"
 prepend_path "$HOME/.local/bin"
 prepend_path "${CARGO_HOME}/bin"
 prepend_path "${ISSL_NIX_PROFILE_PATH}/bin"

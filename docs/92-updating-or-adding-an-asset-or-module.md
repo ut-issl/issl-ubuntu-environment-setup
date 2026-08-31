@@ -163,10 +163,18 @@ Update `scripts/apply.sh` when the setup must connect the shared configuration
 to user-managed files in a careful, incremental way that preserves existing user content.
 In practice, this usually means adding include blocks or source commands to user-managed files such as:
 
-- `~/.bashrc`
+- `~/.bash_profile`
 - `~/.zshenv`
 - `~/.cargo/config.toml`
 - `~/.config/nix/nix.conf`
+
+`prepend_block_once` puts the block at the top of the file and keeps the rest.
+`~/.profile` and `~/.bashrc` are the exception:
+`replace_with_block_once` reduces them to the block alone on the first run
+and keeps the previous file at `<file>.backup`.
+Ubuntu seeds those two from `/etc/skel`,
+and that boilerplate runs after a prepended block and overrides the shared settings.
+Both helpers do nothing once their begin marker is present, so later runs never touch the file again.
 
 ## Validating Changes
 

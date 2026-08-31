@@ -14,6 +14,16 @@ If you want your own tools and settings versioned and restored on any machine,
 
 ## Getting Started
 
+> [!CAUTION]
+> The first run **replaces** the two startup files that Ubuntu seeds from `/etc/skel`: `~/.profile` and `~/.bashrc`.
+>
+> On a fresh Ubuntu account these are just the default skeleton files,
+> so there is nothing of yours to lose and you can safely proceed.
+>
+> If you have customized either of them, the previous file is kept at `<file>.backup`,
+> so you can merge what you want to keep back into the new file afterwards.
+> Later runs leave these files alone, so your own edits survive from then on.
+
 Run:
 
 ```bash
