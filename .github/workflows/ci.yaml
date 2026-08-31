@@ -239,7 +239,7 @@ jobs:
       - name: Install shell tools
         shell: bash
         run: |
-          go install mvdan.cc/sh/v3/cmd/shfmt@2f3f5e36d9b0f8f14c998d50aa20a28832205ae8 # v3.13.1
+          go install mvdan.cc/sh/v3/cmd/shfmt@868c8e8f5cbfae87cc87d517c6aad15733fb6fc0 # v3.14.0
           sudo apt-get update
           if [ "${{ github.event_name }}" != "pull_request" ]; then
             sudo apt-get install -y shellcheck
@@ -310,7 +310,7 @@ jobs:
       - name: Install Zsh tools
         shell: bash
         run: |
-          go install mvdan.cc/sh/v3/cmd/shfmt@2f3f5e36d9b0f8f14c998d50aa20a28832205ae8 # v3.13.1
+          go install mvdan.cc/sh/v3/cmd/shfmt@868c8e8f5cbfae87cc87d517c6aad15733fb6fc0 # v3.14.0
           sudo apt-get update
           sudo apt-get install -y zsh
 
