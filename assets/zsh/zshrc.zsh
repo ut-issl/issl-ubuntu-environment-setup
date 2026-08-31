@@ -52,7 +52,7 @@ zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:git:*' formats '%b'
 zstyle ':vcs_info:git:*' actionformats '%b|%a'
 
-if [[ -n ${TERM} && ${TERM} != "dumb" ]]; then
+if [[ -n ${TERM-} && ${TERM-} != "dumb" ]]; then
   PROMPT='zsh:%F{green}%~%f %F{magenta}${issl_prompt_vcs}%f$ '
   RPROMPT='%F{yellow}%w %T%f'
 else
@@ -60,17 +60,31 @@ else
   RPROMPT=''
 fi
 
+typeset -g issl_prompt_vcs=''
+
 # Refresh the VCS information before every prompt.
 # The hook unregisters itself once neither prompt references the VCS information.
 issl_prompt_precmd() {
-  if [[ ${PROMPT} != *'${issl_prompt_vcs}'* && ${RPROMPT} != *'${issl_prompt_vcs}'* ]]; then
+  setopt localoptions no_err_exit no_err_return no_warn_nested_var no_ignore_braces no_force_float no_sh_glob unset
+
+  if [[ -o restricted ]] || [[ ${PROMPT} != *issl_prompt_vcs* && ${RPROMPT} != *issl_prompt_vcs* ]]; then
+    issl_prompt_vcs=''
     add-zsh-hook -d precmd issl_prompt_precmd
     return
   fi
 
+  # Keep git in the command hash table, which vcs_info tests to detect git.
+  hash git 2>/dev/null
+
   vcs_info
-  # Escape every '%' in the VCS information.
-  issl_prompt_vcs=${vcs_info_msg_0_//\%/%%}
+  # Escape the prompt metacharacters in the VCS information.
+  issl_prompt_vcs=${vcs_info_msg_0_}
+  if [[ -o prompt_percent ]]; then
+    issl_prompt_vcs=${issl_prompt_vcs//\%/%%}
+  fi
+  if [[ -o prompt_bang ]]; then
+    issl_prompt_vcs=${issl_prompt_vcs//\!/!!}
+  fi
 }
 add-zsh-hook precmd issl_prompt_precmd
 
