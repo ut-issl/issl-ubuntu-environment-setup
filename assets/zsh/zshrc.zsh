@@ -109,7 +109,7 @@ fi
 
 # Configure completion styles.
 if [ -n "${LS_COLORS:-}" ]; then
-  zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+  zstyle ':completion:*:default' list-colors "${(@)${(s.:.)LS_COLORS}:#}"
 fi
 zstyle ':completion:*' auto-description 'specify: %d'
 zstyle ':completion:*' completer _oldlist _expand _complete _correct
