@@ -94,25 +94,32 @@ guard_against_existing_home_manager_files() {
   exit 1
 }
 
-prepend_block_once() {
+# Create the parent directory, report whether the block still has to be written,
+# and refuse a file that Home Manager manages.
+prepare_block_file() {
   local file_path="$1"
   local begin_marker="$2"
-  local end_marker="$3"
-  local block_content="$4"
-  local file_dir=""
-  local temp_file=""
 
-  file_dir="$(dirname "${file_path}")"
-  mkdir -p "${file_dir}"
+  mkdir -p "$(dirname "${file_path}")"
 
   if [ -f "${file_path}" ] && grep -Fq "${begin_marker}" "${file_path}"; then
-    return
+    return 1
   fi
 
   if resolves_into_nix_store "${file_path}"; then
     echo "error: refusing to modify ${file_path} because it resolves into the Nix store (likely managed by Home Manager)." >&2
     exit 1
   fi
+}
+
+prepend_block_once() {
+  local file_path="$1"
+  local begin_marker="$2"
+  local end_marker="$3"
+  local block_content="$4"
+  local temp_file=""
+
+  prepare_block_file "${file_path}" "${begin_marker}" || return 0
 
   touch "${file_path}"
 
@@ -129,6 +136,48 @@ prepend_block_once() {
       cat "${file_path}"
     fi
   } >"${temp_file}"
+  mv "${temp_file}" "${file_path}"
+  chmod "${original_mode}" "${file_path}"
+}
+
+# Reduce the file to the block alone, keeping any previous content at <file>.backup.
+replace_with_block_once() {
+  local file_path="$1"
+  local begin_marker="$2"
+  local end_marker="$3"
+  local block_content="$4"
+  local backup_path=""
+  local temp_file=""
+
+  prepare_block_file "${file_path}" "${begin_marker}" || return 0
+
+  touch "${file_path}"
+
+  local original_mode=""
+  original_mode="$(stat -L -c %a "${file_path}")"
+
+  if [ -s "${file_path}" ]; then
+    backup_path="${file_path}.backup"
+    if [ -e "${backup_path}" ] || [ -L "${backup_path}" ]; then
+      echo "error: refusing to replace ${file_path} because ${backup_path} already exists." >&2
+      echo "Move or remove ${backup_path} and re-run this script." >&2
+      exit 1
+    fi
+  fi
+
+  # Build the replacement beside the target so that moving it into place is a same-filesystem rename.
+  temp_file="$(mktemp "${file_path}.XXXXXX")"
+  {
+    printf '%s\n' "${begin_marker}"
+    printf '%s\n' "${block_content}"
+    printf '%s\n' "${end_marker}"
+  } >"${temp_file}"
+
+  if [ -n "${backup_path}" ]; then
+    mv "${file_path}" "${backup_path}"
+    echo "Replaced ${file_path} with the shared configuration and kept the previous file at ${backup_path}."
+  fi
+
   mv "${temp_file}" "${file_path}"
   chmod "${original_mode}" "${file_path}"
 }
@@ -202,7 +251,7 @@ bashrc_block() {
 }
 
 ensure_bash_startup_files() {
-  prepend_block_once \
+  replace_with_block_once \
     "${HOME}/.profile" \
     "# >>> ISSL shell env >>>" \
     "# <<< ISSL shell env <<<" \
@@ -212,7 +261,7 @@ ensure_bash_startup_files() {
     "# >>> ISSL bash profile >>>" \
     "# <<< ISSL bash profile <<<" \
     "$(bash_profile_block)"
-  prepend_block_once \
+  replace_with_block_once \
     "${HOME}/.bashrc" \
     "# >>> ISSL bash rc >>>" \
     "# <<< ISSL bash rc <<<" \
