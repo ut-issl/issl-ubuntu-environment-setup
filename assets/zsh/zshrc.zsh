@@ -138,16 +138,23 @@ zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=00;31'
 autoload -Uz compinit
 compinit
 
+# Evaluate a generated completion script with the default Zsh options.
+issl_eval_completion() {
+  emulate -L zsh
+
+  eval "$1"
+}
+
 # Enable uv completion when uv is available.
 if command -v uv >/dev/null 2>&1; then
   if uv generate-shell-completion zsh >/dev/null 2>&1; then
-    eval "$(uv generate-shell-completion zsh)"
+    issl_eval_completion "$(uv generate-shell-completion zsh)"
   fi
 fi
 
 # Enable rustup completion when rustup is available.
 if command -v rustup >/dev/null 2>&1; then
-  eval "$(rustup completions zsh)"
+  issl_eval_completion "$(rustup completions zsh)"
 fi
 
 # ===== Functions and Aliases ===== #
