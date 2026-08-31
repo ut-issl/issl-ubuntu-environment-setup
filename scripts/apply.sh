@@ -158,7 +158,7 @@ replace_with_block_once() {
 
   if [ -s "${file_path}" ]; then
     backup_path="${file_path}.backup"
-    if [ -e "${backup_path}" ]; then
+    if [ -e "${backup_path}" ] || [ -L "${backup_path}" ]; then
       echo "error: refusing to replace ${file_path} because ${backup_path} already exists." >&2
       echo "Move or remove ${backup_path} and re-run this script." >&2
       exit 1
