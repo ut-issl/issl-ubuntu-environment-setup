@@ -2,9 +2,9 @@
 name: develop
 description: >-
   Guide development of the shared ISSL environment:
-  adding or updating tools, modules, assets, and tests.
+  adding or updating tools, modules, the files they deploy, and tests.
   Use when asked to add a tool or package to the shared environment,
-  update an existing module or asset, or modify how the environment is configured.
+  update an existing module or a file it deploys, or modify how the environment is configured.
   Do not use for documentation-only changes, CI/CD pipeline changes,
   or dependency version bumps handled by Renovate.
 ---
@@ -12,14 +12,17 @@ description: >-
 # Develop the Shared Environment
 
 Help update or extend the shared ISSL Ubuntu environment, one change at a time:
-add a tool, update a module, add or modify an asset, or adjust the imperative setup.
+add a tool, update a module, change a file it deploys, or adjust the imperative setup.
 
-Follow the conventions in `docs/92-updating-or-adding-an-asset-or-module.md`
-and `docs/93-contribution-guidelines.md`.
+`docs/92-updating-or-adding-a-module.md` holds the conventions of this repository.
+Read it and follow it rather than working from a summary; this skill covers only how to carry the work out.
+Every `§` below names a section of that page.
+`docs/93-contribution-guidelines.md` holds the commit and pull request conventions.
+
 Converse in the language the user writes in, but keep all edits (code, comments, commit messages, etc.) in English.
 Leave all changes uncommitted; committing and pushing are up to the user unless explicitly requested.
 Never write secrets (tokens, private keys, credentials) into the repository;
-assets in this repository are deployed to every lab machine.
+what this repository deploys reaches every lab machine.
 Never run `scripts/apply.sh`, `scripts/setup.sh`, or `home-manager switch`
 against the user's real home environment without explicit approval;
 use prek and `nix flake check --all-systems` for local validation instead.
@@ -32,22 +35,21 @@ If Nix is not available, stop and ask the user to set it up first.
 ## 1. Understand the request
 
 Identify what the user wants: a new tool in the shared environment,
-a change to an existing tool's configuration, a new asset, or a structural change.
+a change to an existing tool's configuration, a new deployed file, or a structural change.
 Ask only if the request is ambiguous.
 
 ## 2. Check what already exists
 
 Before adding anything, scan the actual repository state (not the docs, which may lag):
 
-- `home-modules/common/` for existing modules that already cover the tool or area.
-  Every file there is imported automatically by `home-modules/default.nix`.
-- `home-modules/common/zsh.nix` for a conditional module: it declares an option and gates `config` with `lib.mkIf`.
+- `home-modules/` for a module that already covers the tool or area.
+  Each directory there is one module, together with the configuration files it deploys.
+- `home-modules/zsh/zsh.nix` for a conditional module: it declares an option and gates `config` with `lib.mkIf`.
   Read its `lib.mkMerge` and the forced link inside it as specific to the login shell, not as part of that pattern.
-- `assets/` for existing configuration files.
 - `tests/` for existing test coverage.
 - `scripts/apply.sh` for existing imperative wiring.
 
-If there is already a related module or asset, update it rather than creating a new one.
+If there is already a related module, update it rather than creating a new one.
 
 ## 3. Research the package and its options
 
@@ -55,60 +57,33 @@ For a new tool:
 
 - Settle first whether the package is a graphical application, and stop there if it is:
   say that it does not belong in the shared environment, and do not go on to the license check or to a placement.
-  `docs/92-updating-or-adding-an-asset-or-module.md` § "Updating or Adding a Module" has the reasons.
+  § "What Belongs in the Shared Environment" has the reasons.
   Point the user to `docs/13-package-management-practices.md` rather than to a particular alternative:
   whether such an application can live in a personal config repository
   or has to stay with the distribution depends on the host integration it needs.
 - Look the package up in nixpkgs at the pinned revision:
   read the `nixpkgs` entry's `locked.rev` from `flake.lock` and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
-- Every system that `flake.nix` declares has to keep evaluating.
-  Guard a package that is meaningful on only some of them on the platform,
-  as `common/cpp.nix` does with `pkgs.stdenv.hostPlatform.isx86_64` for the multilib GCC.
-- `home-modules/common/nix.nix` sets `nixpkgs.config.allowUnfree = true`,
-  so an unfree package can be added without a flake change.
-  Because that setting also applies to every personal config repository importing this one,
-  check the package's license terms and get an explicit yes from the user before adding one,
-  and state in the pull request why it is worth distributing to all users under those terms.
+- Work out whether the package is meaningful on every system that `flake.nix` declares,
+  and guard it on the platform if it is not, as § "Changing a Module's Packages or Settings" describes.
+- An unfree package needs an explicit yes from the user before you add it,
+  on top of the justification that § "What Belongs in the Shared Environment" asks for in the pull request.
 - If the package is not in nixpkgs, report honestly and let the user decide.
   Never add flake inputs or overlays without an explicit yes.
 
 ## 4. Decide where the change goes
 
-Follow the conventions in `docs/92-updating-or-adding-an-asset-or-module.md`.
+The page has one section per kind of change.
+Work out which one the request is, and follow that section rather than improvising:
 
-This repository deliberately does not use Home Manager's `programs.<tool>` options
-that generate user-level config files (e.g. `~/.gitconfig`, `~/.bashrc`).
-Shared configuration is deployed under `~/.config/issl/` and included or sourced from user-managed files instead,
-to preserve user flexibility and avoid conflicts with both setup modes.
+- only the contents of a file this repository already deploys → § "Changing a Deployed File"
+- a configuration file this repository does not deploy yet → § "Adding a Deployed File"
+- a package or a Home Manager option in an existing module → § "Changing a Module's Packages or Settings"
+- a distinct area with no module of its own → § "Adding a Module"
 
-- **Existing module covers this area**: update that module.
-- **New tool with no settings**: add to `home.packages` in an existing module
-  that covers the same area, or create a new module if it represents a distinct area.
-- **New tool with shared configuration**: create a dedicated module `home-modules/common/<tool>.nix`
-  and place the config file under `assets/<tool>/`.
-  Use `xdg.configFile."issl/<tool>/..."` to deploy shared configuration under the ISSL config directory,
-  `xdg.stateFile."issl/..."` for a path the environment maintains rather than the user edits
-  (`zsh.nix` deploys the login shell link that way),
-  or `home.file` when the file must live at a fixed path outside those directories.
-- **A Home Manager option rather than a package**: a module may set options directly,
-  as `common/platform.nix` does for `targets.genericLinux`.
-  Use `lib.mkDefault` for an option a personal config repository should be able to override,
-  and a plain definition for one that has to hold for everyone.
-  Choose a default that asks nothing of the user, and within that constraint follow what most users want.
-- **New module**: create the file under `home-modules/common/` and track it with Git.
-  It is imported automatically.
-  Reuse the existing `issl.zsh.enable` option where it fits;
-  introducing a new condition means declaring another option and gating `config` with `lib.mkIf`
-  (`docs/92-updating-or-adding-an-asset-or-module.md` § "Updating or Adding a Module" shows the shape),
-  and it also requires changes to `flake.nix` (configurations, checks) and the CI test matrix —
-  confirm with the user before going that route.
-
-If the change also requires imperative wiring
-(connecting shared config to user-managed files such as `~/.bashrc` or `~/.cargo/config.toml`),
-`scripts/apply.sh` will need updating as well.
-But prefer declarative integration in `home-modules/` first,
-and update `scripts/apply.sh` only when that is not enough.
-See `docs/92-updating-or-adding-an-asset-or-module.md` § "When `apply.sh` Needs Changes" for guidance.
+Reuse the existing `issl.zsh.enable` option where it fits.
+Introducing a new condition means declaring another option and gating `config` with `lib.mkIf`,
+and it also requires changes to `flake.nix` (configurations, checks) and the CI test matrix —
+confirm with the user before going that route.
 
 If more than one placement is reasonable, present the options briefly with a recommendation
 and let the user choose before editing.
@@ -118,10 +93,10 @@ and let the user choose before editing.
 Match the style of the existing modules.
 Formatting is enforced by nixfmt via the pre-commit hooks.
 
-For `scripts/apply.sh`, if changes are needed:
-
-- Use the `prepend_block_once` helper for wiring shared config into user-managed files.
-- Follow the existing marker pattern (`# >>> ISSL <name> >>>` / `# <<< ISSL <name> <<<`).
+Where § "Connecting to User-Managed Files" calls for a change to `scripts/apply.sh`,
+follow the existing marker pattern (`# >>> ISSL <name> >>>` / `# <<< ISSL <name> <<<`).
+That section also names the template repository as the other half of the same wiring,
+so say in the wrap-up whether a change there is needed.
 
 ## 6. Add or update tests
 
@@ -149,7 +124,7 @@ If not, create a new `tests/test-<tool>.sh` following the existing pattern:
 4. Make the script executable.
 5. Register the new test script in `tests/run.sh` by adding its name to the loop list.
 
-For a module that takes effect only in specific configurations (like `zsh.nix`),
+For a module that takes effect only in specific configurations (like `zsh/zsh.nix`),
 gate its assertions on the corresponding environment variable
 inside the relevant test script (see `ISSL_ENABLE_ZSH` in `test-shell.sh`)
 instead of adding a separate unconditional script.
@@ -158,7 +133,7 @@ Common assertion patterns:
 
 - **Tool installation**: check `test -x "${nix_profile_bin}/<binary>"`
   and verify `command -v` resolves to the Nix profile path.
-- **Asset deployment**: use `cmp` to verify the deployed file matches the source under `assets/`.
+- **File deployment**: use `cmp` to verify the deployed file matches the source in the module's directory.
 - **Config wiring**: use `grep -Fq` to check that include or source lines are present in user-managed files.
 
 ## 7. Validate
@@ -167,7 +142,7 @@ Run validation in this order:
 
 1. Run `prek run --files <changed files> --skip no-commit-to-branch` and fix what it reports.
    If `prek` is not on PATH, use `uvx prek` instead.
-2. Run the Nix validation of `docs/92-updating-or-adding-an-asset-or-module.md` § "Validating Changes":
+2. Run the Nix validation of § "Validating Changes":
    stage the new files, run the flake checks,
    then build the activation packages and inspect the installed binaries and deployed files.
    Build for the system of this machine, not the one in the example command.
@@ -178,8 +153,7 @@ Run validation in this order:
 Summarize what was changed, what was validated, and what was skipped.
 
 If the change affects contributor workflow or user-visible setup behavior,
-update the relevant documentation under `docs/` as part of this task
-(see `docs/92-updating-or-adding-an-asset-or-module.md` § "Documentation Updates").
+update the relevant documentation under `docs/` as part of this task (see § "Documentation Updates").
 
 If the user later asks for a commit or PR,
 follow the Conventional Commits format described in `docs/93-contribution-guidelines.md`,
