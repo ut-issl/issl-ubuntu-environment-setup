@@ -78,6 +78,10 @@ assert_shared_shell_tools() {
   test -x "${nix_profile_bin}/dircolors"
   test "$(command -v dircolors)" = "${nix_profile_bin}/dircolors"
   dircolors --version
+
+  test -x "${nix_profile_bin}/ls"
+  test "$(command -v ls)" = "${nix_profile_bin}/ls"
+  ls --classify=auto -d . >/dev/null
 }
 
 assert_shellcheck_installation() {
