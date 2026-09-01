@@ -43,11 +43,11 @@ alias rm='rm -i' # Ask before file removal.
 alias mv='mv -i' # Ask before overwrite on move.
 alias cp='cp -i' # Ask before overwrite on copy.
 
-alias la='ls -A'  # Show all except . and ...
+alias la='ls -A'  # Show all except the . and .. entries.
 alias ll='ls -lh' # Long list with human-readable sizes.
-alias lla='ll -A' # Long list including hidden files except . and ...
+alias lla='ll -A' # Long list including hidden files except the . and .. entries.
 alias lr='ls -R'  # Recursive listing.
-alias lra='lr -A' # Recursive listing including hidden files except . and ...
+alias lra='lr -A' # Recursive listing including hidden files except the . and .. entries.
 
 # Use colordiff when available, otherwise keep unified diff output.
 if command -v colordiff >/dev/null 2>&1; then
