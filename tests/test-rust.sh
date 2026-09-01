@@ -67,7 +67,7 @@ assert_default_toolchain_stable() {
 }
 
 assert_shared_rust_config_asset() {
-  cmp "${common_dir}/assets/rust/config.toml" "${config_dir}/issl/rust/config.toml"
+  cmp "${common_dir}/home-modules/rust/config.toml" "${config_dir}/issl/rust/config.toml"
 }
 
 assert_cargo_config_include() {

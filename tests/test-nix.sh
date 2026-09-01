@@ -17,7 +17,7 @@ assert_nix_installation() {
 }
 
 assert_shared_nix_config() {
-  cmp "${common_dir}/assets/nix/nix.conf" "${issl_nix_config_path}"
+  cmp "${common_dir}/home-modules/nix/nix.conf" "${issl_nix_config_path}"
 }
 
 assert_nix_conf_include() {

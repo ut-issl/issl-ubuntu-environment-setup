@@ -7,7 +7,6 @@ on:
     paths:
       - .github/workflows/test.yaml
       - .github/workflows/test-config-repository.yaml
-      - assets/**
       - flake.nix
       - flake.lock
       - home-modules/**
@@ -20,7 +19,6 @@ on:
     paths:
       - .github/workflows/test.yaml
       - .github/workflows/test-config-repository.yaml
-      - assets/**
       - flake.nix
       - flake.lock
       - home-modules/**

@@ -46,7 +46,7 @@ assert_uv_installation() {
 }
 
 assert_shared_pythonrc_asset() {
-  cmp "${common_dir}/assets/python/pythonrc.py" "${issl_pythonrc_path}"
+  cmp "${common_dir}/home-modules/python/pythonrc.py" "${issl_pythonrc_path}"
 }
 
 assert_user_python_startup_file() {
