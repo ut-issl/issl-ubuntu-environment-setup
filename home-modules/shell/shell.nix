@@ -2,7 +2,6 @@
 
 {
   home.packages = [
-    pkgs.bash-completion
     pkgs.colordiff
     pkgs.coreutils
     pkgs.shellcheck
@@ -13,6 +12,5 @@
     "issl/shell/env.sh".source = ./env.sh;
     "issl/shell/rc.sh".source = ./rc.sh;
     "issl/shell/.dircolors".source = ./dircolors;
-    "issl/bash/.bashrc".source = ./bashrc.bash;
   };
 }

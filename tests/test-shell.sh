@@ -18,7 +18,7 @@ assert_shared_shell_assets() {
   cmp "${common_dir}/home-modules/shell/env.sh" "${config_dir}/issl/shell/env.sh"
   cmp "${common_dir}/home-modules/shell/rc.sh" "${config_dir}/issl/shell/rc.sh"
   cmp "${common_dir}/home-modules/shell/dircolors" "${config_dir}/issl/shell/.dircolors"
-  cmp "${common_dir}/home-modules/shell/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
+  cmp "${common_dir}/home-modules/bash/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
 }
 
 assert_shell_env_can_be_sourced() {
