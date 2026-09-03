@@ -65,8 +65,8 @@ in
       ];
 
       xdg.configFile = {
-        "issl/zsh/.zprofile".source = ../../assets/zsh/zprofile.zsh;
-        "issl/zsh/.zshrc".source = ../../assets/zsh/zshrc.zsh;
+        "issl/zsh/.zprofile".source = ./zprofile.zsh;
+        "issl/zsh/.zshrc".source = ./zshrc.zsh;
       };
 
       home.activation.checkLoginShell = lib.hm.dag.entryAnywhere ''

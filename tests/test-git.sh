@@ -40,7 +40,7 @@ assert_zizmor_installation() {
 }
 
 assert_shared_git_config() {
-  cmp "${common_dir}/assets/git/.gitconfig" "${config_dir}/issl/git/.gitconfig"
+  cmp "${common_dir}/home-modules/git/gitconfig" "${config_dir}/issl/git/.gitconfig"
 }
 
 assert_global_git_include() {

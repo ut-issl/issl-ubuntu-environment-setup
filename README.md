@@ -33,7 +33,7 @@ For more details, see the [User Guide](docs/10-user-guide.md).
 See [Developer Guide](docs/90-developer-guide.md).
 
 This repository ships a skill for coding agents that assists development;
-see [agent skill](docs/92-updating-or-adding-an-asset-or-module.md#agent-skill).
+see [agent skill](docs/92-updating-or-adding-a-module.md#agent-skill).
 
 ## License
 

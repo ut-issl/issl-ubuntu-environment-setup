@@ -50,7 +50,7 @@ assert_pkg_config_installation() {
 }
 
 assert_shared_clang_format_configuration() {
-  cmp "${common_dir}/assets/cpp/clang-format.yaml" "${home_dir}/.clang-format"
+  cmp "${common_dir}/home-modules/cpp/clang-format.yaml" "${home_dir}/.clang-format"
 }
 
 main() {

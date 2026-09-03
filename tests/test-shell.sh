@@ -14,11 +14,11 @@ issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_shared_shell_assets() {
-  cmp "${common_dir}/assets/shell/env.sh" "${config_dir}/issl/shell/env.sh"
-  cmp "${common_dir}/assets/shell/rc.sh" "${config_dir}/issl/shell/rc.sh"
-  cmp "${common_dir}/assets/shell/.dircolors" "${config_dir}/issl/shell/.dircolors"
-  cmp "${common_dir}/assets/bash/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
+assert_shared_shell_files() {
+  cmp "${common_dir}/home-modules/shell/env.sh" "${config_dir}/issl/shell/env.sh"
+  cmp "${common_dir}/home-modules/shell/rc.sh" "${config_dir}/issl/shell/rc.sh"
+  cmp "${common_dir}/home-modules/shell/dircolors" "${config_dir}/issl/shell/.dircolors"
+  cmp "${common_dir}/home-modules/bash/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
 }
 
 assert_shell_env_can_be_sourced() {
@@ -102,9 +102,9 @@ assert_zsh_enabled() {
   zsh --version
 }
 
-assert_shared_zsh_assets() {
-  cmp "${common_dir}/assets/zsh/zprofile.zsh" "${config_dir}/issl/zsh/.zprofile"
-  cmp "${common_dir}/assets/zsh/zshrc.zsh" "${config_dir}/issl/zsh/.zshrc"
+assert_shared_zsh_files() {
+  cmp "${common_dir}/home-modules/zsh/zprofile.zsh" "${config_dir}/issl/zsh/.zprofile"
+  cmp "${common_dir}/home-modules/zsh/zshrc.zsh" "${config_dir}/issl/zsh/.zshrc"
 }
 
 assert_zsh_startup_files() {
@@ -175,7 +175,7 @@ assert_zsh_disabled() {
 }
 
 main() {
-  run_assert assert_shared_shell_assets
+  run_assert assert_shared_shell_files
   run_assert assert_shell_env_can_be_sourced
   run_assert assert_bash_startup_files
   run_assert assert_bash_startup_is_loaded
@@ -186,7 +186,7 @@ main() {
 
   if [ "${issl_enable_zsh}" = "1" ]; then
     run_assert assert_zsh_enabled
-    run_assert assert_shared_zsh_assets
+    run_assert assert_shared_zsh_files
     run_assert assert_zsh_startup_files
     run_assert assert_zsh_startup_is_loaded
     run_assert assert_login_shell_is_managed_for_zsh
