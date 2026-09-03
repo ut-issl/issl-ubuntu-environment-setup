@@ -66,7 +66,7 @@ assert_default_toolchain_stable() {
   rustup show active-toolchain | grep -Eq '^stable(-|$)'
 }
 
-assert_shared_rust_config_asset() {
+assert_shared_rust_config_file() {
   cmp "${common_dir}/home-modules/rust/config.toml" "${config_dir}/issl/rust/config.toml"
 }
 
@@ -88,7 +88,7 @@ main() {
   run_assert assert_cargo_nextest_installation
   run_assert assert_dist_installation
   run_assert assert_default_toolchain_stable
-  run_assert assert_shared_rust_config_asset
+  run_assert assert_shared_rust_config_file
   run_assert assert_cargo_config_include
 }
 

@@ -45,7 +45,7 @@ assert_uv_installation() {
   uv --version
 }
 
-assert_shared_pythonrc_asset() {
+assert_shared_pythonrc_file() {
   cmp "${common_dir}/home-modules/python/pythonrc.py" "${issl_pythonrc_path}"
 }
 
@@ -120,7 +120,7 @@ assert_python_startup_basic_repl_libedit_history() {
 
 main() {
   run_assert assert_uv_installation
-  run_assert assert_shared_pythonrc_asset
+  run_assert assert_shared_pythonrc_file
   run_assert assert_user_python_startup_file
   run_assert assert_python_startup_is_loaded
   run_assert assert_python_startup_pyrepl_history
