@@ -28,7 +28,7 @@ Three destinations are available, and the choice between them comes before any o
 [Package management practices](13-package-management-practices.md) describes the last two from the user's side.
 
 The shared environment owns what it deploys under `~/.config/issl/` and `~/.local/state/issl/`,
-together with a few fixed paths outside them, such as `~/.clang-format`.
+along with `~/.clang-format`, the one fixed path outside them that a module deploys.
 It never takes ownership of a file the user is expected to edit, such as `~/.bashrc` or `~/.config/git/config`.
 That rules out `home.file` on such a path, and the `programs.<tool>` options that write one;
 a `programs.<tool>` option that only installs a package is unaffected, as `programs.home-manager` in `nix/nix.nix` shows.
@@ -174,6 +174,11 @@ declare an option for it and gate its `config` with `lib.mkIf`:
 `zsh/zsh.nix` is one such module.
 Its `lib.mkMerge` and the forced link inside it are specific to the login shell, not part of this pattern.
 
+An option that changes what the environment installs is covered on both sides:
+`flake.nix` declares a Home Manager configuration and a check for each state,
+and the matrix of `.github/workflows/test.yaml` runs the tests for each.
+Introducing one therefore reaches beyond the module.
+
 Choose a default that asks nothing of the user:
 `targets.genericLinux.gpu.enable` is off because enabling it asks every machine for a privileged one-time setup.
 Within that constraint, follow what most users want:
@@ -231,8 +236,10 @@ git add -N <new files>
 ```
 
 This records an intent to add and creates no commit.
-Without it, a new module fails to evaluate because Nix does not see the file,
-and a new test is silently left out.
+Without it, Nix does not see the new files.
+An untracked module directory is skipped without a word,
+an untracked file that a module deploys fails the evaluation on a missing path, and a new test is silently left out.
+A directory whose `<name>.nix` alone is untracked is reported as missing that file, however plainly it sits on disk.
 
 1. Run the pre-commit hooks:
 

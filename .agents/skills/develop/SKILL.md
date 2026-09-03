@@ -44,8 +44,7 @@ Before adding anything, scan the actual repository state (not the docs, which ma
 
 - `home-modules/` for a module that already covers the tool or area.
   Each directory there is one module, together with the configuration files it deploys.
-- `home-modules/zsh/zsh.nix` for a conditional module: it declares an option and gates `config` with `lib.mkIf`.
-  Read its `lib.mkMerge` and the forced link inside it as specific to the login shell, not as part of that pattern.
+- `home-modules/zsh/zsh.nix` for a conditional module, read alongside § "Adding a Module".
 - `tests/` for existing test coverage.
 - `scripts/apply.sh` for existing imperative wiring.
 
@@ -81,9 +80,8 @@ Work out which one the request is, and follow that section rather than improvisi
 - a distinct area with no module of its own → § "Adding a Module"
 
 Reuse the existing `issl.zsh.enable` option where it fits.
-Introducing a new condition means declaring another option and gating `config` with `lib.mkIf`,
-and it also requires changes to `flake.nix` (configurations, checks) and the CI test matrix —
-confirm with the user before going that route.
+A new one reaches `flake.nix` and the CI matrix as § "Adding a Module" describes,
+so confirm with the user before going that route.
 
 If more than one placement is reasonable, present the options briefly with a recommendation
 and let the user choose before editing.

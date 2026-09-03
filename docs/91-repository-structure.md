@@ -38,8 +38,6 @@ Each module is a directory holding its Nix expression together with the configur
   - `zsh/zsh.nix` deploys the shared Zsh configuration unless the `issl.zsh.enable` option is set to `false`.
 - Every other file in the directory is a configuration file that the module deploys,
   such as `git/gitconfig` or `python/pythonrc.py`.
-  A file that is deployed as a dotfile is stored here without the leading dot,
-  because the deployed name comes from the `home.file` or `xdg.configFile` key rather than from the source.
 - `default.nix` is the aggregation point, and the only `default.nix` in this directory tree.
   It imports every module directory automatically.
 
