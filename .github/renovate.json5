@@ -79,6 +79,20 @@
       ],
       matchStringsStrategy: 'recursive',
       matchStrings: [
+        "uses: lycheeverse/lychee-action@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+lycheeVersion: '[^'\\s]+'",
+        "\\n\\s+lycheeVersion: '(?<currentValue>[^'\\s]+)'",
+      ],
+      datasourceTemplate: 'github-releases',
+      depNameTemplate: 'lycheeverse/lychee',
+      extractVersionTemplate: '^lychee-(?<version>v\\d+\\.\\d+\\.\\d+)$',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows/ci\\.ya?ml$/',
+      ],
+      matchStringsStrategy: 'recursive',
+      matchStrings: [
         "uses: reviewdog/action-setup@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+reviewdog_version: '[^'\\s]+'",
         "\\n\\s+reviewdog_version: '(?<currentValue>[^'\\s]+)'",
       ],
@@ -172,6 +186,15 @@
       allowedVersions: '/^v?\\d+\\.\\d+\\.\\d+$/',
     },
     {
+      matchManagers: [
+        'pre-commit',
+      ],
+      matchDepNames: [
+        'lycheeverse/lychee',
+      ],
+      versioning: 'regex:^lychee-v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$',
+    },
+    {
       matchDepNames: [
         'commitizen-tools/commitizen',
       ],
@@ -180,7 +203,6 @@
     {
       matchDepNames: [
         'lycheeverse/lychee',
-        'lycheeverse/lychee-action',
       ],
       groupName: 'lychee',
     },
