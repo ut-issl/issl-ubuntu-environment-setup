@@ -46,7 +46,7 @@ Use Commitizen instead of `git commit`:
 cz commit
 ```
 
-For more details, see [Commitizen documentation](https://commitizen-tools.github.io/commitizen).
+For more details, see [Commitizen documentation](https://commitizen-tools.github.io/commitizen/).
 
 ## Version Bumping by Labels
 
