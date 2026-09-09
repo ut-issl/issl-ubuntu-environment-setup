@@ -1,0 +1,8 @@
+# Treat HTTP links as errors when HTTPS is available.
+require_https = true
+
+# Check anchor fragments such as `#section` in addition to the link target.
+include_fragments = "anchor-only"
+
+# Traverse hidden directories and files.
+hidden = true
