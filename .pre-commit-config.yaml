@@ -61,7 +61,6 @@ repos:
       - id: lychee
         args: ["--offline", "--no-progress", "."]
         pass_filenames: false
-        files: \.md$|^lychee\.toml$
 
   - repo: https://github.com/tombi-toml/tombi-pre-commit
     rev: 84223797550a899b3a0d89179934e5f91b8ee4d1  # frozen: v1.5.1
