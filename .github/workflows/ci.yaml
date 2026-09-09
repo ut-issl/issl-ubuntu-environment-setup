@@ -388,6 +388,7 @@ jobs:
       - name: Check links
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
+          lycheeVersion: 'v0.24.2'
           args: '--no-progress .'
 
   lint-json5:
