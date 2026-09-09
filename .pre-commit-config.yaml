@@ -55,6 +55,13 @@ repos:
       - id: rumdl
         args: ["--fix"]
 
+  - repo: https://github.com/lycheeverse/lychee
+    rev: e85aaf5524b2f808e63bae55e594c843220f10f2  # frozen: lychee-v0.24.2
+    hooks:
+      - id: lychee
+        args: ["--offline", "--no-progress", "."]
+        pass_filenames: false
+
   - repo: https://github.com/tombi-toml/tombi-pre-commit
     rev: 2ded3bc1d8379b49bfe7415ecea01f52a254c67d  # frozen: v1.5.2
     hooks:

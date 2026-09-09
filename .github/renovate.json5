@@ -179,6 +179,13 @@
     },
     {
       matchDepNames: [
+        'lycheeverse/lychee',
+        'lycheeverse/lychee-action',
+      ],
+      groupName: 'lychee',
+    },
+    {
+      matchDepNames: [
         'rvben/rumdl',
         'rvben/rumdl-pre-commit',
       ],

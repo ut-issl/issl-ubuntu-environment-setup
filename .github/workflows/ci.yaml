@@ -65,6 +65,7 @@ jobs:
             md:
               - '**/*.md'
               - .rumdl.toml
+              - lychee.toml
             json5:
               - '**/*.json5'
             toml:
@@ -366,6 +367,28 @@ jobs:
         with:
           version: '0.2.66'
           report-type: annotations
+
+  check-links:
+    name: Check links
+    needs: determine-changes
+    if: >-
+      ${{ needs.determine-changes.outputs.md == 'true' ||
+      needs.determine-changes.outputs.github_actions_ci == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: '--no-progress .'
 
   lint-json5:
     name: Lint JSON5
