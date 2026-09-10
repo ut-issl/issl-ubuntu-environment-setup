@@ -50,6 +50,7 @@ jobs:
           files_yaml: |
             github_actions:
               - .github/workflows/**
+              - .github/actionlint.yaml
             github_actions_ci:
               - .github/workflows/ci.yaml
             renovate_config:
@@ -117,7 +118,7 @@ jobs:
       - name: Run zizmor
         uses: zizmorcore/zizmor-action@70fb788f84895a7701f5643d103d587e460b5c99 # v0.6.3
         with:
-          version: 'v1.24.1'
+          version: 'v1.30.0'
           advanced-security: false
           annotations: true
 
@@ -131,7 +132,7 @@ jobs:
           }}
         uses: zizmorcore/zizmor-action@70fb788f84895a7701f5643d103d587e460b5c99 # v0.6.3
         with:
-          version: 'v1.24.1'
+          version: 'v1.30.0'
           advanced-security: true
 
   validate-renovate-config:
