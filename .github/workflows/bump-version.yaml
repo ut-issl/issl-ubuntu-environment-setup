@@ -33,6 +33,8 @@ jobs:
         with:
           client-id: ${{ vars.GH_APP_CLIENT_ID }}
           private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
 
       - name: Bump version
         id: bump-version
