@@ -1,6 +1,11 @@
 ---
 default_stages: [pre-commit]
 
+update:
+  repos:
+    "https://github.com/lycheeverse/lychee":
+      include_tags: ["lychee-v*"]
+
 repos:
   - repo: local
     hooks:
