@@ -23,6 +23,7 @@ jobs:
     outputs:
       github_actions: ${{ steps.changed-files.outputs.github_actions_any_changed }}
       github_actions_ci: ${{ steps.changed-files.outputs.github_actions_ci_any_changed }}
+      pre_commit_config: ${{ steps.changed-files.outputs.pre_commit_config_any_changed }}
       renovate_config: ${{ steps.changed-files.outputs.renovate_config_any_changed }}
       nix: ${{ steps.changed-files.outputs.nix_any_changed }}
       sh_bash: ${{ steps.changed-files.outputs.sh_bash_any_changed }}
@@ -53,6 +54,8 @@ jobs:
               - .github/actionlint.yaml
             github_actions_ci:
               - .github/workflows/ci.yaml
+            pre_commit_config:
+              - .pre-commit-config.yaml
             renovate_config:
               - .github/renovate.json5
             nix:
@@ -92,7 +95,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      security-events: write
 
     steps:
       - name: Checkout the main repository
@@ -114,6 +116,24 @@ jobs:
           reporter: github-pr-review
           filter_mode: nofilter
           fail_level: error
+
+  audit-zizmor:
+    name: Audit with zizmor
+    needs: determine-changes
+    if: >-
+      ${{ needs.determine-changes.outputs.github_actions == 'true' ||
+      needs.determine-changes.outputs.pre_commit_config == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout the main repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Run zizmor
         uses: zizmorcore/zizmor-action@70fb788f84895a7701f5643d103d587e460b5c99 # v0.6.3
