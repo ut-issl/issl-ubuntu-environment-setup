@@ -2,3 +2,10 @@
 self-hosted-runner:
   labels:
     - ubuntu-26.04
+
+paths:
+  .github/workflows/*.{yml,yaml}:
+    ignore:
+      # actionlint does not yet recognise GitHub's self-repository `uses:` syntax.
+      # Remove this once https://github.com/rhysd/actionlint/issues/711 ships.
+      - 'reusable workflow call "\$/.*" at "uses" is not following the format'
