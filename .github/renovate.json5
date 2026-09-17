@@ -306,6 +306,10 @@
   nix: {
     enabled: true,
   },
+  lockFileMaintenance: {
+    automerge: true,
+    minimumReleaseAge: '0 days',
+  },
   labels: [
     'automated',
     'dependencies',
