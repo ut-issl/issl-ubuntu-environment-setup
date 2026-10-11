@@ -178,6 +178,6 @@ jobs:
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
       user-repository: ut-issl/personal-nix-config-template
-      user-ref: da33e0cd1c1c663260099c55d017a836a634ec23 # main
+      user-ref: 19d29e409a20037fdabb2fb40371bdcd2c6e047e # main
       override-issl-input: true
       timeout-minutes: 15
