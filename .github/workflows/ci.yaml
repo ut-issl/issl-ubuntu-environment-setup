@@ -179,7 +179,7 @@ jobs:
 
       - name: Validate Renovate config
         run: |
-          npx --yes --package renovate@44.132.2 \
+          npx --yes --package renovate@44.148.4 \
             renovate-config-validator .github/renovate.json5
 
   lint-nix:
