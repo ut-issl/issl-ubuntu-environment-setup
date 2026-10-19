@@ -169,7 +169,7 @@ jobs:
           node-version: '24'
 
       - name: Validate Renovate config
-        run: npx --package=renovate@44.148.4 --yes renovate-config-validator .github/renovate.json5
+        run: npx --package=renovate@44.148.4 --yes renovate-config-validator --strict --no-global .github/renovate.json5
 
   lint-nix:
     name: Lint Nix
