@@ -231,7 +231,7 @@ and finally inspect what it actually produces.
 
 Nix reads this repository through Git, so stage a new file before you validate:
 
-```console
+```sh
 git add -N <new files>
 ```
 
@@ -243,7 +243,7 @@ A directory whose `<name>.nix` alone is untracked is reported as missing that fi
 
 1. Run the pre-commit hooks:
 
-   ```console
+   ```sh
    prek run --files <changed files>
    ```
 
@@ -253,7 +253,7 @@ A directory whose `<name>.nix` alone is untracked is reported as missing that fi
 
 2. Run the checks:
 
-   ```console
+   ```sh
    nix flake check --all-systems --show-trace
    ```
 
@@ -265,7 +265,7 @@ A directory whose `<name>.nix` alone is untracked is reported as missing that fi
 
 3. Build the activation packages to inspect the result:
 
-   ```console
+   ```sh
    nix build .#checks.x86_64-linux.home --out-link result-home
    nix build .#checks.x86_64-linux.home-bash-only --out-link result-home-bash-only
    ```
