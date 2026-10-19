@@ -5,40 +5,40 @@ on:
     inputs:
       os:
         required: false
-        type: string
         default: ubuntu-latest
+        type: string
       flake-target:
         required: false
-        type: string
         default: user
+        type: string
       zsh-enabled:
         required: false
-        type: boolean
         default: true
+        type: boolean
       common-repository:
         required: false
-        type: string
         default: ut-issl/issl-ubuntu-environment-setup
+        type: string
       common-ref:
         required: false
-        type: string
         default: main
+        type: string
       user-repository:
         required: false
-        type: string
         default: ''
+        type: string
       user-ref:
         required: false
-        type: string
         default: ''
+        type: string
       override-issl-input:
         required: false
-        type: boolean
         default: false
+        type: boolean
       timeout-minutes:
         required: false
-        type: number
         default: 10
+        type: number
 
 permissions:
   contents: read
@@ -57,16 +57,16 @@ jobs:
         with:
           repository: ${{ inputs.common-repository }}
           ref: ${{ inputs.common-ref }}
-          path: common
           persist-credentials: false
+          path: common
 
       - name: Checkout user repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.user-repository }}
           ref: ${{ inputs.user-ref }}
-          path: user
           persist-credentials: false
+          path: user
 
       - name: Install Nix
         uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2

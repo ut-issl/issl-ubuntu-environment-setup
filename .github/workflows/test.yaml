@@ -1,9 +1,11 @@
 name: Test
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
     paths:
       - .github/workflows/test.yaml
       - .github/workflows/test-config-repository.yaml
@@ -14,8 +16,9 @@ on:
       - scripts/bootstrap-host.sh
       - scripts/setup.sh
       - tests/**
-  pull_request:
-    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
     paths:
       - .github/workflows/test.yaml
       - .github/workflows/test-config-repository.yaml
@@ -39,8 +42,6 @@ jobs:
     name: Test script-based setup
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
-    permissions:
-      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -59,13 +60,15 @@ jobs:
             enable_zsh: "1"
           - zsh: disabled
             enable_zsh: "0"
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout common repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          path: common
           persist-credentials: false
+          path: common
 
       - name: Install Nix
         if: matrix.entry-point != 'setup'

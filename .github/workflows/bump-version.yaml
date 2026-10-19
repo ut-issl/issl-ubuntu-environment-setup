@@ -2,7 +2,8 @@ name: Bump Version
 
 on:
   pull_request:
-    types: [closed]
+    types:
+      - closed
   workflow_dispatch:
     inputs:
       bump_type:
@@ -17,7 +18,6 @@ on:
 permissions: {}
 
 jobs:
-
   bump-version:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
@@ -39,13 +39,13 @@ jobs:
         id: bump-version
         uses: conjikidow/bump-version-action@f63d3275c47f3bf6348d6f58e47e9aee5addd55b # v4.2.3
         with:
-          github-token: ${{ steps.app-token.outputs.token }}
           label-major: 'update::major'
           label-minor: 'update::minor'
           label-patch: 'update::patch'
           manual-bump-type: ${{ inputs.bump_type }}
           labels-to-add: 'automated,versioning'
           create-release: 'false'
+          github-token: ${{ steps.app-token.outputs.token }}
 
       - name: Prepare release asset
         if: steps.bump-version.outputs.version-bumped == 'true'
