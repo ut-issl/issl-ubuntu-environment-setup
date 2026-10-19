@@ -34,8 +34,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   script-based:
@@ -174,6 +173,8 @@ jobs:
         flake-target:
           - user
           - user-desktop
+    permissions:
+      contents: read
     uses: $/.github/workflows/test-config-repository.yaml
     with:
       os: ${{ matrix.os }}

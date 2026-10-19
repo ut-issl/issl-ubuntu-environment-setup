@@ -40,8 +40,7 @@ on:
         default: 10
         type: number
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   test-config-repository:
