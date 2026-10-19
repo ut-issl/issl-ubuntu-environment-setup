@@ -74,6 +74,7 @@ jobs:
               - '.github/problem-matchers/shellcheck.json'
             zsh:
               - '**/*.zsh'
+              - '.github/problem-matchers/zsh.json'
             markdown:
               - '**/*.md'
               - '.rumdl.toml'
@@ -325,8 +326,49 @@ jobs:
           echo '::add-matcher::.github/problem-matchers/shellcheck.json'
           git ls-files -z '*.sh' '*.bash' | xargs -0 -r shellcheck --format=gcc
 
-  lint-zsh:
-    name: Lint Zsh
+  format-zsh:
+    name: Format Zsh
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.zsh == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install shfmt
+        run: go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
+
+      - name: Format Zsh
+        run: |
+          git ls-files -z '*.zsh' \
+            | xargs -0 -r "$(go env GOPATH)/bin/shfmt" --write --language-dialect=zsh --simplify --indent=2
+
+      - name: Suggest Zsh formatting
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: shfmt-zsh
+          cleanup: false
+
+      - name: Check Zsh formatting
+        run: |
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=shfmt-zsh::File is not formatted. Run shfmt."
+          done
+          git diff --exit-code
+
+  validate-zsh:
+    name: Validate Zsh
     needs: determine-changes
     if: >-
       needs.determine-changes.outputs.zsh == 'true'
@@ -342,36 +384,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install shfmt and Zsh
+      - name: Install Zsh
         run: |
-          go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
           sudo apt-get update
           sudo apt-get --yes install zsh
 
-      - name: Collect Zsh files
-        id: zsh-files
-        run: |
-          zsh_files_path="$(mktemp)"
-          find . -type f -name '*.zsh' -not -path './.git/*' -print0 > "${zsh_files_path}"
-          echo "zsh-files=${zsh_files_path}" >> "${GITHUB_OUTPUT}"
-          if [[ ! -s ${zsh_files_path} ]]; then
-            echo 'No Zsh files found.'
-            echo 'found=false' >> "${GITHUB_OUTPUT}"
-          else
-            echo 'found=true' >> "${GITHUB_OUTPUT}"
-          fi
-
-      - name: Check Zsh formatting
-        if: steps.zsh-files.outputs.found == 'true'
-        env:
-          ZSH_FILES: ${{ steps.zsh-files.outputs.zsh-files }}
-        run: xargs -0 "$(go env GOPATH)/bin/shfmt" --diff --language-dialect=zsh --simplify --indent=2 < "${ZSH_FILES}"
-
       - name: Validate Zsh
-        if: steps.zsh-files.outputs.found == 'true'
-        env:
-          ZSH_FILES: ${{ steps.zsh-files.outputs.zsh-files }}
-        run: xargs -0 -n 1 zsh --no-exec < "${ZSH_FILES}"
+        run: |
+          echo '::add-matcher::.github/problem-matchers/zsh.json'
+          git ls-files -z '*.zsh' | xargs -0 -r -n 1 zsh --no-exec
 
   lint-markdown:
     name: Lint Markdown
