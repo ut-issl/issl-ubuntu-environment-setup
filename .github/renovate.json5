@@ -240,17 +240,11 @@
     {
       matchFileNames: [
         '.github/workflows/**',
+        '.pre-commit-config.yaml',
       ],
-      addLabels: [
-        'ci',
-      ],
-    },
-    {
-      matchManagers: [
-        'pre-commit',
-      ],
-      addLabels: [
-        'pre-commit',
+      labels: [
+        'automated',
+        'dev-dependencies',
       ],
     },
     {
