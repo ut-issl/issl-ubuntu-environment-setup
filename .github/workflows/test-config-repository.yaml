@@ -40,6 +40,10 @@ on:
         default: 10
         type: number
 
+defaults:
+  run:
+    shell: bash
+
 permissions: {}
 
 jobs:
@@ -74,7 +78,6 @@ jobs:
 
       - name: Prepare test environment
         id: test-environment
-        shell: bash
         run: |
           tmpdir="$(mktemp -d)"
           home_dir="${tmpdir}/home"
@@ -88,16 +91,16 @@ jobs:
             echo "config-dir=${home_dir}/.config"
             echo "data-dir=${home_dir}/.local/share"
             echo "state-dir=${home_dir}/.local/state"
-          } >> "$GITHUB_OUTPUT"
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Apply Home Manager configuration
-        shell: bash
         env:
           HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
           CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
           DATA_DIR: ${{ steps.test-environment.outputs.data-dir }}
           STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
           FLAKE_TARGET: ${{ inputs.flake-target }}
+          OVERRIDE_ISSL_INPUT: ${{ inputs.override-issl-input }}
         run: |
           cd user
 
@@ -106,7 +109,7 @@ jobs:
             --show-trace
           )
 
-          if [ "${{ inputs.override-issl-input }}" = "true" ]; then
+          if [[ ${OVERRIDE_ISSL_INPUT} == 'true' ]]; then
             switch_args+=(
               --override-input
               issl
@@ -116,21 +119,19 @@ jobs:
 
           env \
             HOME="${HOME_DIR}" \
-            USER="issl-test" \
+            USER='issl-test' \
             XDG_CONFIG_HOME="${CONFIG_DIR}" \
             XDG_DATA_HOME="${DATA_DIR}" \
             XDG_STATE_HOME="${STATE_DIR}" \
-            nix run ".#home-manager" -- \
+            nix run '.#home-manager' -- \
               switch --flake ".#${FLAKE_TARGET}" "${switch_args[@]}"
 
       - name: Add Home Manager profile to PATH
-        shell: bash
         env:
           HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
         run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
 
       - name: Test the environment
-        shell: bash
         env:
           COMMON_DIR: ${{ github.workspace }}/common
           HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}

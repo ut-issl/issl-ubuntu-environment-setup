@@ -7,32 +7,36 @@ on:
       - synchronize
       - reopened
     paths:
-      - .github/workflows/test.yaml
-      - .github/workflows/test-config-repository.yaml
-      - flake.nix
-      - flake.lock
-      - home-modules/**
-      - scripts/apply.sh
-      - scripts/bootstrap-host.sh
-      - scripts/setup.sh
-      - tests/**
+      - '.github/workflows/test.yaml'
+      - '.github/workflows/test-config-repository.yaml'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'home-modules/**'
+      - 'scripts/apply.sh'
+      - 'scripts/bootstrap-host.sh'
+      - 'scripts/setup.sh'
+      - 'tests/**'
   push:
     branches:
-      - main
+      - 'main'
     paths:
-      - .github/workflows/test.yaml
-      - .github/workflows/test-config-repository.yaml
-      - flake.nix
-      - flake.lock
-      - home-modules/**
-      - scripts/apply.sh
-      - scripts/bootstrap-host.sh
-      - scripts/setup.sh
-      - tests/**
+      - '.github/workflows/test.yaml'
+      - '.github/workflows/test-config-repository.yaml'
+      - 'flake.nix'
+      - 'flake.lock'
+      - 'home-modules/**'
+      - 'scripts/apply.sh'
+      - 'scripts/bootstrap-host.sh'
+      - 'scripts/setup.sh'
+      - 'tests/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash
 
 permissions: {}
 
@@ -56,9 +60,9 @@ jobs:
           - disabled
         include:
           - zsh: enabled
-            enable-zsh: "1"
+            enable-zsh: '1'
           - zsh: disabled
-            enable-zsh: "0"
+            enable-zsh: '0'
     permissions:
       contents: read
 
@@ -77,7 +81,6 @@ jobs:
 
       - name: Prepare test environment
         id: test-environment
-        shell: bash
         run: |
           tmpdir="$(mktemp -d)"
           home_dir="${tmpdir}/home"
@@ -91,11 +94,10 @@ jobs:
             echo "config-dir=${home_dir}/.config"
             echo "data-dir=${home_dir}/.local/share"
             echo "state-dir=${home_dir}/.local/state"
-          } >> "$GITHUB_OUTPUT"
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Apply Home Manager configuration (apply.sh)
         if: matrix.entry-point == 'apply'
-        shell: bash
         env:
           HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
           CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
@@ -105,18 +107,17 @@ jobs:
         run: |
           env \
             HOME="${HOME_DIR}" \
-            USER="issl-test" \
+            USER='issl-test' \
             XDG_CONFIG_HOME="${CONFIG_DIR}" \
             XDG_DATA_HOME="${DATA_DIR}" \
             XDG_STATE_HOME="${STATE_DIR}" \
             ISSL_ENABLE_ZSH="${ENABLE_ZSH}" \
-            GIT_USER_NAME="ISSL Test User" \
-            GIT_USER_EMAIL="issl-test@example.com" \
+            GIT_USER_NAME='ISSL Test User' \
+            GIT_USER_EMAIL='issl-test@example.com' \
             bash ./common/scripts/apply.sh
 
       - name: Apply Home Manager configuration (setup.sh)
         if: matrix.entry-point == 'setup'
-        shell: bash
         env:
           HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
           CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
@@ -129,28 +130,26 @@ jobs:
 
           env \
             HOME="${HOME_DIR}" \
-            USER="issl-test" \
+            USER='issl-test' \
             XDG_CONFIG_HOME="${CONFIG_DIR}" \
             XDG_DATA_HOME="${DATA_DIR}" \
             XDG_STATE_HOME="${STATE_DIR}" \
             REPO_URL="file://${GITHUB_WORKSPACE}/common" \
-            REPO_REF="ci-setup-entry" \
+            REPO_REF='ci-setup-entry' \
             ISSL_INSTALL_DOCKER=no \
             ISSL_ENABLE_ZSH="${ENABLE_ZSH}" \
-            GIT_USER_NAME="ISSL Test User" \
-            GIT_USER_EMAIL="issl-test@example.com" \
+            GIT_USER_NAME='ISSL Test User' \
+            GIT_USER_EMAIL='issl-test@example.com' \
             bash ./common/scripts/setup.sh
 
-          echo "/nix/var/nix/profiles/default/bin" >>"${GITHUB_PATH}"
+          echo '/nix/var/nix/profiles/default/bin' >>"${GITHUB_PATH}"
 
       - name: Add Home Manager profile to PATH
-        shell: bash
         env:
           HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
         run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
 
       - name: Test the environment
-        shell: bash
         env:
           COMMON_DIR: ${{ github.workspace }}/common
           HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
