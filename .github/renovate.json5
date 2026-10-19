@@ -240,6 +240,16 @@
     {
       matchFileNames: [
         '.github/workflows/**',
+        '.pre-commit-config.yaml',
+      ],
+      labels: [
+        'automated',
+        'dev-dependencies',
+      ],
+    },
+    {
+      matchFileNames: [
+        '.github/workflows/**',
       ],
       matchUpdateTypes: [
         'patch',
