@@ -112,11 +112,10 @@ repos:
         files: '\.nix$'
         pass_filenames: false
 
-  - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: 99470f5e12208ff0fb17ab81c3c494f7620a1d8d  # frozen: v0.11.0
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: a6564f5d57444e123433a5c9af733e3975c77229  # frozen: v0.11.0.1-1
     hooks:
       - id: shellcheck
-        exclude: '\.zsh$'
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: 57217c394fff5064bedd48421fe4b6f5f73aad47  # frozen: v4.19.2

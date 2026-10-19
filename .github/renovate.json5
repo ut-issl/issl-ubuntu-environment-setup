@@ -50,6 +50,18 @@
         '/^\\.github/workflows/ci\\.ya?ml$/',
       ],
       matchStrings: [
+        'shellcheck-py==(?<currentValue>[^"\\s]+)',
+      ],
+      datasourceTemplate: 'pypi',
+      depNameTemplate: 'shellcheck-py/shellcheck-py',
+      packageNameTemplate: 'shellcheck-py',
+    },
+    {
+      customType: 'regex',
+      managerFilePatterns: [
+        '/^\\.github/workflows/ci\\.ya?ml$/',
+      ],
+      matchStrings: [
         'mvdan\\.cc/sh/v3/cmd/shfmt@(?<currentDigest>[a-f0-9]{40}) # (?<currentValue>v[^\\s]+)',
       ],
       autoReplaceStringTemplate: 'mvdan.cc/sh/v3/cmd/shfmt@{{{newDigest}}} # {{{newValue}}}',
@@ -193,6 +205,14 @@
         'astral-sh/ruff-pre-commit',
       ],
       groupName: 'ruff',
+    },
+    {
+      description: 'Compare ShellCheck versions as PEP 440, as Renovate would otherwise take its four-part hook tags such as v0.11.0.1-1 for prereleases and never offer them',
+      matchDepNames: [
+        'shellcheck-py/shellcheck-py',
+      ],
+      versioning: 'pep440',
+      groupName: 'shellcheck',
     },
     {
       description: 'Compare shfmt hook versions as PEP 440, as Renovate would otherwise take its -N tags such as v3.14.1-1 for prereleases and never offer them',
