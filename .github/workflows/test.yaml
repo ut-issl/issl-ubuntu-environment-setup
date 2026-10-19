@@ -142,7 +142,7 @@ jobs:
             GIT_USER_EMAIL='issl-test@example.com' \
             bash ./common/scripts/setup.sh
 
-          echo '/nix/var/nix/profiles/default/bin' >>"${GITHUB_PATH}"
+          echo '/nix/var/nix/profiles/default/bin' >> "${GITHUB_PATH}"
 
       - name: Add Home Manager profile to PATH
         env:
