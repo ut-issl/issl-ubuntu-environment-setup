@@ -241,22 +241,6 @@
       matchFileNames: [
         '.github/workflows/**',
       ],
-      addLabels: [
-        'ci',
-      ],
-    },
-    {
-      matchManagers: [
-        'pre-commit',
-      ],
-      addLabels: [
-        'pre-commit',
-      ],
-    },
-    {
-      matchFileNames: [
-        '.github/workflows/**',
-      ],
       matchUpdateTypes: [
         'patch',
       ],
