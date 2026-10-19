@@ -32,15 +32,14 @@ jobs:
       github-actions-ci: ${{ steps.changed-files.outputs.github_actions_ci_any_changed }}
       pre-commit-config: ${{ steps.changed-files.outputs.pre_commit_config_any_changed }}
       renovate-config: ${{ steps.changed-files.outputs.renovate_config_any_changed }}
-      nix: ${{ steps.changed-files.outputs.nix_any_changed }}
-      shell: ${{ steps.changed-files.outputs.shell_any_changed }}
-      zsh: ${{ steps.changed-files.outputs.zsh_any_changed }}
-      markdown: ${{ steps.changed-files.outputs.markdown_any_changed }}
       json5: ${{ steps.changed-files.outputs.json5_any_changed }}
-      json5-files: ${{ steps.changed-files.outputs.json5_all_changed_files }}
       toml: ${{ steps.changed-files.outputs.toml_any_changed }}
       yaml: ${{ steps.changed-files.outputs.yaml_any_changed }}
+      markdown: ${{ steps.changed-files.outputs.markdown_any_changed }}
+      nix: ${{ steps.changed-files.outputs.nix_any_changed }}
       python: ${{ steps.changed-files.outputs.python_any_changed }}
+      shell: ${{ steps.changed-files.outputs.shell_any_changed }}
+      zsh: ${{ steps.changed-files.outputs.zsh_any_changed }}
 
     steps:
       - name: Check out the repository
@@ -53,45 +52,45 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
-          separator: "\n"
           files_yaml: |
             github_actions:
               - '.github/workflows/**'
               - '.github/actionlint.yaml'
+              - '.github/problem-matchers/actionlint.json'
             github_actions_ci:
               - '.github/workflows/ci.yaml'
             pre_commit_config:
               - '.pre-commit-config.yaml'
             renovate_config:
               - '.github/renovate.json5'
-            nix:
-              - '**/*.nix'
-              - 'flake.lock'
-            shell:
-              - '**/*.sh'
-              - '**/*.bash'
-            zsh:
-              - '**/*.zsh'
+            json5:
+              - '**/*.json5'
+              - '.github/problem-matchers/json5.json'
+            toml:
+              - '**/*.toml'
+            yaml:
+              - '**/*.yaml'
+              - '**/*.yml'
+              - '.yamllint.yaml'
             markdown:
               - '**/*.md'
               - '.rumdl.toml'
               - 'lychee.toml'
-            json5:
-              - '**/*.json5'
-            toml:
-              - '**/*.toml'
-            yaml:
-              - '**/*.yml'
-              - '**/*.yaml'
-              - '.yamllint.yaml'
+            nix:
+              - '**/*.nix'
+              - 'flake.lock'
+              - '.github/problem-matchers/statix.json'
             python:
               - '**/*.py'
-              - '**/*.md'
-              - 'pyproject.toml'
-              - '.python-version'
-              - 'uv.lock'
               - '.ruff.toml'
-          safe_output: false
+            shell:
+              - '**/*.sh'
+              - '**/*.bash'
+              - '.shellcheckrc'
+              - '.github/problem-matchers/shellcheck.json'
+            zsh:
+              - '**/*.zsh'
+              - '.github/problem-matchers/zsh.json'
 
   lint-github-actions:
     name: Lint GitHub Actions
@@ -101,7 +100,6 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
-      pull-requests: write
 
     steps:
       - name: Check out the repository
@@ -110,19 +108,10 @@ jobs:
           persist-credentials: false
 
       - name: Lint GitHub Actions
-        if: github.event_name != 'pull_request'
         run: |
           go install github.com/rhysd/actionlint/cmd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+          echo '::add-matcher::.github/problem-matchers/actionlint.json'
           "$(go env GOPATH)/bin/actionlint" -color
-
-      - name: Lint GitHub Actions (reviewdog)
-        if: github.event_name == 'pull_request'
-        uses: reviewdog/action-actionlint@8b682e1e7e512151d73a6b9449cbff173846226e # v1.74.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_level: error
 
   audit-zizmor:
     name: Audit with zizmor
@@ -152,8 +141,8 @@ jobs:
       - name: Audit with zizmor (SARIF upload)
         if: >-
           always()
+          && github.event_name == 'push'
           && github.event.repository.private == false
-          && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
         with:
           version: 'v1.31.0'
@@ -182,13 +171,26 @@ jobs:
           node-version: '24'
 
       - name: Validate Renovate config
-        run: npx --package=renovate@44.148.4 --yes renovate-config-validator .github/renovate.json5
+        env:
+          LOG_FORMAT: json
+        run: |
+          npx --package=renovate@44.148.4 --yes renovate-config-validator --strict --no-global .github/renovate.json5 \
+            | jq --raw-output --arg file .github/renovate.json5 '
+                def escape: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+                def level: if .level >= 50 then "ERROR" elif .level >= 40 then "WARN" else "INFO" end;
+                "\(level): \(.msg)",
+                (.err.message? // empty),
+                (.errors[]? | "::error file=\($file),title=\(.topic)::\(.topic): \(.message | escape)"),
+                (.warnings[]? | "::warning file=\($file),title=\(.topic)::\(.topic): \(.message | escape)"),
+                (select(.msg == "Config migration necessary")
+                  | "::warning file=\($file),title=\(.msg)::\(.msg): See the log for the diff.")
+              '
 
-  lint-nix:
-    name: Lint Nix
+  validate-json5:
+    name: Validate JSON5
     needs: determine-changes
     if: >-
-      needs.determine-changes.outputs.nix == 'true'
+      needs.determine-changes.outputs.json5 == 'true'
       || needs.determine-changes.outputs.github-actions-ci == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -201,49 +203,27 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install Nix
-        uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2
-        with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Collect Nix files
-        id: nix-files
+      - name: Validate JSON5
         run: |
-          nix_files_path="$(mktemp)"
-          find . -type f -name '*.nix' -not -path './.git/*' -print0 > "${nix_files_path}"
-          echo "nix-files=${nix_files_path}" >> "${GITHUB_OUTPUT}"
-          if [[ ! -s ${nix_files_path} ]]; then
-            echo 'No Nix files found.'
-            echo 'found=false' >> "${GITHUB_OUTPUT}"
-          else
-            echo 'found=true' >> "${GITHUB_OUTPUT}"
-          fi
+          echo '::add-matcher::.github/problem-matchers/json5.json'
+          exit_code=0
+          while IFS= read -r -d '' json5_file; do
+            npx --yes json5@2.2.3 --validate "${json5_file}" 2>&1 \
+              | while IFS= read -r line; do
+                  case "${line}" in
+                    'JSON5: '*) printf '%s: %s\n' "${json5_file}" "${line}" ;;
+                    *) printf '%s\n' "${line}" ;;
+                  esac
+                done \
+              || exit_code=1
+          done < <(git ls-files -z '*.json5')
+          exit "${exit_code}"
 
-      - name: Check Nix formatting
-        if: steps.nix-files.outputs.found == 'true'
-        env:
-          NIX_FILES: ${{ steps.nix-files.outputs.nix-files }}
-        run: xargs -0 nix fmt -- --check < "${NIX_FILES}"
-
-      - name: Lint Nix (deadnix)
-        run: nix run --inputs-from . nixpkgs#deadnix -- --fail .
-
-      - name: Lint Nix (statix)
-        run: nix run --inputs-from . nixpkgs#statix -- check .
-
-      - name: Check the flake
-        run: |
-          if [[ -f flake.nix ]]; then
-            nix flake check --all-systems --show-trace
-          else
-            echo 'No flake.nix found. Skipping flake check.'
-          fi
-
-  lint-shell-scripts:
-    name: Lint shell scripts
+  format-toml:
+    name: Format TOML
     needs: determine-changes
     if: >-
-      needs.determine-changes.outputs.shell == 'true'
+      needs.determine-changes.outputs.toml == 'true'
       || needs.determine-changes.outputs.github-actions-ci == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -257,61 +237,34 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install shfmt and ShellCheck
-        run: |
-          go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
-          sudo apt-get update
-          if [[ ${GITHUB_EVENT_NAME} != 'pull_request' ]]; then
-            sudo apt-get --yes install shellcheck
-          fi
+      - name: Install Tombi
+        uses: tombi-toml/setup-tombi@be97456589cb1f9c6c8a419bd7fe825b40a9df50 # v1.8.5
+        with:
+          version: '1.8.5'
 
-      - name: Collect shell scripts
-        id: shell-scripts
-        run: |
-          shell_scripts_path="$(mktemp)"
-          find . -type f \( \
-            -name '*.sh' -o \
-            -name '*.bash' \
-          \) -not -path './.git/*' -print0 > "${shell_scripts_path}"
-          echo "shell-scripts=${shell_scripts_path}" >> "${GITHUB_OUTPUT}"
-          if [[ ! -s ${shell_scripts_path} ]]; then
-            echo 'No shell scripts found.'
-            echo 'found=false' >> "${GITHUB_OUTPUT}"
-          else
-            echo 'found=true' >> "${GITHUB_OUTPUT}"
-          fi
+      - name: Format TOML
+        run: tombi format
 
-      - name: Check shell script formatting
-        if: steps.shell-scripts.outputs.found == 'true'
-        env:
-          SHELL_SCRIPTS: ${{ steps.shell-scripts.outputs.shell-scripts }}
-        run: xargs -0 "$(go env GOPATH)/bin/shfmt" --diff --simplify --indent=2 < "${SHELL_SCRIPTS}"
-
-      - name: Lint shell scripts
-        if: >-
-          github.event_name != 'pull_request'
-          && steps.shell-scripts.outputs.found == 'true'
-        env:
-          SHELL_SCRIPTS: ${{ steps.shell-scripts.outputs.shell-scripts }}
-        run: xargs -0 shellcheck --external-sources < "${SHELL_SCRIPTS}"
-
-      - name: Lint shell scripts (reviewdog)
+      - name: Suggest TOML formatting
         if: github.event_name == 'pull_request'
-        uses: reviewdog/action-shellcheck@d0b8d5fd7fad6afdb6e1b6ce1778892be4d1f427 # v1.34.1
+        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_level: error
-          pattern: |
-            *.sh
-            *.bash
+          tool_name: tombi-format
+          cleanup: false
 
-  lint-zsh:
-    name: Lint Zsh
+      - name: Check TOML formatting
+        run: |
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=tombi-format::File is not formatted. Run tombi format."
+          done
+          git diff --exit-code
+
+  lint-toml:
+    name: Lint TOML
     needs: determine-changes
     if: >-
-      needs.determine-changes.outputs.zsh == 'true'
+      needs.determine-changes.outputs.toml == 'true'
       || needs.determine-changes.outputs.github-actions-ci == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -324,42 +277,19 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install shfmt and Zsh
-        run: |
-          go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
-          sudo apt-get update
-          sudo apt-get --yes install zsh
+      - name: Install Tombi
+        uses: tombi-toml/setup-tombi@be97456589cb1f9c6c8a419bd7fe825b40a9df50 # v1.8.5
+        with:
+          version: '1.8.5'
 
-      - name: Collect Zsh files
-        id: zsh-files
-        run: |
-          zsh_files_path="$(mktemp)"
-          find . -type f -name '*.zsh' -not -path './.git/*' -print0 > "${zsh_files_path}"
-          echo "zsh-files=${zsh_files_path}" >> "${GITHUB_OUTPUT}"
-          if [[ ! -s ${zsh_files_path} ]]; then
-            echo 'No Zsh files found.'
-            echo 'found=false' >> "${GITHUB_OUTPUT}"
-          else
-            echo 'found=true' >> "${GITHUB_OUTPUT}"
-          fi
+      - name: Lint TOML
+        run: tombi lint --error-on-warnings --diagnostics-format=github
 
-      - name: Check Zsh formatting
-        if: steps.zsh-files.outputs.found == 'true'
-        env:
-          ZSH_FILES: ${{ steps.zsh-files.outputs.zsh-files }}
-        run: xargs -0 "$(go env GOPATH)/bin/shfmt" --diff --language-dialect=zsh --simplify --indent=2 < "${ZSH_FILES}"
-
-      - name: Validate Zsh
-        if: steps.zsh-files.outputs.found == 'true'
-        env:
-          ZSH_FILES: ${{ steps.zsh-files.outputs.zsh-files }}
-        run: xargs -0 -n 1 zsh --no-exec < "${ZSH_FILES}"
-
-  lint-markdown:
-    name: Lint Markdown
+  lint-yaml:
+    name: Lint YAML
     needs: determine-changes
     if: >-
-      needs.determine-changes.outputs.markdown == 'true'
+      needs.determine-changes.outputs.yaml == 'true'
       || needs.determine-changes.outputs.github-actions-ci == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -372,11 +302,16 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Lint Markdown
-        uses: rvben/rumdl@a7a8434abe60f64239ea05624885f9bad66a1026 # v0.2.79
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          version: '0.2.79'
-          report-type: annotations
+          version: '0.12.24'
+          enable-cache: false
+
+      - name: Lint YAML
+        run: |
+          git ls-files -z '*.yaml' '*.yml' \
+            | xargs -0 -r uvx --from="yamllint==1.38.0" yamllint --format=github --strict
 
   check-links:
     name: Check links
@@ -401,11 +336,11 @@ jobs:
           args: --no-progress .
           lycheeVersion: 'v0.24.2'
 
-  validate-json5:
-    name: Validate JSON5
+  lint-markdown:
+    name: Lint Markdown
     needs: determine-changes
     if: >-
-      needs.determine-changes.outputs.json5 == 'true'
+      needs.determine-changes.outputs.markdown == 'true'
       || needs.determine-changes.outputs.github-actions-ci == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -418,213 +353,59 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Validate JSON5
-        env:
-          CHANGED_JSON5_FILES: ${{ needs.determine-changes.outputs.json5-files }}
+      - name: Lint Markdown
+        uses: rvben/rumdl@a7a8434abe60f64239ea05624885f9bad66a1026 # v0.2.79
+        with:
+          version: '0.2.79'
+          report-type: annotations
+
+  format-nix:
+    name: Format Nix
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.nix == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Format Nix
+        run: git ls-files -z '*.nix' | xargs -0 -r nix fmt --
+
+      - name: Suggest Nix formatting
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: nixfmt
+          cleanup: false
+
+      - name: Check Nix formatting
         run: |
-          readarray -t json5_files < <(
-            printf '%s\n' "${CHANGED_JSON5_FILES}" | sed '/^$/d'
-          )
-          if [[ ${#json5_files[@]} -eq 0 ]]; then
-            readarray -d '' -t json5_files < <(
-              find . -type f -name '*.json5' -not -path './.git/*' -print0
-            )
-          fi
-          if [[ ${#json5_files[@]} -eq 0 ]]; then
-            echo 'No JSON5 files found.'
-            exit 0
-          fi
-          exit_code=0
-          for json5_file in "${json5_files[@]}"; do
-            npx --yes json5@2.2.3 --validate "${json5_file}" || exit_code=1
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=nixfmt::File is not formatted. Run nix fmt."
           done
-          exit ${exit_code}
+          git diff --exit-code
 
-  lint-toml:
-    name: Lint TOML
+  lint-nix:
+    name: Lint Nix
     needs: determine-changes
     if: >-
-      needs.determine-changes.outputs.toml == 'true'
+      needs.determine-changes.outputs.nix == 'true'
       || needs.determine-changes.outputs.github-actions-ci == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install Tombi
-        uses: tombi-toml/setup-tombi@be97456589cb1f9c6c8a419bd7fe825b40a9df50 # v1.8.5
-        with:
-          version: '1.8.5'
-
-      - name: Lint TOML
-        if: github.event_name != 'pull_request'
-        run: tombi lint
-
-      - name: Install reviewdog
-        if: github.event_name == 'pull_request'
-        uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
-        with:
-          reviewdog_version: 'v0.21.2'
-
-      - name: Lint TOML (reviewdog)
-        if: github.event_name == 'pull_request'
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NO_COLOR: 1
-        run: |
-          lint_rc=0
-          tombi lint --quiet > /tmp/tombi-lint-report.txt 2>&1 || lint_rc=$?
-          gawk '
-            match($0, /^[[:space:]]*(Warning|Error):[[:space:]]*(.*)$/, m) {
-              severity = m[1]; message = m[2]; next
-            }
-            match($0, /^[[:space:]]*at[[:space:]]+(.*):([0-9]+):([0-9]+)/, m) {
-              printf "%s:%s:%s: %s: %s\n", m[1], m[2], m[3], substr(severity, 1, 1), message
-            }
-          ' /tmp/tombi-lint-report.txt > /tmp/tombi-lint-report.efm.txt
-          reviewdog_rc=0
-          reviewdog < /tmp/tombi-lint-report.efm.txt \
-              -efm='%f:%l:%c: %t: %m' \
-              -name=tombi-lint \
-              -reporter=github-pr-review \
-              -filter-mode=nofilter \
-              -fail-level=error || reviewdog_rc=$?
-          if [[ ${lint_rc} -ne 0 && ! -s /tmp/tombi-lint-report.efm.txt ]]; then
-            echo '::error title=tombi::tombi lint failed before producing parseable diagnostics'
-            cat /tmp/tombi-lint-report.txt
-            exit ${lint_rc}
-          fi
-          exit ${reviewdog_rc}
-
-      - name: Format TOML
-        run: tombi format
-
-      - name: Suggest TOML formatting
-        if: github.event_name == 'pull_request'
-        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tool_name: tombi-format
-          cleanup: false
-
-      - name: Check TOML formatting
-        run: git diff --exit-code
-
-  lint-yaml:
-    name: Lint YAML
-    needs: determine-changes
-    if: >-
-      needs.determine-changes.outputs.yaml == 'true'
-      || needs.determine-changes.outputs.github-actions-ci == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install uv
-        if: github.event_name != 'pull_request'
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-        with:
-          version: '0.12.24'
-
-      - name: Lint YAML
-        if: github.event_name != 'pull_request'
-        run: uvx --from="yamllint==1.38.0" yamllint .
-
-      - name: Lint YAML (reviewdog)
-        if: github.event_name == 'pull_request'
-        uses: reviewdog/action-yamllint@3224b47de22a2fd9c8c0fbc120e6d0049d1f5060 # v1.25.2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_level: error
-          yamllint_flags: .
-
-  lint-python:
-    name: Lint Python
-    needs: determine-changes
-    if: >-
-      needs.determine-changes.outputs.python == 'true'
-      || needs.determine-changes.outputs.github-actions-ci == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      pull-requests: write
-
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
-        with:
-          version: '0.12.24'
-
-      - name: Lint Python
-        if: github.event_name != 'pull_request'
-        run: uvx --from="ruff==0.16.10" ruff check --output-format=github .
-
-      - name: Install reviewdog
-        if: github.event_name == 'pull_request'
-        uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
-        with:
-          reviewdog_version: 'v0.21.2'
-
-      - name: Lint Python (reviewdog)
-        if: github.event_name == 'pull_request'
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ruff_rc=0
-          uvx --from="ruff==0.16.10" ruff check --output-format=rdjson . > /tmp/ruff-report.json || ruff_rc=$?
-          reviewdog_rc=0
-          reviewdog < /tmp/ruff-report.json \
-              -f=rdjson \
-              -name=ruff \
-              -reporter=github-pr-review \
-              -filter-mode=nofilter \
-              -fail-level=warning \
-              -tee || reviewdog_rc=$?
-          if [[ ${ruff_rc} -ne 0 && ! -s /tmp/ruff-report.json ]]; then
-            echo '::error title=ruff::ruff failed before producing diagnostics for reviewdog'
-            exit ${ruff_rc}
-          fi
-          exit ${reviewdog_rc}
-
-      - name: Format Python
-        run: uvx --from="ruff==0.16.10" ruff format .
-
-      - name: Suggest Python formatting
-        if: github.event_name == 'pull_request'
-        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          tool_name: ruff-format
-          cleanup: false
-
-      - name: Check Python formatting
-        run: git diff --exit-code
-
-  run-prek-hooks:
-    name: Run prek hooks
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -641,14 +422,37 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run prek hooks
-        uses: j178/prek-action@1382ad72dea72f9d53832f2bcb65b3e87a947204 # v3.0.1
-        with:
-          prek-version: 'v0.5.5'
-          extra-args: --skip=no-commit-to-branch --all-files
+      - name: Lint Nix (deadnix)
+        run: |
+          git ls-files -z '*.nix' \
+            | xargs -0 -r nix run --inputs-from . nixpkgs#deadnix -- --fail --output-format=json \
+            | jq --raw-output '
+                def escape: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+                .file as $file
+                | .results[]
+                | if .line then
+                    "::warning file=\($file),line=\(.line),col=\(.column),endColumn=\(.endColumn),"
+                    + "title=deadnix::\(.message | escape)"
+                  else
+                    "Error parsing file \($file): \(.message)"
+                  end
+              '
 
-  check-spelling:
-    name: Check spelling
+      - name: Lint Nix (statix)
+        run: |
+          echo '::add-matcher::.github/problem-matchers/statix.json'
+          git ls-files -z '*.nix' | xargs -0 -r -n 1 nix run --inputs-from . nixpkgs#statix -- check --format=errfmt
+
+      - name: Check the flake
+        run: nix flake check --all-systems --show-trace
+
+  format-python:
+    name: Format Python
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.python == 'true'
+      || needs.determine-changes.outputs.markdown == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -661,19 +465,205 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Check spelling
-        if: github.event_name != 'pull_request'
-        uses: crate-ci/typos@00f422f3b19c57bc6338715ebfe3316d38768461 # v1.50.3
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.24'
+          enable-cache: false
 
-      - name: Check spelling (reviewdog)
+      - name: Format Python
+        run: uvx --from="ruff==0.16.10" ruff format .
+
+      - name: Suggest Python formatting
         if: github.event_name == 'pull_request'
-        uses: reviewdog/action-typos@d5eb1bbcd1b3bfde596f6eeb470322727862fe98 # v1.19.0
+        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_level: error
-          typos_flags: .
+          tool_name: ruff-format
+          cleanup: false
+
+      - name: Check Python formatting
+        run: |
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=ruff-format::File is not formatted. Run ruff format."
+          done
+          git diff --exit-code
+
+  lint-python:
+    name: Lint Python
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.python == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.24'
+          enable-cache: false
+
+      - name: Lint Python
+        run: uvx --from="ruff==0.16.10" ruff check --output-format=github .
+
+  format-shell-scripts:
+    name: Format shell scripts
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.shell == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install shfmt
+        run: go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
+
+      - name: Format shell scripts
+        run: git ls-files -z '*.sh' '*.bash' | xargs -0 -r "$(go env GOPATH)/bin/shfmt" --write --simplify --indent=2
+
+      - name: Suggest shell script formatting
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: shfmt
+          cleanup: false
+
+      - name: Check shell script formatting
+        run: |
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=shfmt::File is not formatted. Run shfmt."
+          done
+          git diff --exit-code
+
+  lint-shell-scripts:
+    name: Lint shell scripts
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.shell == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get --yes install shellcheck
+
+      - name: Lint shell scripts
+        run: |
+          echo '::add-matcher::.github/problem-matchers/shellcheck.json'
+          git ls-files -z '*.sh' '*.bash' | xargs -0 -r shellcheck --format=gcc
+
+  format-zsh:
+    name: Format Zsh
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.zsh == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install shfmt
+        run: go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
+
+      - name: Format Zsh
+        run: |
+          git ls-files -z '*.zsh' \
+            | xargs -0 -r "$(go env GOPATH)/bin/shfmt" --write --language-dialect=zsh --simplify --indent=2
+
+      - name: Suggest Zsh formatting
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: shfmt-zsh
+          cleanup: false
+
+      - name: Check Zsh formatting
+        run: |
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=shfmt-zsh::File is not formatted. Run shfmt."
+          done
+          git diff --exit-code
+
+  validate-zsh:
+    name: Validate Zsh
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.zsh == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Zsh
+        run: |
+          sudo apt-get update
+          sudo apt-get --yes install zsh
+
+      - name: Validate Zsh
+        run: |
+          echo '::add-matcher::.github/problem-matchers/zsh.json'
+          git ls-files -z '*.zsh' | xargs -0 -r -n 1 zsh --no-exec
+
+  check-spelling:
+    name: Check spelling
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check spelling
+        uses: crate-ci/typos@00f422f3b19c57bc6338715ebfe3316d38768461 # v1.50.3
 
   lint-commit-messages:
     name: Lint commit messages
@@ -712,3 +702,27 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: cz check --rev-range="${PR_BASE_SHA}..${PR_HEAD_SHA}"
+
+  run-prek-hooks:
+    name: Run prek hooks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run prek hooks
+        uses: j178/prek-action@1382ad72dea72f9d53832f2bcb65b3e87a947204 # v3.0.1
+        with:
+          prek-version: 'v0.5.5'
+          extra-args: --skip=no-commit-to-branch --all-files
