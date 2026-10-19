@@ -7,20 +7,22 @@ This repository recommends using [`prek`](https://prek.j178.dev) (a faster, drop
 Install the hooks by running:
 
 ```console
-uvx prek install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
+uvx prek install
 ```
 
 If `prek` is already installed:
 
 ```console
-prek install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
+prek install
 ```
 
 If you prefer `pre-commit`:
 
 ```console
-uvx pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
+uvx pre-commit install
 ```
+
+The hook types to install are set by `default_install_hook_types` in `.pre-commit-config.yaml`.
 
 ## Commit Message Linting
 
