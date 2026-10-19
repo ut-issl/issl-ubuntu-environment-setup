@@ -66,6 +66,7 @@ jobs:
             nix:
               - '**/*.nix'
               - 'flake.lock'
+              - '.github/problem-matchers/statix.json'
             shell:
               - '**/*.sh'
               - '**/*.bash'
@@ -184,6 +185,47 @@ jobs:
                   | "::warning file=\($file),title=\(.msg)::\(.msg): See the log for the diff.")
               '
 
+  format-nix:
+    name: Format Nix
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.nix == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Format Nix
+        run: git ls-files -z '*.nix' | xargs -0 -r nix fmt --
+
+      - name: Suggest Nix formatting
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tool_name: nixfmt
+          cleanup: false
+
+      - name: Check Nix formatting
+        run: |
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=nixfmt::File is not formatted. Run nix fmt."
+          done
+          git diff --exit-code
+
   lint-nix:
     name: Lint Nix
     needs: determine-changes
@@ -206,38 +248,16 @@ jobs:
         with:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Collect Nix files
-        id: nix-files
-        run: |
-          nix_files_path="$(mktemp)"
-          find . -type f -name '*.nix' -not -path './.git/*' -print0 > "${nix_files_path}"
-          echo "nix-files=${nix_files_path}" >> "${GITHUB_OUTPUT}"
-          if [[ ! -s ${nix_files_path} ]]; then
-            echo 'No Nix files found.'
-            echo 'found=false' >> "${GITHUB_OUTPUT}"
-          else
-            echo 'found=true' >> "${GITHUB_OUTPUT}"
-          fi
-
-      - name: Check Nix formatting
-        if: steps.nix-files.outputs.found == 'true'
-        env:
-          NIX_FILES: ${{ steps.nix-files.outputs.nix-files }}
-        run: xargs -0 nix fmt -- --check < "${NIX_FILES}"
-
       - name: Lint Nix (deadnix)
         run: nix run --inputs-from . nixpkgs#deadnix -- --fail .
 
       - name: Lint Nix (statix)
-        run: nix run --inputs-from . nixpkgs#statix -- check .
+        run: |
+          echo '::add-matcher::.github/problem-matchers/statix.json'
+          git ls-files -z '*.nix' | xargs -0 -r -n 1 nix run --inputs-from . nixpkgs#statix -- check --format=errfmt
 
       - name: Check the flake
-        run: |
-          if [[ -f flake.nix ]]; then
-            nix flake check --all-systems --show-trace
-          else
-            echo 'No flake.nix found. Skipping flake check.'
-          fi
+        run: nix flake check --all-systems --show-trace
 
   format-shell-scripts:
     name: Format shell scripts
