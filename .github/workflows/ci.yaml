@@ -37,7 +37,6 @@ jobs:
       zsh: ${{ steps.changed-files.outputs.zsh_any_changed }}
       markdown: ${{ steps.changed-files.outputs.markdown_any_changed }}
       json5: ${{ steps.changed-files.outputs.json5_any_changed }}
-      json5-files: ${{ steps.changed-files.outputs.json5_all_changed_files }}
       toml: ${{ steps.changed-files.outputs.toml_any_changed }}
       yaml: ${{ steps.changed-files.outputs.yaml_any_changed }}
       python: ${{ steps.changed-files.outputs.python_any_changed }}
@@ -53,7 +52,6 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@9426d40962ed5378910ee2e21d5f8c6fcbf2dd96 # v47.0.6
         with:
-          separator: "\n"
           files_yaml: |
             github_actions:
               - '.github/workflows/**'
@@ -81,6 +79,7 @@ jobs:
               - 'lychee.toml'
             json5:
               - '**/*.json5'
+              - '.github/problem-matchers/json5.json'
             toml:
               - '**/*.toml'
             yaml:
@@ -90,7 +89,6 @@ jobs:
             python:
               - '**/*.py'
               - '.ruff.toml'
-          safe_output: false
 
   lint-github-actions:
     name: Lint GitHub Actions
@@ -406,26 +404,20 @@ jobs:
           persist-credentials: false
 
       - name: Validate JSON5
-        env:
-          CHANGED_JSON5_FILES: ${{ needs.determine-changes.outputs.json5-files }}
         run: |
-          readarray -t json5_files < <(
-            printf '%s\n' "${CHANGED_JSON5_FILES}" | sed '/^$/d'
-          )
-          if [[ ${#json5_files[@]} -eq 0 ]]; then
-            readarray -d '' -t json5_files < <(
-              find . -type f -name '*.json5' -not -path './.git/*' -print0
-            )
-          fi
-          if [[ ${#json5_files[@]} -eq 0 ]]; then
-            echo 'No JSON5 files found.'
-            exit 0
-          fi
+          echo '::add-matcher::.github/problem-matchers/json5.json'
           exit_code=0
-          for json5_file in "${json5_files[@]}"; do
-            npx --yes json5@2.2.3 --validate "${json5_file}" || exit_code=1
-          done
-          exit ${exit_code}
+          while IFS= read -r -d '' json5_file; do
+            npx --yes json5@2.2.3 --validate "${json5_file}" 2>&1 \
+              | while IFS= read -r line; do
+                  case "${line}" in
+                    'JSON5: '*) printf '%s: %s\n' "${json5_file}" "${line}" ;;
+                    *) printf '%s\n' "${line}" ;;
+                  esac
+                done \
+              || exit_code=1
+          done < <(git ls-files -z '*.json5')
+          exit "${exit_code}"
 
   format-toml:
     name: Format TOML
