@@ -6,21 +6,23 @@ This repository recommends using [`prek`](https://prek.j178.dev) (a faster, drop
 
 Install the hooks by running:
 
-```console
-uvx prek install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
+```sh
+uvx prek install
 ```
 
 If `prek` is already installed:
 
-```console
-prek install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
+```sh
+prek install
 ```
 
 If you prefer `pre-commit`:
 
-```console
-uvx pre-commit install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
+```sh
+uvx pre-commit install
 ```
+
+The hook types to install are set by `default_install_hook_types` in `.pre-commit-config.yaml`.
 
 ## Commit Message Linting
 
@@ -36,13 +38,13 @@ for checks, so it is recommended.
 
 Install Commitizen:
 
-```console
+```sh
 uv tool install commitizen
 ```
 
 Use Commitizen instead of `git commit`:
 
-```console
+```sh
 cz commit
 ```
 

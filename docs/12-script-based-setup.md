@@ -119,38 +119,38 @@ If you just want to try additional tools without moving to a personal config rep
 
 Install a package:
 
-```bash
+```sh
 nix profile install nixpkgs#pandoc
 ```
 
 Install multiple packages:
 
-```bash
+```sh
 nix profile install nixpkgs#elan nixpkgs#quint nixpkgs#z3
 ```
 
 List installed profile packages:
 
-```bash
+```sh
 nix profile list
 ```
 
 Remove a package:
 
-```bash
+```sh
 nix profile remove pandoc
 ```
 
 Upgrade installed profile packages:
 
-```bash
+```sh
 nix profile upgrade --all
 ```
 
 `nix profile` refuses packages with an unfree license, even though the shared Home Manager configuration allows them.
 Allow it for every invocation that evaluates such a package, including a later `nix profile upgrade`:
 
-```bash
+```sh
 NIXPKGS_ALLOW_UNFREE=1 nix profile install --impure nixpkgs#claude-code
 ```
 
