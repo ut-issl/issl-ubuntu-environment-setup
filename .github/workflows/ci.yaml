@@ -423,7 +423,20 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Lint Nix (deadnix)
-        run: nix run --inputs-from . nixpkgs#deadnix -- --fail .
+        run: |
+          git ls-files -z '*.nix' \
+            | xargs -0 -r nix run --inputs-from . nixpkgs#deadnix -- --fail --output-format=json \
+            | jq --raw-output '
+                def escape: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+                .file as $file
+                | .results[]
+                | if .line then
+                    "::warning file=\($file),line=\(.line),col=\(.column),endColumn=\(.endColumn),"
+                    + "title=deadnix::\(.message | escape)"
+                  else
+                    "Error parsing file \($file): \(.message)"
+                  end
+              '
 
       - name: Lint Nix (statix)
         run: |
