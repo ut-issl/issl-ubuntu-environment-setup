@@ -16,7 +16,7 @@ require_command() {
 }
 
 is_interactive() {
-  [ -t 0 ] && [ -t 1 ]
+  [[ -t 0 && -t 1 ]]
 }
 
 is_yes() {
@@ -46,7 +46,7 @@ prompt_yes_no() {
     return 1
   fi
 
-  if [ -z "${reply}" ]; then
+  if [[ -z ${reply} ]]; then
     is_yes "${default_answer}"
     return
   fi
@@ -59,11 +59,11 @@ source_nix() {
     return
   fi
 
-  if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+  if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]]; then
     # Official multi-user installs expose Nix through this profile script.
     # shellcheck source=/dev/null
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-  elif [ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+  elif [[ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
     # Fallback for single-user installs.
     # shellcheck source=/dev/null
     . "$HOME/.nix-profile/etc/profile.d/nix.sh"
@@ -80,8 +80,8 @@ ensure_nix() {
     return
   fi
 
-  if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ] ||
-    [ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+  if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ||
+    -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
     source_nix
     return
   fi
@@ -94,7 +94,7 @@ ensure_nix() {
 }
 
 is_systemd_available() {
-  [ -d /run/systemd/system ] && command -v systemctl >/dev/null 2>&1
+  [[ -d /run/systemd/system ]] && command -v systemctl >/dev/null 2>&1
 }
 
 resolve_nix_daemon_path() {
@@ -103,7 +103,7 @@ resolve_nix_daemon_path() {
     return 0
   fi
 
-  if [ -x /nix/var/nix/profiles/default/bin/nix-daemon ]; then
+  if [[ -x /nix/var/nix/profiles/default/bin/nix-daemon ]]; then
     printf '%s\n' "/nix/var/nix/profiles/default/bin/nix-daemon"
     return 0
   fi
@@ -127,10 +127,10 @@ start_nix_daemon_without_systemd() {
     return
   fi
 
-  if [ "$(id -u)" = "0" ]; then
+  if [[ "$(id -u)" == "0" ]]; then
     setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   elif command -v sudo >/dev/null 2>&1; then
-    if [ -t 0 ]; then
+    if [[ -t 0 ]]; then
       if ! sudo -v; then
         echo "warning: failed to authenticate via sudo. Nix commands may fail." >&2
         return
@@ -160,7 +160,7 @@ issl_login_shell_link() {
 }
 
 is_executable_file() {
-  [ -f "$1" ] && [ -x "$1" ]
+  [[ -f $1 && -x $1 ]]
 }
 
 current_login_shell() {
@@ -169,7 +169,7 @@ current_login_shell() {
     return 0
   fi
 
-  if [ -n "${SHELL-}" ]; then
+  if [[ -n ${SHELL-} ]]; then
     printf '%s\n' "${SHELL}"
     return 0
   fi
@@ -180,7 +180,7 @@ current_login_shell() {
 etc_shells_entry() {
   local shell_path="$1"
 
-  if [ -s /etc/shells ] && [ -n "$(tail -c1 /etc/shells)" ]; then
+  if [[ -s /etc/shells && -n "$(tail -c1 /etc/shells)" ]]; then
     printf '\n%s\n' "${shell_path}"
   else
     printf '%s\n' "${shell_path}"
@@ -194,7 +194,7 @@ ensure_shell_listed_in_etc_shells() {
     return 0
   fi
 
-  if [ -w /etc/shells ]; then
+  if [[ -w /etc/shells ]]; then
     if etc_shells_entry "${shell_path}" >>/etc/shells; then
       return 0
     fi
@@ -219,7 +219,7 @@ maybe_register_login_shell() {
 
   link="$(issl_login_shell_link)"
   active_login_shell="$(current_login_shell || true)"
-  if [ "${active_login_shell}" = "${link}" ] && is_executable_file "${link}"; then
+  if [[ ${active_login_shell} == "${link}" ]] && is_executable_file "${link}"; then
     return
   fi
 
@@ -259,7 +259,7 @@ has_github_ssh_auth() {
   ssh_output="$(nix_with_openssh ssh -o ConnectTimeout=10 -T git@github.com 2>&1)" || ssh_status=$?
   ssh_status="${ssh_status:-0}"
 
-  if [ "${ssh_status}" -eq 1 ] &&
+  if [[ ${ssh_status} -eq 1 ]] &&
     printf '%s\n' "${ssh_output}" | grep -Fq "successfully authenticated"; then
     return 0
   fi
@@ -273,7 +273,7 @@ ensure_ssh_directory() {
 }
 
 github_ssh_key_exists() {
-  [ -f "${github_key_path}" ] && [ -f "${github_key_path}.pub" ]
+  [[ -f ${github_key_path} && -f "${github_key_path}.pub" ]]
 }
 
 create_github_ssh_key() {
@@ -285,7 +285,7 @@ create_github_ssh_key() {
     echo
   fi
 
-  if [ -n "${key_comment}" ]; then
+  if [[ -n ${key_comment} ]]; then
     nix_with_openssh ssh-keygen -t ed25519 -C "${key_comment}" -f "${github_key_path}"
   else
     nix_with_openssh ssh-keygen -t ed25519 -f "${github_key_path}"
@@ -295,7 +295,7 @@ create_github_ssh_key() {
 ensure_github_ssh_config() {
   ensure_ssh_directory
 
-  if [ -f "${ssh_config_path}" ] &&
+  if [[ -f ${ssh_config_path} ]] &&
     grep -Eq '^[[:space:]]*[Hh][Oo][Ss][Tt][[:space:]]+github\.com([[:space:]]|$)' "${ssh_config_path}"; then
     return
   fi
@@ -399,9 +399,9 @@ should_add_user_to_docker_group() {
 }
 
 target_docker_user() {
-  if [ -n "${SUDO_USER-}" ] && [ "${SUDO_USER}" != "root" ]; then
+  if [[ -n ${SUDO_USER-} && ${SUDO_USER} != "root" ]]; then
     printf '%s\n' "${SUDO_USER}"
-  elif [ -n "${USER-}" ]; then
+  elif [[ -n ${USER-} ]]; then
     printf '%s\n' "${USER}"
   else
     id -un
@@ -417,13 +417,13 @@ install_docker_engine() {
   require_command apt-get
   require_command dpkg
 
-  if [ -r /etc/os-release ]; then
+  if [[ -r /etc/os-release ]]; then
     # shellcheck source=/dev/null
     . /etc/os-release
   fi
 
   ubuntu_codename="${UBUNTU_CODENAME:-${VERSION_CODENAME:-}}"
-  if [ -z "${ubuntu_codename}" ]; then
+  if [[ -z ${ubuntu_codename} ]]; then
     echo "could not determine the Ubuntu codename for Docker repository setup." >&2
     exit 1
   fi
@@ -453,7 +453,7 @@ install_docker_engine() {
     echo "Log out and back in, or run 'newgrp docker', before using Docker without sudo."
   fi
 
-  if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+  if command -v systemctl >/dev/null 2>&1 && [[ -d /run/systemd/system ]]; then
     sudo systemctl enable --now docker.service
   fi
 }
@@ -474,6 +474,6 @@ bootstrap_host() {
   maybe_install_docker_engine
 }
 
-if [ "${BASH_SOURCE[0]}" = "$0" ]; then
+if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
   bootstrap_host
 fi

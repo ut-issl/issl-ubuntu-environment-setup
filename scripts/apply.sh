@@ -53,7 +53,7 @@ guard_against_existing_home_manager_files() {
   if zshenv_defines_zdotdir "${zshenv_path}"; then
     if resolved_zdotdir="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
       zdotdir_path="${resolved_zdotdir}"
-    elif [ "${zsh_enabled}" = "1" ] && resolve_zsh_bin >/dev/null; then
+    elif [[ ${zsh_enabled} == "1" ]] && resolve_zsh_bin >/dev/null; then
       echo "error: ${zshenv_path} defines ZDOTDIR, but it could not be resolved before the Home Manager switch." >&2
       echo "Fix ${zshenv_path} so that zsh can evaluate it, or re-run with ISSL_ENABLE_ZSH=no to skip the zsh setup." >&2
       exit 1
@@ -80,7 +80,7 @@ guard_against_existing_home_manager_files() {
     fi
   done
 
-  if [ "${#managed_paths[@]}" -eq 0 ]; then
+  if [[ ${#managed_paths[@]} -eq 0 ]]; then
     return
   fi
 
@@ -102,7 +102,7 @@ prepare_block_file() {
 
   mkdir -p "$(dirname "${file_path}")"
 
-  if [ -f "${file_path}" ] && grep -Fq "${begin_marker}" "${file_path}"; then
+  if [[ -f ${file_path} ]] && grep -Fq "${begin_marker}" "${file_path}"; then
     return 1
   fi
 
@@ -131,7 +131,7 @@ prepend_block_once() {
     printf '%s\n' "${begin_marker}"
     printf '%s\n' "${block_content}"
     printf '%s\n' "${end_marker}"
-    if [ -s "${file_path}" ]; then
+    if [[ -s ${file_path} ]]; then
       printf '\n'
       cat "${file_path}"
     fi
@@ -156,9 +156,9 @@ replace_with_block_once() {
   local original_mode=""
   original_mode="$(stat -L -c %a "${file_path}")"
 
-  if [ -s "${file_path}" ]; then
+  if [[ -s ${file_path} ]]; then
     backup_path="${file_path}.backup"
-    if [ -e "${backup_path}" ] || [ -L "${backup_path}" ]; then
+    if [[ -e ${backup_path} || -L ${backup_path} ]]; then
       echo "error: refusing to replace ${file_path} because ${backup_path} already exists." >&2
       echo "Move or remove ${backup_path} and re-run this script." >&2
       exit 1
@@ -173,7 +173,7 @@ replace_with_block_once() {
     printf '%s\n' "${end_marker}"
   } >"${temp_file}"
 
-  if [ -n "${backup_path}" ]; then
+  if [[ -n ${backup_path} ]]; then
     mv "${file_path}" "${backup_path}"
     echo "Replaced ${file_path} with the shared configuration and kept the previous file at ${backup_path}."
   fi
@@ -208,7 +208,7 @@ ensure_nix_conf_include() {
 
   mkdir -p "${nix_config_dir}"
 
-  if [ -f "${nix_config_path}" ] && grep -Fq "${shared_nix_config_path}" "${nix_config_path}"; then
+  if [[ -f ${nix_config_path} ]] && grep -Fq "${shared_nix_config_path}" "${nix_config_path}"; then
     return
   fi
 
@@ -273,7 +273,7 @@ ensure_bash_startup_files() {
 should_enable_zsh() {
   local current_shell_name=""
 
-  if [ -n "${issl_enable_zsh}" ]; then
+  if [[ -n ${issl_enable_zsh} ]]; then
     if is_yes "${issl_enable_zsh}"; then
       return 0
     fi
@@ -285,7 +285,7 @@ should_enable_zsh() {
   fi
 
   current_shell_name="$(basename "${SHELL-}")"
-  if [ "${current_shell_name}" = "zsh" ]; then
+  if [[ ${current_shell_name} == "zsh" ]]; then
     return 0
   fi
 
@@ -299,7 +299,7 @@ should_enable_zsh() {
 zshenv_defines_zdotdir() {
   local zshenv_path="$1"
 
-  [ -f "${zshenv_path}" ] && grep -Eq '^[[:space:]]*(export[[:space:]]+)?ZDOTDIR[[:space:]]*=' "${zshenv_path}"
+  [[ -f ${zshenv_path} ]] && grep -Eq '^[[:space:]]*(export[[:space:]]+)?ZDOTDIR[[:space:]]*=' "${zshenv_path}"
 }
 
 resolve_zdotdir_from_zshenv() {
@@ -307,7 +307,7 @@ resolve_zdotdir_from_zshenv() {
   local zsh_bin=""
   local resolved_value=""
 
-  if [ -x "${HOME}/.nix-profile/bin/zsh" ]; then
+  if [[ -x "${HOME}/.nix-profile/bin/zsh" ]]; then
     zsh_bin="${HOME}/.nix-profile/bin/zsh"
   elif command -v zsh >/dev/null 2>&1; then
     zsh_bin="$(command -v zsh)"
@@ -329,7 +329,7 @@ resolve_zdotdir_from_zshenv() {
         fi
       ' _ "${zshenv_path}" </dev/null
   )"
-  [ -n "${resolved_value}" ] || return 1
+  [[ -n ${resolved_value} ]] || return 1
   printf '%s\n' "${resolved_value}"
 }
 
@@ -387,7 +387,7 @@ ensure_zsh_startup_files() {
 }
 
 resolve_zsh_bin() {
-  if [ -x "${HOME}/.nix-profile/bin/zsh" ]; then
+  if [[ -x "${HOME}/.nix-profile/bin/zsh" ]]; then
     printf '%s\n' "${HOME}/.nix-profile/bin/zsh"
     return 0
   fi
@@ -403,7 +403,7 @@ resolve_zsh_bin() {
 # ===== Git ===== #
 
 resolve_git_bin() {
-  if [ -x "${HOME}/.nix-profile/bin/git" ]; then
+  if [[ -x "${HOME}/.nix-profile/bin/git" ]]; then
     printf '%s\n' "${HOME}/.nix-profile/bin/git"
     return 0
   fi
@@ -427,35 +427,35 @@ prompt_for_git_identity() {
   local git_email=""
   local missing_identity=0
 
-  if ! git_name="$("${git_bin}" config --global --get user.name 2>/dev/null)" || [ -z "${git_name}" ]; then
-    if [ -n "${git_user_name}" ]; then
+  if ! git_name="$("${git_bin}" config --global --get user.name 2>/dev/null)" || [[ -z ${git_name} ]]; then
+    if [[ -n ${git_user_name} ]]; then
       git_name="${git_user_name}"
-    elif [ -t 0 ]; then
+    elif [[ -t 0 ]]; then
       read -r -p "Enter your full name for Git commits: " git_name
     else
       echo 'warning: Git user.name setup was skipped. Run with GIT_USER_NAME, or set it later with: git config --global user.name "Your Name"' >&2
       missing_identity=1
     fi
-    if [ -n "${git_name}" ]; then
+    if [[ -n ${git_name} ]]; then
       "${git_bin}" config --global user.name "${git_name}"
     fi
   fi
 
-  if ! git_email="$("${git_bin}" config --global --get user.email 2>/dev/null)" || [ -z "${git_email}" ]; then
-    if [ -n "${git_user_email}" ]; then
+  if ! git_email="$("${git_bin}" config --global --get user.email 2>/dev/null)" || [[ -z ${git_email} ]]; then
+    if [[ -n ${git_user_email} ]]; then
       git_email="${git_user_email}"
-    elif [ -t 0 ]; then
+    elif [[ -t 0 ]]; then
       read -r -p "Enter your email address for Git commits: " git_email
     else
       echo 'warning: Git user.email setup was skipped. Run with GIT_USER_EMAIL, or set it later with: git config --global user.email "you@example.com"' >&2
       missing_identity=1
     fi
-    if [ -n "${git_email}" ]; then
+    if [[ -n ${git_email} ]]; then
       "${git_bin}" config --global user.email "${git_email}"
     fi
   fi
 
-  if [ "${missing_identity}" = "1" ]; then
+  if [[ ${missing_identity} == "1" ]]; then
     echo "warning: Git identity was not configured. Environment variables were not provided, and this run is non-interactive so prompts could not be used. Pass the env vars, run interactively, or set it later." >&2
   fi
 }
@@ -502,11 +502,11 @@ ensure_cargo_config_include() {
 
   mkdir -p "${cargo_home_path}"
 
-  if [ -f "${cargo_config_path}" ] && grep -Fq "${shared_rust_config_path}" "${cargo_config_path}"; then
+  if [[ -f ${cargo_config_path} ]] && grep -Fq "${shared_rust_config_path}" "${cargo_config_path}"; then
     return
   fi
 
-  if [ -f "${cargo_config_path}" ] && grep -Eq '^[[:space:]]*include[[:space:]]*=' "${cargo_config_path}"; then
+  if [[ -f ${cargo_config_path} ]] && grep -Eq '^[[:space:]]*include[[:space:]]*=' "${cargo_config_path}"; then
     echo "Skipping Cargo include setup because ${cargo_config_path} already defines include." >&2
     echo "Please add ${shared_rust_config_path} to include manually." >&2
     return
@@ -533,7 +533,7 @@ main() {
 
   guard_against_existing_home_manager_files "${zsh_enabled}"
 
-  if [ -n "${NIX_CONFIG-}" ]; then
+  if [[ -n ${NIX_CONFIG-} ]]; then
     export NIX_CONFIG="${NIX_CONFIG}"$'\n'"${nix_feature_config}"
   else
     export NIX_CONFIG="${nix_feature_config}"
@@ -547,7 +547,7 @@ main() {
   )"
 
   ensure_home_manager_profile_dir
-  if [ "${zsh_enabled}" = "1" ]; then
+  if [[ ${zsh_enabled} == "1" ]]; then
     home_configuration_name="issl-common-${current_system}"
   else
     home_configuration_name="issl-common-bash-only-${current_system}"
@@ -558,7 +558,7 @@ main() {
 
   ensure_nix_conf_include
   ensure_bash_startup_files
-  if [ "${zsh_enabled}" = "1" ]; then
+  if [[ ${zsh_enabled} == "1" ]]; then
     ensure_zsh_startup_files
     maybe_register_login_shell
   fi

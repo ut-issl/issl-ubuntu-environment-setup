@@ -53,7 +53,7 @@ assert_git_identity() {
   local user_name
   local user_email
 
-  if [ -n "${EXPECTED_GIT_USER_NAME:-}" ]; then
+  if [[ -n ${EXPECTED_GIT_USER_NAME:-} ]]; then
     user_name="$(
       HOME="${home_dir}" XDG_CONFIG_HOME="${config_dir}" \
         git config --global --get user.name
@@ -61,7 +61,7 @@ assert_git_identity() {
     test "${user_name}" = "${EXPECTED_GIT_USER_NAME}"
   fi
 
-  if [ -n "${EXPECTED_GIT_USER_EMAIL:-}" ]; then
+  if [[ -n ${EXPECTED_GIT_USER_EMAIL:-} ]]; then
     user_email="$(
       HOME="${home_dir}" XDG_CONFIG_HOME="${config_dir}" \
         git config --global --get user.email

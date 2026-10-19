@@ -184,7 +184,7 @@ main() {
   run_assert assert_shellcheck_installation
   run_assert assert_shfmt_installation
 
-  if [ "${issl_enable_zsh}" = "1" ]; then
+  if [[ ${issl_enable_zsh} == "1" ]]; then
     run_assert assert_zsh_enabled
     run_assert assert_shared_zsh_files
     run_assert assert_zsh_startup_files
