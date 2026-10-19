@@ -87,10 +87,6 @@ jobs:
               - '.yamllint.yaml'
             python:
               - '**/*.py'
-              - '**/*.md'
-              - 'pyproject.toml'
-              - '.python-version'
-              - 'uv.lock'
               - '.ruff.toml'
           safe_output: false
 
@@ -525,11 +521,12 @@ jobs:
           git ls-files -z '*.yaml' '*.yml' \
             | xargs -0 -r uvx --from="yamllint==1.38.0" yamllint --format=github --strict
 
-  lint-python:
-    name: Lint Python
+  format-python:
+    name: Format Python
     needs: determine-changes
     if: >-
       needs.determine-changes.outputs.python == 'true'
+      || needs.determine-changes.outputs.markdown == 'true'
       || needs.determine-changes.outputs.github-actions-ci == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -547,37 +544,7 @@ jobs:
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: '0.12.24'
-
-      - name: Lint Python
-        if: github.event_name != 'pull_request'
-        run: uvx --from="ruff==0.16.10" ruff check --output-format=github .
-
-      - name: Install reviewdog
-        if: github.event_name == 'pull_request'
-        uses: reviewdog/action-setup@d8a7baabd7f3e8544ee4dbde3ee41d0011c3a93f # v1.5.0
-        with:
-          reviewdog_version: 'v0.21.2'
-
-      - name: Lint Python (reviewdog)
-        if: github.event_name == 'pull_request'
-        env:
-          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          ruff_rc=0
-          uvx --from="ruff==0.16.10" ruff check --output-format=rdjson . > /tmp/ruff-report.json || ruff_rc=$?
-          reviewdog_rc=0
-          reviewdog < /tmp/ruff-report.json \
-              -f=rdjson \
-              -name=ruff \
-              -reporter=github-pr-review \
-              -filter-mode=nofilter \
-              -fail-level=warning \
-              -tee || reviewdog_rc=$?
-          if [[ ${ruff_rc} -ne 0 && ! -s /tmp/ruff-report.json ]]; then
-            echo '::error title=ruff::ruff failed before producing diagnostics for reviewdog'
-            exit ${ruff_rc}
-          fi
-          exit ${reviewdog_rc}
+          enable-cache: false
 
       - name: Format Python
         run: uvx --from="ruff==0.16.10" ruff format .
@@ -591,7 +558,37 @@ jobs:
           cleanup: false
 
       - name: Check Python formatting
-        run: git diff --exit-code
+        run: |
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=ruff-format::File is not formatted. Run ruff format."
+          done
+          git diff --exit-code
+
+  lint-python:
+    name: Lint Python
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.python == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: '0.12.24'
+          enable-cache: false
+
+      - name: Lint Python
+        run: uvx --from="ruff==0.16.10" ruff check --output-format=github .
 
   run-prek-hooks:
     name: Run prek hooks
