@@ -195,6 +195,13 @@
       groupName: 'ruff',
     },
     {
+      description: 'Compare shfmt hook versions as PEP 440, as Renovate would otherwise take its -N tags such as v3.14.1-1 for prereleases and never offer them',
+      matchDepNames: [
+        'scop/pre-commit-shfmt',
+      ],
+      versioning: 'pep440',
+    },
+    {
       matchDepNames: [
         'mvdan/shfmt',
         'scop/pre-commit-shfmt',
