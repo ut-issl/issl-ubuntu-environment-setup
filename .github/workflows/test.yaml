@@ -57,14 +57,14 @@ jobs:
           - disabled
         include:
           - zsh: enabled
-            enable_zsh: "1"
+            enable-zsh: "1"
           - zsh: disabled
-            enable_zsh: "0"
+            enable-zsh: "0"
     permissions:
       contents: read
 
     steps:
-      - name: Checkout common repository
+      - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -77,7 +77,7 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare test environment
-        id: test-env
+        id: test-environment
         shell: bash
         run: |
           tmpdir="$(mktemp -d)"
@@ -88,21 +88,21 @@ jobs:
           cp -a /etc/skel/. "${home_dir}/"
 
           {
-            echo "home_dir=${home_dir}"
-            echo "config_dir=${home_dir}/.config"
-            echo "data_dir=${home_dir}/.local/share"
-            echo "state_dir=${home_dir}/.local/state"
+            echo "home-dir=${home_dir}"
+            echo "config-dir=${home_dir}/.config"
+            echo "data-dir=${home_dir}/.local/share"
+            echo "state-dir=${home_dir}/.local/state"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Run apply.sh
+      - name: Apply Home Manager configuration (apply.sh)
         if: matrix.entry-point == 'apply'
         shell: bash
         env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
-          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
-          ENABLE_ZSH: ${{ matrix.enable_zsh }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
+          CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
+          DATA_DIR: ${{ steps.test-environment.outputs.data-dir }}
+          STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
+          ENABLE_ZSH: ${{ matrix.enable-zsh }}
         run: |
           env \
             HOME="${HOME_DIR}" \
@@ -115,15 +115,15 @@ jobs:
             GIT_USER_EMAIL="issl-test@example.com" \
             bash ./common/scripts/apply.sh
 
-      - name: Run setup.sh
+      - name: Apply Home Manager configuration (setup.sh)
         if: matrix.entry-point == 'setup'
         shell: bash
         env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
-          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
-          ENABLE_ZSH: ${{ matrix.enable_zsh }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
+          CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
+          DATA_DIR: ${{ steps.test-environment.outputs.data-dir }}
+          STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
+          ENABLE_ZSH: ${{ matrix.enable-zsh }}
           NIX_CONFIG: access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
         run: |
           git -C common branch ci-setup-entry HEAD
@@ -147,17 +147,17 @@ jobs:
       - name: Add Home Manager profile to PATH
         shell: bash
         env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
         run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
 
-      - name: Run environment tests
+      - name: Test the environment
         shell: bash
         env:
           COMMON_DIR: ${{ github.workspace }}/common
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
-          ISSL_ENABLE_ZSH: ${{ matrix.enable_zsh }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
+          CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
+          STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
+          ISSL_ENABLE_ZSH: ${{ matrix.enable-zsh }}
           EXPECTED_GIT_USER_NAME: ISSL Test User
           EXPECTED_GIT_USER_EMAIL: issl-test@example.com
         run: ./common/tests/run.sh

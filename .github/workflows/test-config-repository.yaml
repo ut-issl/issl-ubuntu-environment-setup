@@ -44,15 +44,15 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test
+  test-config-repository:
+    name: Test config repository
     runs-on: ${{ inputs.os }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     permissions:
       contents: read
 
     steps:
-      - name: Checkout common repository
+      - name: Check out the common repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.common-repository }}
@@ -60,7 +60,7 @@ jobs:
           persist-credentials: false
           path: common
 
-      - name: Checkout user repository
+      - name: Check out the user repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.user-repository }}
@@ -74,7 +74,7 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare test environment
-        id: test-env
+        id: test-environment
         shell: bash
         run: |
           tmpdir="$(mktemp -d)"
@@ -85,19 +85,19 @@ jobs:
           cp -a /etc/skel/. "${home_dir}/"
 
           {
-            echo "home_dir=${home_dir}"
-            echo "config_dir=${home_dir}/.config"
-            echo "data_dir=${home_dir}/.local/share"
-            echo "state_dir=${home_dir}/.local/state"
+            echo "home-dir=${home_dir}"
+            echo "config-dir=${home_dir}/.config"
+            echo "data-dir=${home_dir}/.local/share"
+            echo "state-dir=${home_dir}/.local/state"
           } >> "$GITHUB_OUTPUT"
 
       - name: Apply Home Manager configuration
         shell: bash
         env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
-          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
+          CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
+          DATA_DIR: ${{ steps.test-environment.outputs.data-dir }}
+          STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
           FLAKE_TARGET: ${{ inputs.flake-target }}
         run: |
           cd user
@@ -127,15 +127,15 @@ jobs:
       - name: Add Home Manager profile to PATH
         shell: bash
         env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
         run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
 
-      - name: Run environment tests
+      - name: Test the environment
         shell: bash
         env:
           COMMON_DIR: ${{ github.workspace }}/common
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
+          CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
+          STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
           ISSL_ENABLE_ZSH: ${{ case(inputs.zsh-enabled, '1', '0') }}
         run: ./common/tests/run.sh
