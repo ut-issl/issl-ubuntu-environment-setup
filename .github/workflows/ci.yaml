@@ -71,6 +71,8 @@ jobs:
             shell:
               - '**/*.sh'
               - '**/*.bash'
+              - '.shellcheckrc'
+              - '.github/problem-matchers/shellcheck.json'
             zsh:
               - '**/*.zsh'
             markdown:
@@ -226,8 +228,8 @@ jobs:
             echo 'No flake.nix found. Skipping flake check.'
           fi
 
-  lint-shell-scripts:
-    name: Lint shell scripts
+  format-shell-scripts:
+    name: Format shell scripts
     needs: determine-changes
     if: >-
       needs.determine-changes.outputs.shell == 'true'
@@ -244,55 +246,53 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Install shfmt and ShellCheck
-        run: |
-          go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
-          sudo apt-get update
-          if [[ ${GITHUB_EVENT_NAME} != 'pull_request' ]]; then
-            sudo apt-get --yes install shellcheck
-          fi
+      - name: Install shfmt
+        run: go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
 
-      - name: Collect shell scripts
-        id: shell-scripts
-        run: |
-          shell_scripts_path="$(mktemp)"
-          find . -type f \( \
-            -name '*.sh' -o \
-            -name '*.bash' \
-          \) -not -path './.git/*' -print0 > "${shell_scripts_path}"
-          echo "shell-scripts=${shell_scripts_path}" >> "${GITHUB_OUTPUT}"
-          if [[ ! -s ${shell_scripts_path} ]]; then
-            echo 'No shell scripts found.'
-            echo 'found=false' >> "${GITHUB_OUTPUT}"
-          else
-            echo 'found=true' >> "${GITHUB_OUTPUT}"
-          fi
+      - name: Format shell scripts
+        run: git ls-files -z '*.sh' '*.bash' | xargs -0 -r "$(go env GOPATH)/bin/shfmt" --write --simplify --indent=2
 
-      - name: Check shell script formatting
-        if: steps.shell-scripts.outputs.found == 'true'
-        env:
-          SHELL_SCRIPTS: ${{ steps.shell-scripts.outputs.shell-scripts }}
-        run: xargs -0 "$(go env GOPATH)/bin/shfmt" --diff --simplify --indent=2 < "${SHELL_SCRIPTS}"
-
-      - name: Lint shell scripts
-        if: >-
-          github.event_name != 'pull_request'
-          && steps.shell-scripts.outputs.found == 'true'
-        env:
-          SHELL_SCRIPTS: ${{ steps.shell-scripts.outputs.shell-scripts }}
-        run: xargs -0 shellcheck --external-sources < "${SHELL_SCRIPTS}"
-
-      - name: Lint shell scripts (reviewdog)
+      - name: Suggest shell script formatting
         if: github.event_name == 'pull_request'
-        uses: reviewdog/action-shellcheck@d0b8d5fd7fad6afdb6e1b6ce1778892be4d1f427 # v1.34.1
+        uses: reviewdog/action-suggester@ac5ce6d94e35c00530447dc63c271e38e4fd36c6 # v1.26.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          filter_mode: nofilter
-          fail_level: error
-          pattern: |
-            *.sh
-            *.bash
+          tool_name: shfmt
+          cleanup: false
+
+      - name: Check shell script formatting
+        run: |
+          git diff --name-only | while IFS= read -r file; do
+            echo "::error file=${file},title=shfmt::File is not formatted. Run shfmt."
+          done
+          git diff --exit-code
+
+  lint-shell-scripts:
+    name: Lint shell scripts
+    needs: determine-changes
+    if: >-
+      needs.determine-changes.outputs.shell == 'true'
+      || needs.determine-changes.outputs.github-actions-ci == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get --yes install shellcheck
+
+      - name: Lint shell scripts
+        run: |
+          echo '::add-matcher::.github/problem-matchers/shellcheck.json'
+          git ls-files -z '*.sh' '*.bash' | xargs -0 -r shellcheck --format=gcc
 
   lint-zsh:
     name: Lint Zsh
