@@ -81,6 +81,7 @@ repos:
     rev: 08e70e40a095571503c7079810352e942756259c  # frozen: v1.8.5
     hooks:
       - id: tombi-lint
+        args: [--error-on-warnings]
 
   - repo: https://github.com/adrienverge/yamllint
     rev: cba56bcde1fdd01c1deb3f945e69764c291a6530  # frozen: v1.38.0
