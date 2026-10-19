@@ -91,14 +91,14 @@ Run it again if you turned down its GitHub SSH or Docker Engine setup and need i
 
 Before you apply your own configuration, list what you installed imperatively:
 
-```bash
+```sh
 nix profile list
 ```
 
 Add those packages to `home.packages` in your own modules and apply the configuration,
 then remove them from the profile so that nothing is installed twice:
 
-```bash
+```sh
 nix profile remove <name>
 ```
 

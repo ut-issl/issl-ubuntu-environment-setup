@@ -6,19 +6,19 @@ This repository recommends using [`prek`](https://prek.j178.dev) (a faster, drop
 
 Install the hooks by running:
 
-```console
+```sh
 uvx prek install
 ```
 
 If `prek` is already installed:
 
-```console
+```sh
 prek install
 ```
 
 If you prefer `pre-commit`:
 
-```console
+```sh
 uvx pre-commit install
 ```
 
@@ -38,13 +38,13 @@ for checks, so it is recommended.
 
 Install Commitizen:
 
-```console
+```sh
 uv tool install commitizen
 ```
 
 Use Commitizen instead of `git commit`:
 
-```console
+```sh
 cz commit
 ```
 
