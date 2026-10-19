@@ -5,68 +5,71 @@ on:
     inputs:
       os:
         required: false
-        type: string
         default: ubuntu-latest
+        type: string
       flake-target:
         required: false
-        type: string
         default: user
+        type: string
       zsh-enabled:
         required: false
-        type: boolean
         default: true
+        type: boolean
       common-repository:
         required: false
-        type: string
         default: ut-issl/issl-ubuntu-environment-setup
+        type: string
       common-ref:
         required: false
-        type: string
         default: main
+        type: string
       user-repository:
         required: false
-        type: string
         default: ''
+        type: string
       user-ref:
         required: false
-        type: string
         default: ''
+        type: string
       override-issl-input:
         required: false
-        type: boolean
         default: false
+        type: boolean
       timeout-minutes:
         required: false
-        type: number
         default: 10
+        type: number
 
-permissions:
-  contents: read
+defaults:
+  run:
+    shell: bash
+
+permissions: {}
 
 jobs:
-  test:
-    name: Test
+  test-config-repository:
+    name: Test config repository
     runs-on: ${{ inputs.os }}
     timeout-minutes: ${{ inputs.timeout-minutes }}
     permissions:
       contents: read
 
     steps:
-      - name: Checkout common repository
+      - name: Check out the common repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.common-repository }}
           ref: ${{ inputs.common-ref }}
-          path: common
           persist-credentials: false
+          path: common
 
-      - name: Checkout user repository
+      - name: Check out the user repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: ${{ inputs.user-repository }}
           ref: ${{ inputs.user-ref }}
-          path: user
           persist-credentials: false
+          path: user
 
       - name: Install Nix
         uses: cachix/install-nix-action@448cde739abec1eaf0646249e3d25bb8d9bc7702 # v31.11.2
@@ -74,8 +77,7 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Prepare test environment
-        id: test-env
-        shell: bash
+        id: test-environment
         run: |
           tmpdir="$(mktemp -d)"
           home_dir="${tmpdir}/home"
@@ -85,20 +87,20 @@ jobs:
           cp -a /etc/skel/. "${home_dir}/"
 
           {
-            echo "home_dir=${home_dir}"
-            echo "config_dir=${home_dir}/.config"
-            echo "data_dir=${home_dir}/.local/share"
-            echo "state_dir=${home_dir}/.local/state"
-          } >> "$GITHUB_OUTPUT"
+            echo "home-dir=${home_dir}"
+            echo "config-dir=${home_dir}/.config"
+            echo "data-dir=${home_dir}/.local/share"
+            echo "state-dir=${home_dir}/.local/state"
+          } >> "${GITHUB_OUTPUT}"
 
       - name: Apply Home Manager configuration
-        shell: bash
         env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          DATA_DIR: ${{ steps.test-env.outputs.data_dir }}
-          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
+          CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
+          DATA_DIR: ${{ steps.test-environment.outputs.data-dir }}
+          STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
           FLAKE_TARGET: ${{ inputs.flake-target }}
+          OVERRIDE_ISSL_INPUT: ${{ inputs.override-issl-input }}
         run: |
           cd user
 
@@ -107,7 +109,7 @@ jobs:
             --show-trace
           )
 
-          if [ "${{ inputs.override-issl-input }}" = "true" ]; then
+          if [[ ${OVERRIDE_ISSL_INPUT} == 'true' ]]; then
             switch_args+=(
               --override-input
               issl
@@ -117,25 +119,23 @@ jobs:
 
           env \
             HOME="${HOME_DIR}" \
-            USER="issl-test" \
+            USER='issl-test' \
             XDG_CONFIG_HOME="${CONFIG_DIR}" \
             XDG_DATA_HOME="${DATA_DIR}" \
             XDG_STATE_HOME="${STATE_DIR}" \
-            nix run ".#home-manager" -- \
+            nix run '.#home-manager' -- \
               switch --flake ".#${FLAKE_TARGET}" "${switch_args[@]}"
 
       - name: Add Home Manager profile to PATH
-        shell: bash
         env:
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
         run: echo "${HOME_DIR}/.nix-profile/bin" >> "${GITHUB_PATH}"
 
-      - name: Run environment tests
-        shell: bash
+      - name: Test the environment
         env:
           COMMON_DIR: ${{ github.workspace }}/common
-          HOME_DIR: ${{ steps.test-env.outputs.home_dir }}
-          CONFIG_DIR: ${{ steps.test-env.outputs.config_dir }}
-          STATE_DIR: ${{ steps.test-env.outputs.state_dir }}
+          HOME_DIR: ${{ steps.test-environment.outputs.home-dir }}
+          CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
+          STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
           ISSL_ENABLE_ZSH: ${{ case(inputs.zsh-enabled, '1', '0') }}
         run: ./common/tests/run.sh

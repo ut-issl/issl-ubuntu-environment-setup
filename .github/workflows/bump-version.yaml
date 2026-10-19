@@ -1,11 +1,12 @@
-name: Bump Version
+name: Bump version
 
 on:
   pull_request:
-    types: [closed]
+    types:
+      - closed
   workflow_dispatch:
     inputs:
-      bump_type:
+      bump-type:
         description: 'Version bump type'
         required: true
         type: choice
@@ -14,12 +15,18 @@ on:
           - minor
           - patch
 
+defaults:
+  run:
+    shell: bash
+
 permissions: {}
 
 jobs:
-
   bump-version:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    name: Bump version
+    if: >-
+      github.event_name == 'workflow_dispatch'
+      || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -39,13 +46,13 @@ jobs:
         id: bump-version
         uses: conjikidow/bump-version-action@f63d3275c47f3bf6348d6f58e47e9aee5addd55b # v4.2.3
         with:
+          label-major: update::major
+          label-minor: update::minor
+          label-patch: update::patch
+          manual-bump-type: ${{ inputs.bump-type }}
+          labels-to-add: automated,versioning
+          create-release: false
           github-token: ${{ steps.app-token.outputs.token }}
-          label-major: 'update::major'
-          label-minor: 'update::minor'
-          label-patch: 'update::patch'
-          manual-bump-type: ${{ inputs.bump_type }}
-          labels-to-add: 'automated,versioning'
-          create-release: 'false'
 
       - name: Prepare release asset
         if: steps.bump-version.outputs.version-bumped == 'true'
@@ -54,12 +61,13 @@ jobs:
           cp scripts/bootstrap-host.sh release-assets/bootstrap-host.sh
           cp scripts/setup.sh release-assets/setup.sh
 
-      - name: Create GitHub release
+      - name: Publish GitHub release
         if: steps.bump-version.outputs.version-bumped == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           RELEASE_TAG: v${{ steps.bump-version.outputs.new-version }}
         run: |
           gh release create "${RELEASE_TAG}" release-assets/bootstrap-host.sh release-assets/setup.sh \
-            --title "${RELEASE_TAG}" \
+            --title="${RELEASE_TAG}" \
             --generate-notes
