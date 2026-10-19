@@ -108,8 +108,10 @@ jobs:
           persist-credentials: false
 
       - name: Lint GitHub Actions
+        env:
+          ACTIONLINT_VERSION: '1.7.12'
         run: |
-          go install github.com/rhysd/actionlint/cmd/actionlint@914e7df21a07ef503a81201c76d2b11c789d3fca # v1.7.12
+          go install "github.com/rhysd/actionlint/cmd/actionlint@v${ACTIONLINT_VERSION}"
           echo '::add-matcher::.github/problem-matchers/actionlint.json'
           "$(go env GOPATH)/bin/actionlint" -color
 
@@ -173,8 +175,10 @@ jobs:
       - name: Validate Renovate config
         env:
           LOG_FORMAT: json
+          RENOVATE_VERSION: '44.148.4'
         run: |
-          npx --package=renovate@44.148.4 --yes renovate-config-validator --strict --no-global .github/renovate.json5 \
+          npx --package="renovate@${RENOVATE_VERSION}" --yes renovate-config-validator \
+            --strict --no-global .github/renovate.json5 \
             | jq --raw-output --arg file .github/renovate.json5 '
                 def escape: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
                 def level: if .level >= 50 then "ERROR" elif .level >= 40 then "WARN" else "INFO" end;
@@ -204,11 +208,13 @@ jobs:
           persist-credentials: false
 
       - name: Validate JSON5
+        env:
+          JSON5_VERSION: '2.2.3'
         run: |
           echo '::add-matcher::.github/problem-matchers/json5.json'
           exit_code=0
           while IFS= read -r -d '' json5_file; do
-            npx --yes json5@2.2.3 --validate "${json5_file}" 2>&1 \
+            npx --yes "json5@${JSON5_VERSION}" --validate "${json5_file}" 2>&1 \
               | while IFS= read -r line; do
                   case "${line}" in
                     'JSON5: '*) printf '%s: %s\n' "${json5_file}" "${line}" ;;
@@ -309,9 +315,11 @@ jobs:
           enable-cache: false
 
       - name: Lint YAML
+        env:
+          YAMLLINT_VERSION: '1.38.0'
         run: |
           git ls-files -z '*.yaml' '*.yml' \
-            | xargs -0 -r uvx --from="yamllint==1.38.0" yamllint --format=github --strict
+            | xargs -0 -r uvx --from="yamllint==${YAMLLINT_VERSION}" yamllint --format=github --strict
 
   check-links:
     name: Check links
@@ -472,7 +480,9 @@ jobs:
           enable-cache: false
 
       - name: Format Python
-        run: uvx --from="ruff==0.16.10" ruff format .
+        env:
+          RUFF_VERSION: '0.16.10'
+        run: uvx --from="ruff==${RUFF_VERSION}" ruff format .
 
       - name: Suggest Python formatting
         if: github.event_name == 'pull_request'
@@ -513,7 +523,9 @@ jobs:
           enable-cache: false
 
       - name: Lint Python
-        run: uvx --from="ruff==0.16.10" ruff check --output-format=github .
+        env:
+          RUFF_VERSION: '0.16.10'
+        run: uvx --from="ruff==${RUFF_VERSION}" ruff check --output-format=github .
 
   format-shell-scripts:
     name: Format shell scripts
@@ -534,7 +546,9 @@ jobs:
           persist-credentials: false
 
       - name: Install shfmt
-        run: go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
+        env:
+          SHFMT_VERSION: '3.14.1'
+        run: go install "mvdan.cc/sh/v3/cmd/shfmt@v${SHFMT_VERSION}"
 
       - name: Format shell scripts
         run: git ls-files -z '*.sh' '*.bash' | xargs -0 -r "$(go env GOPATH)/bin/shfmt" --write --simplify --indent=2
@@ -578,9 +592,12 @@ jobs:
           enable-cache: false
 
       - name: Lint shell scripts
+        env:
+          SHELLCHECK_PY_VERSION: '0.11.0.1'
         run: |
           echo '::add-matcher::.github/problem-matchers/shellcheck.json'
-          git ls-files -z '*.sh' '*.bash' | xargs -0 -r uvx --from="shellcheck-py==0.11.0.1" shellcheck --format=gcc
+          git ls-files -z '*.sh' '*.bash' \
+            | xargs -0 -r uvx --from="shellcheck-py==${SHELLCHECK_PY_VERSION}" shellcheck --format=gcc
 
   format-zsh:
     name: Format Zsh
@@ -601,7 +618,9 @@ jobs:
           persist-credentials: false
 
       - name: Install shfmt
-        run: go install mvdan.cc/sh/v3/cmd/shfmt@a3f0c75d21d918756fa38de8b5d3429efde7948b # v3.14.1
+        env:
+          SHFMT_VERSION: '3.14.1'
+        run: go install "mvdan.cc/sh/v3/cmd/shfmt@v${SHFMT_VERSION}"
 
       - name: Format Zsh
         run: |

@@ -6,145 +6,147 @@
   minimumReleaseAge: '3 days',
   customManagers: [
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
         '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
-      matchStringsStrategy: 'recursive',
+      fileFormat: 'yaml',
       matchStrings: [
-        "uses: commitizen-tools/setup-cz@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+version: '[^'\\s]+'",
-        "\\n\\s+version: '(?<currentValue>[^'\\s]+)'",
+        'jobs.*.steps[$substringBefore(uses, "@") = "commitizen-tools/setup-cz"].{ "currentValue": with.version }',
       ],
-      datasourceTemplate: 'pypi',
       depNameTemplate: 'commitizen-tools/commitizen',
+      datasourceTemplate: 'pypi',
       packageNameTemplate: 'commitizen',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
+      fileFormat: 'yaml',
       matchStrings: [
-        'github\\.com/rhysd/actionlint/cmd/actionlint@(?<currentDigest>[a-f0-9]{40}) # (?<currentValue>v[^\\s]+)',
+        'jobs.*.steps[$exists(env.ACTIONLINT_VERSION)].{ "currentValue": env.ACTIONLINT_VERSION }',
       ],
-      autoReplaceStringTemplate: 'github.com/rhysd/actionlint/cmd/actionlint@{{{newDigest}}} # {{{newValue}}}',
-      datasourceTemplate: 'github-tags',
       depNameTemplate: 'rhysd/actionlint',
-      versioningTemplate: 'semver',
+      datasourceTemplate: 'go',
+      packageNameTemplate: 'github.com/rhysd/actionlint',
+      extractVersionTemplate: '^v(?<version>.+)$',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
+      fileFormat: 'yaml',
       matchStrings: [
-        'renovate@(?<currentValue>\\S+)',
+        'jobs.*.steps[$exists(env.RENOVATE_VERSION)].{ "currentValue": env.RENOVATE_VERSION }',
       ],
-      datasourceTemplate: 'npm',
       depNameTemplate: 'renovatebot/renovate',
+      datasourceTemplate: 'npm',
       packageNameTemplate: 'renovate',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
+      fileFormat: 'yaml',
       matchStrings: [
-        'shellcheck-py==(?<currentValue>[^"\\s]+)',
+        'jobs.*.steps[$exists(env.SHELLCHECK_PY_VERSION)].{ "currentValue": env.SHELLCHECK_PY_VERSION }',
       ],
-      datasourceTemplate: 'pypi',
       depNameTemplate: 'shellcheck-py/shellcheck-py',
+      datasourceTemplate: 'pypi',
       packageNameTemplate: 'shellcheck-py',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
+      fileFormat: 'yaml',
       matchStrings: [
-        'mvdan\\.cc/sh/v3/cmd/shfmt@(?<currentDigest>[a-f0-9]{40}) # (?<currentValue>v[^\\s]+)',
+        'jobs.*.steps[$exists(env.SHFMT_VERSION)].{ "currentValue": env.SHFMT_VERSION }',
       ],
-      autoReplaceStringTemplate: 'mvdan.cc/sh/v3/cmd/shfmt@{{{newDigest}}} # {{{newValue}}}',
-      datasourceTemplate: 'github-tags',
-      depNameTemplate: 'mvdan/shfmt',
-      packageNameTemplate: 'mvdan/sh',
-      versioningTemplate: 'semver',
+      depNameTemplate: 'mvdan/sh',
+      datasourceTemplate: 'go',
+      packageNameTemplate: 'mvdan.cc/sh/v3',
+      extractVersionTemplate: '^v(?<version>.+)$',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
-      matchStringsStrategy: 'recursive',
+      fileFormat: 'yaml',
       matchStrings: [
-        "uses: rvben/rumdl@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+version: '[^'\\s]+'",
-        "\\n\\s+version: '(?<currentValue>[^'\\s]+)'",
+        'jobs.*.steps[$substringBefore(uses, "@") = "rvben/rumdl"].{ "currentValue": with.version }',
       ],
-      datasourceTemplate: 'pypi',
       depNameTemplate: 'rvben/rumdl',
+      datasourceTemplate: 'pypi',
       packageNameTemplate: 'rumdl',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
-      matchStringsStrategy: 'recursive',
+      fileFormat: 'yaml',
       matchStrings: [
-        "uses: lycheeverse/lychee-action@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+lycheeVersion: '[^'\\s]+'",
-        "\\n\\s+lycheeVersion: '(?<currentValue>[^'\\s]+)'",
+        'jobs.*.steps[$substringBefore(uses, "@") = "lycheeverse/lychee-action"].{ "currentValue": with.lycheeVersion }',
       ],
-      datasourceTemplate: 'github-releases',
       depNameTemplate: 'lycheeverse/lychee',
+      datasourceTemplate: 'github-releases',
       extractVersionTemplate: '^lychee-(?<version>v\\d+\\.\\d+\\.\\d+)$',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
+      fileFormat: 'yaml',
       matchStrings: [
-        'json5@(?<currentValue>\\S+)',
+        'jobs.*.steps[$exists(env.JSON5_VERSION)].{ "currentValue": env.JSON5_VERSION }',
       ],
-      datasourceTemplate: 'npm',
       depNameTemplate: 'json5/json5',
+      datasourceTemplate: 'npm',
       packageNameTemplate: 'json5',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
-      matchStringsStrategy: 'recursive',
+      fileFormat: 'yaml',
       matchStrings: [
-        "uses: tombi-toml/setup-tombi@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+version: '[^'\\s]+'",
-        "\\n\\s+version: '(?<currentValue>[^'\\s]+)'",
+        'jobs.*.steps[$substringBefore(uses, "@") = "tombi-toml/setup-tombi"].{ "currentValue": with.version }',
       ],
-      datasourceTemplate: 'github-releases',
       depNameTemplate: 'tombi-toml/tombi',
+      datasourceTemplate: 'github-releases',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
+      fileFormat: 'yaml',
       matchStrings: [
-        'yamllint==(?<currentValue>[^"\\s]+)',
+        'jobs.*.steps[$exists(env.YAMLLINT_VERSION)].{ "currentValue": env.YAMLLINT_VERSION }',
       ],
-      datasourceTemplate: 'pypi',
       depNameTemplate: 'adrienverge/yamllint',
+      datasourceTemplate: 'pypi',
       packageNameTemplate: 'yamllint',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
+      fileFormat: 'yaml',
       matchStrings: [
-        'ruff==(?<currentValue>[^"\\s]+)',
+        'jobs.*.steps[$exists(env.RUFF_VERSION)].{ "currentValue": env.RUFF_VERSION }',
       ],
-      datasourceTemplate: 'pypi',
       depNameTemplate: 'astral-sh/ruff',
+      datasourceTemplate: 'pypi',
       packageNameTemplate: 'ruff',
     },
     {
@@ -223,7 +225,7 @@
     },
     {
       matchDepNames: [
-        'mvdan/shfmt',
+        'mvdan/sh',
         'scop/pre-commit-shfmt',
       ],
       groupName: 'shfmt',
@@ -280,10 +282,6 @@
       matchDepNames: [
         'renovatebot/renovate',
       ],
-      matchFileNames: [
-        '.github/workflows/ci.yaml',
-        '.github/workflows/ci.yml',
-      ],
       extends: [
         'schedule:weekly',
       ],
@@ -291,10 +289,6 @@
     {
       matchDepNames: [
         'renovatebot/renovate',
-      ],
-      matchFileNames: [
-        '.github/workflows/ci.yaml',
-        '.github/workflows/ci.yml',
       ],
       matchUpdateTypes: [
         'minor',
