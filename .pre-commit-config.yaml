@@ -4,8 +4,8 @@ default_stages: [pre-commit]
 
 update:
   repos:
-    "https://github.com/lycheeverse/lychee":
-      include_tags: ["lychee-v*"]
+    https://github.com/lycheeverse/lychee:
+      include_tags: ['lychee-v*']
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -13,14 +13,14 @@ repos:
     hooks:
       - id: fix-byte-order-marker
       - id: mixed-line-ending
-        args: ["--fix=lf"]
+        args: [--fix=lf]
       - id: trailing-whitespace
-        args: ["--markdown-linebreak-ext=md"]
+        args: [--markdown-linebreak-ext=md]
       - id: end-of-file-fixer
       - id: check-json
         fail_fast: true
       - id: pretty-format-json
-        args: ["--autofix", "--no-sort-keys"]
+        args: [--autofix, --no-sort-keys]
 
   - repo: https://github.com/crate-ci/typos
     rev: 00f422f3b19c57bc6338715ebfe3316d38768461  # frozen: v1.50.3
@@ -36,7 +36,7 @@ repos:
     rev: 3429bee0c8870bff7874f898c6e8659d1ffe9645  # frozen: v0.2.79
     hooks:
       - id: rumdl-check
-        args: ["--fix"]
+        args: [--fix]
 
   - repo: local
     hooks:
@@ -44,20 +44,20 @@ repos:
         name: nixfmt
         entry: nix fmt --
         language: system
-        files: \.nix$
+        files: '\.nix$'
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: f12be1ebaa5351c1fc76472de98db2c3446c8253  # frozen: v0.16.10
     hooks:
       - id: ruff-check
-        args: ["--fix"]
+        args: [--fix]
       - id: ruff-format
 
   - repo: https://github.com/scop/pre-commit-shfmt
     rev: 479be5958357ba5ab65ce47172117348516860e9  # frozen: v3.14.1-1
     hooks:
       - id: shfmt
-        args: ["--write", "--simplify", "--indent=2"]
+        args: [--write, --simplify, --indent=2]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c  # frozen: v6.0.0
@@ -86,13 +86,13 @@ repos:
     rev: cba56bcde1fdd01c1deb3f945e69764c291a6530  # frozen: v1.38.0
     hooks:
       - id: yamllint
-        args: ["--format=standard", "--strict"]
+        args: [--format=standard, --strict]
 
   - repo: https://github.com/lycheeverse/lychee
     rev: 2bba271688c1abb1503097a064e6c3bc1d1b6a9b  # frozen: lychee-v0.24.2
     hooks:
       - id: lychee
-        args: ["--offline", "--no-progress", "."]
+        args: [--offline, --no-progress, .]
         pass_filenames: false
 
   - repo: local
@@ -101,21 +101,21 @@ repos:
         name: deadnix
         entry: nix run --inputs-from . nixpkgs#deadnix -- --fail .
         language: system
-        files: \.nix$
+        files: '\.nix$'
         pass_filenames: false
 
       - id: statix
         name: statix
         entry: nix run --inputs-from . nixpkgs#statix -- check .
         language: system
-        files: \.nix$
+        files: '\.nix$'
         pass_filenames: false
 
   - repo: https://github.com/koalaman/shellcheck-precommit
     rev: 99470f5e12208ff0fb17ab81c3c494f7620a1d8d  # frozen: v0.11.0
     hooks:
       - id: shellcheck
-        exclude: \.zsh$
+        exclude: '\.zsh$'
 
   - repo: https://github.com/commitizen-tools/commitizen
     rev: 57217c394fff5064bedd48421fe4b6f5f73aad47  # frozen: v4.19.2
