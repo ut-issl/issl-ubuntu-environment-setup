@@ -4,38 +4,51 @@ on:
   workflow_call:
     inputs:
       os:
+        description: 'Runner to run the tests on'
         required: false
         default: ubuntu-latest
         type: string
       flake-target:
+        description: 'Home Manager configuration of the config repository to apply'
         required: false
         default: user
         type: string
       zsh-enabled:
+        description: 'Whether the applied configuration enables Zsh'
         required: false
         default: true
         type: boolean
       common-repository:
+        description: >-
+          Repository that provides the environment tests and,
+          with `override-issl-input`, the `issl` flake input
         required: false
         default: ut-issl/issl-ubuntu-environment-setup
         type: string
       common-ref:
+        description: 'Revision of `common-repository` to check out'
         required: false
         default: main
         type: string
       user-repository:
+        description: 'Config repository to test, or empty for the calling repository'
         required: false
         default: ''
         type: string
       user-ref:
+        description: >-
+          Revision of `user-repository` to check out,
+          or empty for the triggering revision of the calling repository or the default branch of another one
         required: false
         default: ''
         type: string
       override-issl-input:
+        description: 'Whether to override the `issl` flake input with the checked-out `common-repository`'
         required: false
         default: false
         type: boolean
       timeout-minutes:
+        description: 'Timeout of the test job in minutes'
         required: false
         default: 10
         type: number
