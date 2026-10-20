@@ -61,7 +61,7 @@ This directory contains imperative shell entry points.
 
 This directory contains shell-based validation scripts for each area of the environment.
 
-- `lib.sh` provides the shared test helpers, such as test logging and failure reporting.
+- `lib.sh` provides the shared test helpers, such as assertions, test logging and failure reporting.
   Every `test-*.sh` sources it.
 - `run.sh` runs all the test scripts in order.
 - Each `test-*.sh` corresponds to the module of the same name, such as:

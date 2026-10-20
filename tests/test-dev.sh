@@ -9,20 +9,17 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_commitizen_installation() {
-  [[ -x "${nix_profile_bin}/cz" ]]
-  [[ "$(command -v cz)" == "${nix_profile_bin}/cz" ]]
+  assert_command_path "${nix_profile_bin}/cz"
   cz version
 }
 
 test_prek_installation() {
-  [[ -x "${nix_profile_bin}/prek" ]]
-  [[ "$(command -v prek)" == "${nix_profile_bin}/prek" ]]
+  assert_command_path "${nix_profile_bin}/prek"
   prek --version
 }
 
 test_typos_installation() {
-  [[ -x "${nix_profile_bin}/typos" ]]
-  [[ "$(command -v typos)" == "${nix_profile_bin}/typos" ]]
+  assert_command_path "${nix_profile_bin}/typos"
   typos --version
 }
 

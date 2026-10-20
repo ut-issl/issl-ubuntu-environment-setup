@@ -9,14 +9,12 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_typst_installation() {
-  [[ -x "${nix_profile_bin}/typst" ]]
-  [[ "$(command -v typst)" == "${nix_profile_bin}/typst" ]]
+  assert_command_path "${nix_profile_bin}/typst"
   typst --version
 }
 
 test_typstyle_installation() {
-  [[ -x "${nix_profile_bin}/typstyle" ]]
-  [[ "$(command -v typstyle)" == "${nix_profile_bin}/typstyle" ]]
+  assert_command_path "${nix_profile_bin}/typstyle"
   typstyle --version
 }
 

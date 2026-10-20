@@ -40,8 +40,7 @@ _python_exe() {
 }
 
 test_uv_installation() {
-  [[ -x "${nix_profile_bin}/uv" ]]
-  [[ "$(command -v uv)" == "${nix_profile_bin}/uv" ]]
+  assert_command_path "${nix_profile_bin}/uv"
   uv --version
 }
 
@@ -50,7 +49,7 @@ test_shared_pythonrc_file() {
 }
 
 test_user_python_startup_file() {
-  [[ -f ${pythonrc_path} ]]
+  assert_file "${pythonrc_path}"
   grep -Fq 'runpy.run_path(str(shared_pythonrc), run_name="__main__")' "${pythonrc_path}"
 }
 
@@ -84,11 +83,11 @@ test_python_startup_pyrepl_history() {
     TERM=xterm \
     uv run --no-project --python=3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
-  [[ -f "${hist_base}/history" ]]
+  assert_file "${hist_base}/history"
   grep -q 'exit()' "${hist_base}/history"
 
   if _is_libedit; then
-    [[ ! -f "${hist_base}/history.editline" ]]
+    assert_not_exists "${hist_base}/history.editline"
   fi
 }
 
@@ -113,9 +112,9 @@ test_python_startup_basic_repl_libedit_history() {
     TERM=xterm \
     uv run --no-project --python=3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
-  [[ -f "${hist_base}/history.editline" ]]
+  assert_file "${hist_base}/history.editline"
   grep -q 'exit()' "${hist_base}/history.editline"
-  [[ ! -f "${hist_base}/history" ]]
+  assert_not_exists "${hist_base}/history"
 }
 
 main() {
