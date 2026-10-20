@@ -1,5 +1,4 @@
 # shellcheck shell=bash
-# shellcheck disable=SC1091
 
 if [[ ${ISSL_BASHRC_LOADED:-0} == "1" ]]; then
   return 0

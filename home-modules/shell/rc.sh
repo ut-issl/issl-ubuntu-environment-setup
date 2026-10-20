@@ -1,5 +1,4 @@
 # shellcheck shell=sh
-# shellcheck disable=SC1091
 
 if [ "${ISSL_RC_SH_LOADED:-0}" = "1" ]; then
   return 0
