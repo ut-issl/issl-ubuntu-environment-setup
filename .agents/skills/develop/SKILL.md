@@ -132,6 +132,8 @@ Common assertion patterns (helpers are defined in `tests/lib.sh`):
 - **File deployment**: use `cmp` to verify the deployed file matches the source in the module's directory.
 - **Config wiring**: use `grep -Fq` to check that include or source lines are present in user-managed files.
 
+Keep each helper call on a single line, because a failure report shows only the source line of the call.
+
 ## 7. Validate
 
 Run validation in this order:
