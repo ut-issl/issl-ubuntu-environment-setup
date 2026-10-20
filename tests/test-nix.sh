@@ -52,7 +52,36 @@ test_deadnix_installation() {
   deadnix --version
 }
 
+_injected_partial_failure() {
+  false
+  echo after
+}
+
+test_injected_failure() {
+  local version_id
+  local value
+  version_id="$(. /etc/os-release && echo "${VERSION_ID}")"
+  echo "bash ${BASH_VERSION}"
+
+  if [[ ${ISSL_ENABLE_ZSH:-} == '1' && ${version_id} == '22.04' ]]; then
+    value="$(
+      readlink -e /nonexistent
+    )"
+  elif [[ ${ISSL_ENABLE_ZSH:-} == '1' && ${version_id} == '24.04' ]]; then
+    value="$(_injected_partial_failure)"
+  elif [[ ${ISSL_ENABLE_ZSH:-} == '1' ]]; then
+    value="$(
+      false
+      printf ok
+    )"
+  else
+    (exit 4)
+  fi
+  echo "not reached: ${value}"
+}
+
 main() {
+  run_test test_injected_failure
   run_test test_nix_installation
   run_test test_shared_nix_config
   run_test test_nix_conf_include
