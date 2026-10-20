@@ -1,5 +1,2 @@
-# Same as the root .shellcheckrc, plus disable=SC1091.
-external-sources=true
-source-path=SCRIPTDIR/..
 enable=require-double-brackets
 disable=SC1091
