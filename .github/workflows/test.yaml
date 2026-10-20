@@ -183,4 +183,3 @@ jobs:
       user-repository: ut-issl/personal-nix-config-template
       user-ref: 388e09fd124cc51e9a4e4be62315ac3916774fc4 # main
       override-issl-input: true
-      timeout-minutes: 15
