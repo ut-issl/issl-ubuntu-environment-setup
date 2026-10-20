@@ -130,7 +130,7 @@ start_nix_daemon_without_systemd() {
     return
   fi
 
-  if [[ "$(id -u)" == '0' ]]; then
+  if [[ ${EUID} -eq 0 ]]; then
     setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   elif command -v sudo >/dev/null 2>&1; then
     if [[ -t 0 ]]; then
@@ -168,7 +168,7 @@ is_executable_file() {
 
 current_login_shell() {
   if command -v getent >/dev/null 2>&1; then
-    getent passwd "$(id -un)" | cut -d: -f7
+    getent passwd "${EUID}" | cut -d: -f7
     return 0
   fi
 
@@ -182,8 +182,12 @@ current_login_shell() {
 
 etc_shells_entry() {
   local shell_path="$1"
+  local last_char=''
 
-  if [[ -s /etc/shells && -n "$(tail -c1 /etc/shells)" ]]; then
+  if [[ -s /etc/shells ]]; then
+    last_char="$(tail -c1 /etc/shells)" || return 1
+  fi
+  if [[ -n ${last_char} ]]; then
     printf '\n%s\n' "${shell_path}"
   else
     printf '%s\n' "${shell_path}"
@@ -219,6 +223,7 @@ ensure_shell_listed_in_etc_shells() {
 maybe_register_login_shell() {
   local link=''
   local active_login_shell=''
+  local user_name=''
 
   link="$(issl_login_shell_link)"
   active_login_shell="$(current_login_shell || true)"
@@ -244,10 +249,15 @@ maybe_register_login_shell() {
     return
   fi
 
-  if sudo chsh --shell="${link}" "$(id -un)"; then
+  if ! user_name="$(id -un)"; then
+    echo 'warning: could not determine the current user name. Skipping the login shell registration.' >&2
+    return
+  fi
+
+  if sudo chsh --shell="${link}" "${user_name}"; then
     echo "Login shell set to ${link}. This will apply to new login sessions."
   else
-    echo "warning: failed to run chsh. You can retry manually with: sudo chsh -s ${link} $(id -un)" >&2
+    echo "warning: failed to run chsh. You can retry manually with: sudo chsh -s ${link} ${user_name}" >&2
   fi
 }
 
@@ -415,6 +425,7 @@ install_docker_engine() {
   local apt_keyrings_dir='/etc/apt/keyrings'
   local docker_user=''
   local ubuntu_codename=''
+  local architecture=''
 
   require_command sudo
   require_command apt-get
@@ -442,8 +453,9 @@ install_docker_engine() {
     sudo tee "${apt_keyrings_dir}/docker.gpg" >/dev/null
   sudo chmod a+r "${apt_keyrings_dir}/docker.gpg"
 
+  architecture="$(dpkg --print-architecture)"
   printf 'deb [arch=%s signed-by=%s/docker.gpg] https://download.docker.com/linux/ubuntu %s stable\n' \
-    "$(dpkg --print-architecture)" "${apt_keyrings_dir}" "${ubuntu_codename}" |
+    "${architecture}" "${apt_keyrings_dir}" "${ubuntu_codename}" |
     sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   sudo apt-get update
