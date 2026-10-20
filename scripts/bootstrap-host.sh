@@ -70,7 +70,7 @@ source_nix() {
   fi
 
   if ! command -v nix >/dev/null 2>&1; then
-    echo "nix is installed but was not added to PATH in the current shell." >&2
+    echo 'nix is installed but was not added to PATH in the current shell.' >&2
     exit 1
   fi
 }
@@ -104,7 +104,7 @@ resolve_nix_daemon_path() {
   fi
 
   if [[ -x /nix/var/nix/profiles/default/bin/nix-daemon ]]; then
-    printf '%s\n' "/nix/var/nix/profiles/default/bin/nix-daemon"
+    printf '%s\n' '/nix/var/nix/profiles/default/bin/nix-daemon'
     return 0
   fi
 
@@ -112,7 +112,7 @@ resolve_nix_daemon_path() {
 }
 
 start_nix_daemon_without_systemd() {
-  local nix_daemon_path=""
+  local nix_daemon_path=''
 
   if is_systemd_available; then
     return
@@ -123,36 +123,36 @@ start_nix_daemon_without_systemd() {
   fi
 
   if ! nix_daemon_path="$(resolve_nix_daemon_path)"; then
-    echo "warning: nix-daemon binary was not found. Nix commands may fail in no-systemd environments." >&2
+    echo 'warning: nix-daemon binary was not found. Nix commands may fail in no-systemd environments.' >&2
     return
   fi
 
-  if [[ "$(id -u)" == "0" ]]; then
+  if [[ "$(id -u)" == '0' ]]; then
     setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   elif command -v sudo >/dev/null 2>&1; then
     if [[ -t 0 ]]; then
       if ! sudo -v; then
-        echo "warning: failed to authenticate via sudo. Nix commands may fail." >&2
+        echo 'warning: failed to authenticate via sudo. Nix commands may fail.' >&2
         return
       fi
     elif ! sudo -n true >/dev/null 2>&1; then
-      echo "warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode)." >&2
+      echo 'warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode).' >&2
       return
     fi
     sudo -n setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   else
-    echo "warning: cannot start nix-daemon automatically (sudo is unavailable in a no-systemd environment)." >&2
+    echo 'warning: cannot start nix-daemon automatically (sudo is unavailable in a no-systemd environment).' >&2
     return
   fi
 
   for _ in {1..10}; do
-    if nix --extra-experimental-features "nix-command flakes" store info >/dev/null 2>&1; then
+    if nix --extra-experimental-features 'nix-command flakes' store info >/dev/null 2>&1; then
       return
     fi
     sleep 1
   done
 
-  echo "warning: attempted to start nix-daemon, but it is not responding yet. Nix commands may fail." >&2
+  echo 'warning: attempted to start nix-daemon, but it is not responding yet. Nix commands may fail.' >&2
 }
 
 issl_login_shell_link() {
@@ -209,13 +209,13 @@ ensure_shell_listed_in_etc_shells() {
     return 1
   fi
 
-  echo "warning: /etc/shells is not writable and sudo is unavailable. Skipping login shell registration." >&2
+  echo 'warning: /etc/shells is not writable and sudo is unavailable. Skipping login shell registration.' >&2
   return 1
 }
 
 maybe_register_login_shell() {
-  local link=""
-  local active_login_shell=""
+  local link=''
+  local active_login_shell=''
 
   link="$(issl_login_shell_link)"
   active_login_shell="$(current_login_shell || true)"
@@ -249,7 +249,7 @@ maybe_register_login_shell() {
 }
 
 nix_with_openssh() {
-  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#openssh_gssapi --command "$@"
+  nix --extra-experimental-features 'nix-command flakes' shell nixpkgs#openssh_gssapi --command "$@"
 }
 
 has_github_ssh_auth() {
@@ -260,7 +260,7 @@ has_github_ssh_auth() {
   ssh_status="${ssh_status:-0}"
 
   if [[ ${ssh_status} -eq 1 ]] &&
-    printf '%s\n' "${ssh_output}" | grep -Fq "successfully authenticated"; then
+    printf '%s\n' "${ssh_output}" | grep -Fq 'successfully authenticated'; then
     return 0
   fi
 
@@ -277,11 +277,11 @@ github_ssh_key_exists() {
 }
 
 create_github_ssh_key() {
-  local key_comment=""
+  local key_comment=''
 
   ensure_ssh_directory
 
-  if ! read -r -p "Enter an email/comment for the GitHub SSH key (optional): " key_comment; then
+  if ! read -r -p 'Enter an email/comment for the GitHub SSH key (optional): ' key_comment; then
     echo
   fi
 
@@ -301,36 +301,36 @@ ensure_github_ssh_config() {
   fi
 
   {
-    echo "Host github.com"
-    echo "  HostName github.com"
-    echo "  User git"
-    echo "  IdentityFile ~/.ssh/github_ed25519"
+    echo 'Host github.com'
+    echo '  HostName github.com'
+    echo '  User git'
+    echo '  IdentityFile ~/.ssh/github_ed25519'
   } >>"${ssh_config_path}"
   chmod 600 "${ssh_config_path}"
 }
 
 prompt_github_ssh_registration() {
-  echo "Register the following public key in GitHub:"
-  echo "https://github.com/settings/keys"
+  echo 'Register the following public key in GitHub:'
+  echo 'https://github.com/settings/keys'
   echo
   cat "${github_key_path}.pub"
   echo
 
   for _ in {1..3}; do
-    if ! prompt_yes_no "Have you registered the key in GitHub? Answer n to skip. [Y/n]" yes; then
-      echo "Skipping GitHub SSH setup. Re-run this script to set it up later."
+    if ! prompt_yes_no 'Have you registered the key in GitHub? Answer n to skip. [Y/n]' yes; then
+      echo 'Skipping GitHub SSH setup. Re-run this script to set it up later.'
       return 0
     fi
 
     if has_github_ssh_auth; then
-      echo "GitHub SSH authentication succeeded."
+      echo 'GitHub SSH authentication succeeded.'
       return 0
     fi
 
-    echo "Could not authenticate to GitHub with this key yet." >&2
+    echo 'Could not authenticate to GitHub with this key yet.' >&2
   done
 
-  echo "GitHub SSH access is not available. Re-run this script after registering the key or resolving the SSH connection." >&2
+  echo 'GitHub SSH access is not available. Re-run this script after registering the key or resolving the SSH connection.' >&2
   return 0
 }
 
@@ -346,7 +346,7 @@ prompt_github_ssh_setup() {
   ensure_github_ssh_config
 
   if ! is_interactive; then
-    echo "Register the following public key in GitHub and re-run:" >&2
+    echo 'Register the following public key in GitHub and re-run:' >&2
     echo "  ${github_key_path}.pub" >&2
     return
   fi
@@ -363,7 +363,7 @@ maybe_offer_github_ssh_setup() {
     return
   fi
 
-  if ! prompt_yes_no "Set up GitHub SSH access now for future private repository use? [Y/n]" yes; then
+  if ! prompt_yes_no 'Set up GitHub SSH access now for future private repository use? [Y/n]' yes; then
     return
   fi
 
@@ -383,7 +383,7 @@ should_install_docker() {
     return 1
   fi
 
-  prompt_yes_no "Install Docker Engine for local container execution? [Y/n]" yes
+  prompt_yes_no 'Install Docker Engine for local container execution? [Y/n]' yes
 }
 
 should_add_user_to_docker_group() {
@@ -399,7 +399,7 @@ should_add_user_to_docker_group() {
 }
 
 target_docker_user() {
-  if [[ -n ${SUDO_USER-} && ${SUDO_USER} != "root" ]]; then
+  if [[ -n ${SUDO_USER-} && ${SUDO_USER} != 'root' ]]; then
     printf '%s\n' "${SUDO_USER}"
   elif [[ -n ${USER-} ]]; then
     printf '%s\n' "${USER}"
@@ -409,9 +409,9 @@ target_docker_user() {
 }
 
 install_docker_engine() {
-  local apt_keyrings_dir="/etc/apt/keyrings"
-  local docker_user=""
-  local ubuntu_codename=""
+  local apt_keyrings_dir='/etc/apt/keyrings'
+  local docker_user=''
+  local ubuntu_codename=''
 
   require_command sudo
   require_command apt-get
@@ -424,7 +424,7 @@ install_docker_engine() {
 
   ubuntu_codename="${UBUNTU_CODENAME:-${VERSION_CODENAME:-}}"
   if [[ -z ${ubuntu_codename} ]]; then
-    echo "could not determine the Ubuntu codename for Docker repository setup." >&2
+    echo 'could not determine the Ubuntu codename for Docker repository setup.' >&2
     exit 1
   fi
 

@@ -26,7 +26,7 @@ assert_shell_env_can_be_sourced() {
     HOME="${home_dir}" \
     SHELL_ENV_PATH="${config_dir}/issl/shell/env.sh" \
     XDG_CONFIG_HOME="${config_dir}" \
-    PATH="/usr/bin:/bin" \
+    PATH='/usr/bin:/bin' \
     bash -e <<'EOF'
 . "${SHELL_ENV_PATH}"
 test "${ISSL_CONFIG_HOME}" = "${XDG_CONFIG_HOME}/issl"
@@ -57,7 +57,7 @@ assert_bash_startup_is_loaded() {
   env -i \
     HOME="${home_dir}" \
     XDG_CONFIG_HOME="${config_dir}" \
-    PATH="/usr/bin:/bin" \
+    PATH='/usr/bin:/bin' \
     TERM=dumb \
     bash -lic '
       ok=1
@@ -118,7 +118,7 @@ assert_zsh_startup_is_loaded() {
   env -i \
     HOME="${home_dir}" \
     XDG_CONFIG_HOME="${config_dir}" \
-    PATH="/usr/bin:/bin" \
+    PATH='/usr/bin:/bin' \
     TERM=dumb \
     "${nix_profile_bin}/zsh" -lic '
       ok=1
@@ -147,7 +147,7 @@ assert_shell_variable_is_corrected() {
     XDG_STATE_HOME="${state_dir}" \
     SHELL="${login_shell_link}" \
     EXPECTED_SHELL="${expected}" \
-    PATH="/usr/bin:/bin" \
+    PATH='/usr/bin:/bin' \
     "${shell_bin}" <<'EOF'
 . "${SHELL_ENV_PATH}"
 test "${SHELL}" = "${EXPECTED_SHELL}"
@@ -184,7 +184,7 @@ main() {
   run_assert assert_shellcheck_installation
   run_assert assert_shfmt_installation
 
-  if [[ ${issl_enable_zsh} == "1" ]]; then
+  if [[ ${issl_enable_zsh} == '1' ]]; then
     run_assert assert_zsh_enabled
     run_assert assert_shared_zsh_files
     run_assert assert_zsh_startup_files

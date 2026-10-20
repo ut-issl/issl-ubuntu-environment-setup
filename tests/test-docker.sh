@@ -15,8 +15,8 @@ assert_docker_client_installation() {
 }
 
 assert_docker_client_plugin_dirs_wrapper() {
-  grep -Fq "DOCKER_CLI_PLUGIN_DIRS" "${nix_profile_bin}/docker"
-  grep -Fq "docker-buildx" "${nix_profile_bin}/docker"
+  grep -Fq 'DOCKER_CLI_PLUGIN_DIRS' "${nix_profile_bin}/docker"
+  grep -Fq 'docker-buildx' "${nix_profile_bin}/docker"
 }
 
 assert_docker_compose_installation() {
@@ -27,8 +27,8 @@ assert_docker_compose_installation() {
 }
 
 assert_docker_compose_plugin_dirs_wrapper() {
-  grep -Fq "DOCKER_CLI_PLUGIN_DIRS" "${nix_profile_bin}/docker-compose"
-  grep -Fq "docker-buildx" "${nix_profile_bin}/docker-compose"
+  grep -Fq 'DOCKER_CLI_PLUGIN_DIRS' "${nix_profile_bin}/docker-compose"
+  grep -Fq 'docker-buildx' "${nix_profile_bin}/docker-compose"
 }
 
 assert_docker_buildx_installation() {

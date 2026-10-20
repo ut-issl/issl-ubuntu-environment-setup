@@ -32,7 +32,7 @@ if sys.version_info >= (3, 13):
 else:
     print("yes" if "libedit" in getattr(readline, "__doc__", "") else "no")
 ')"
-  [[ ${result} == "yes" ]]
+  [[ ${result} == 'yes' ]]
 }
 
 _python_exe() {
@@ -70,7 +70,7 @@ assert_python_startup_is_loaded() {
 
 assert_python_startup_pyrepl_history() {
   if ! _is_python_ge_3_13; then
-    echo "Skipping: Python < 3.13 (no pyrepl)"
+    echo 'Skipping: Python < 3.13 (no pyrepl)'
     return 0
   fi
 
@@ -85,7 +85,7 @@ assert_python_startup_pyrepl_history() {
     uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
   [[ -f "${hist_base}/history" ]]
-  grep -q "exit()" "${hist_base}/history"
+  grep -q 'exit()' "${hist_base}/history"
 
   if _is_libedit; then
     [[ ! -f "${hist_base}/history.editline" ]]
@@ -94,11 +94,11 @@ assert_python_startup_pyrepl_history() {
 
 assert_python_startup_basic_repl_libedit_history() {
   if ! _is_python_ge_3_13; then
-    echo "Skipping: Python < 3.13 (no basic REPL redirect needed)"
+    echo 'Skipping: Python < 3.13 (no basic REPL redirect needed)'
     return 0
   fi
   if ! _is_libedit; then
-    echo "Skipping: readline backend is not libedit"
+    echo 'Skipping: readline backend is not libedit'
     return 0
   fi
 
@@ -114,7 +114,7 @@ assert_python_startup_basic_repl_libedit_history() {
     uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
   [[ -f "${hist_base}/history.editline" ]]
-  grep -q "exit()" "${hist_base}/history.editline"
+  grep -q 'exit()' "${hist_base}/history.editline"
   [[ ! -f "${hist_base}/history" ]]
 }
 
