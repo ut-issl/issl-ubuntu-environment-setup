@@ -8,60 +8,60 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_gcc_installation() {
+test_gcc_installation() {
   [[ -x "${nix_profile_bin}/gcc" ]]
   [[ "$(command -v gcc)" == "${nix_profile_bin}/gcc" ]]
   gcc --version
 }
 
-assert_gxx_installation() {
+test_gxx_installation() {
   [[ -x "${nix_profile_bin}/g++" ]]
   [[ "$(command -v g++)" == "${nix_profile_bin}/g++" ]]
   g++ --version
 }
 
-assert_multilib_support() {
+test_multilib_support() {
   gcc -print-multi-lib | grep -Eq '(^|;)32'
   g++ -print-multi-lib | grep -Eq '(^|;)32'
 }
 
-assert_make_installation() {
+test_make_installation() {
   [[ -x "${nix_profile_bin}/make" ]]
   [[ "$(command -v make)" == "${nix_profile_bin}/make" ]]
   make --version
 }
 
-assert_cmake_installation() {
+test_cmake_installation() {
   [[ -x "${nix_profile_bin}/cmake" ]]
   [[ "$(command -v cmake)" == "${nix_profile_bin}/cmake" ]]
   cmake --version
 }
 
-assert_clang_format_installation() {
+test_clang_format_installation() {
   [[ -x "${nix_profile_bin}/clang-format" ]]
   [[ "$(command -v clang-format)" == "${nix_profile_bin}/clang-format" ]]
   clang-format --version
 }
 
-assert_pkg_config_installation() {
+test_pkg_config_installation() {
   [[ -x "${nix_profile_bin}/pkg-config" ]]
   [[ "$(command -v pkg-config)" == "${nix_profile_bin}/pkg-config" ]]
   pkg-config --version
 }
 
-assert_shared_clang_format_configuration() {
+test_shared_clang_format_configuration() {
   cmp "${common_dir}/home-modules/cpp/clang-format.yaml" "${home_dir}/.clang-format"
 }
 
 main() {
-  run_assert assert_gcc_installation
-  run_assert assert_gxx_installation
-  run_assert assert_multilib_support
-  run_assert assert_make_installation
-  run_assert assert_cmake_installation
-  run_assert assert_clang_format_installation
-  run_assert assert_pkg_config_installation
-  run_assert assert_shared_clang_format_configuration
+  run_test test_gcc_installation
+  run_test test_gxx_installation
+  run_test test_multilib_support
+  run_test test_make_installation
+  run_test test_cmake_installation
+  run_test test_clang_format_installation
+  run_test test_pkg_config_installation
+  run_test test_shared_clang_format_configuration
 }
 
 main "$@"

@@ -9,47 +9,47 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_git_installation() {
+test_git_installation() {
   [[ -x "${nix_profile_bin}/git" ]]
   [[ "$(command -v git)" == "${nix_profile_bin}/git" ]]
   git --version
 }
 
-assert_gh_installation() {
+test_gh_installation() {
   [[ -x "${nix_profile_bin}/gh" ]]
   [[ "$(command -v gh)" == "${nix_profile_bin}/gh" ]]
   gh --version
 }
 
-assert_act_installation() {
+test_act_installation() {
   [[ -x "${nix_profile_bin}/act" ]]
   [[ "$(command -v act)" == "${nix_profile_bin}/act" ]]
   act --version
 }
 
-assert_actionlint_installation() {
+test_actionlint_installation() {
   [[ -x "${nix_profile_bin}/actionlint" ]]
   [[ "$(command -v actionlint)" == "${nix_profile_bin}/actionlint" ]]
   actionlint --version
 }
 
-assert_zizmor_installation() {
+test_zizmor_installation() {
   [[ -x "${nix_profile_bin}/zizmor" ]]
   [[ "$(command -v zizmor)" == "${nix_profile_bin}/zizmor" ]]
   zizmor --version
 }
 
-assert_shared_git_config() {
+test_shared_git_config() {
   cmp "${common_dir}/home-modules/git/gitconfig" "${config_dir}/issl/git/.gitconfig"
 }
 
-assert_global_git_include() {
+test_global_git_include() {
   HOME="${home_dir}" XDG_CONFIG_HOME="${config_dir}" \
     git config --global --get-all include.path |
     grep -Fx "${config_dir}/issl/git/.gitconfig"
 }
 
-assert_git_identity() {
+test_git_identity() {
   local user_name
   local user_email
 
@@ -71,14 +71,14 @@ assert_git_identity() {
 }
 
 main() {
-  run_assert assert_git_installation
-  run_assert assert_gh_installation
-  run_assert assert_act_installation
-  run_assert assert_actionlint_installation
-  run_assert assert_zizmor_installation
-  run_assert assert_shared_git_config
-  run_assert assert_global_git_include
-  run_assert assert_git_identity
+  run_test test_git_installation
+  run_test test_gh_installation
+  run_test test_act_installation
+  run_test test_actionlint_installation
+  run_test test_zizmor_installation
+  run_test test_shared_git_config
+  run_test test_global_git_include
+  run_test test_git_identity
 }
 
 main "$@"

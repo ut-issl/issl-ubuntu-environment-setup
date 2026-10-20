@@ -8,14 +8,14 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_codex_installation() {
+test_codex_installation() {
   [[ -x "${nix_profile_bin}/codex" ]]
   [[ "$(command -v codex)" == "${nix_profile_bin}/codex" ]]
   codex --version
 }
 
 main() {
-  run_assert assert_codex_installation
+  run_test test_codex_installation
 }
 
 main "$@"

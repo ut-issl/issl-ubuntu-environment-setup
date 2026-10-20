@@ -39,22 +39,22 @@ _python_exe() {
   uv run --no-project --python=3 python -c 'import sys; print(sys.executable)'
 }
 
-assert_uv_installation() {
+test_uv_installation() {
   [[ -x "${nix_profile_bin}/uv" ]]
   [[ "$(command -v uv)" == "${nix_profile_bin}/uv" ]]
   uv --version
 }
 
-assert_shared_pythonrc_file() {
+test_shared_pythonrc_file() {
   cmp "${common_dir}/home-modules/python/pythonrc.py" "${issl_pythonrc_path}"
 }
 
-assert_user_python_startup_file() {
+test_user_python_startup_file() {
   [[ -f ${pythonrc_path} ]]
   grep -Fq 'runpy.run_path(str(shared_pythonrc), run_name="__main__")' "${pythonrc_path}"
 }
 
-assert_python_startup_is_loaded() {
+test_python_startup_is_loaded() {
   local marker_dir
   marker_dir="$(mktemp -d)"
 
@@ -68,7 +68,7 @@ assert_python_startup_is_loaded() {
   [[ -f "${marker_dir}/history" || -f "${marker_dir}/history.editline" ]]
 }
 
-assert_python_startup_pyrepl_history() {
+test_python_startup_pyrepl_history() {
   if ! _is_python_ge_3_13; then
     echo 'Skipping: Python < 3.13 (no pyrepl)'
     return 0
@@ -92,7 +92,7 @@ assert_python_startup_pyrepl_history() {
   fi
 }
 
-assert_python_startup_basic_repl_libedit_history() {
+test_python_startup_basic_repl_libedit_history() {
   if ! _is_python_ge_3_13; then
     echo 'Skipping: Python < 3.13 (no basic REPL redirect needed)'
     return 0
@@ -119,12 +119,12 @@ assert_python_startup_basic_repl_libedit_history() {
 }
 
 main() {
-  run_assert assert_uv_installation
-  run_assert assert_shared_pythonrc_file
-  run_assert assert_user_python_startup_file
-  run_assert assert_python_startup_is_loaded
-  run_assert assert_python_startup_pyrepl_history
-  run_assert assert_python_startup_basic_repl_libedit_history
+  run_test test_uv_installation
+  run_test test_shared_pythonrc_file
+  run_test test_user_python_startup_file
+  run_test test_python_startup_is_loaded
+  run_test test_python_startup_pyrepl_history
+  run_test test_python_startup_basic_repl_libedit_history
 }
 
 main "$@"

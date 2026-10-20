@@ -8,14 +8,14 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_vim_installation() {
+test_vim_installation() {
   [[ -x "${nix_profile_bin}/vim" ]]
   [[ "$(command -v vim)" == "${nix_profile_bin}/vim" ]]
   vim --version
 }
 
 main() {
-  run_assert assert_vim_installation
+  run_test test_vim_installation
 }
 
 main "$@"

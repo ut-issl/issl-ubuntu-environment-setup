@@ -8,28 +8,28 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_node_installation() {
+test_node_installation() {
   [[ -x "${nix_profile_bin}/node" ]]
   [[ "$(command -v node)" == "${nix_profile_bin}/node" ]]
   node --version
 }
 
-assert_npm_installation() {
+test_npm_installation() {
   [[ -x "${nix_profile_bin}/npm" ]]
   [[ "$(command -v npm)" == "${nix_profile_bin}/npm" ]]
   npm --version
 }
 
-assert_npx_installation() {
+test_npx_installation() {
   [[ -x "${nix_profile_bin}/npx" ]]
   [[ "$(command -v npx)" == "${nix_profile_bin}/npx" ]]
   npx --version
 }
 
 main() {
-  run_assert assert_node_installation
-  run_assert assert_npm_installation
-  run_assert assert_npx_installation
+  run_test test_node_installation
+  run_test test_npm_installation
+  run_test test_npx_installation
 }
 
 main "$@"

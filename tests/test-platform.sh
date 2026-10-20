@@ -8,7 +8,7 @@ common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_xdg_data_dirs_are_exported() {
+test_xdg_data_dirs_are_exported() {
   env -i \
     HOME="${home_dir}" \
     SHELL_ENV_PATH="${config_dir}/issl/shell/env.sh" \
@@ -28,7 +28,7 @@ EOF
 }
 
 main() {
-  run_assert assert_xdg_data_dirs_are_exported
+  run_test test_xdg_data_dirs_are_exported
 }
 
 main "$@"

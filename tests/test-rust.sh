@@ -10,67 +10,67 @@ export RUSTUP_HOME="${home_dir}/.rustup"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_rustup_installation() {
+test_rustup_installation() {
   [[ -x "${nix_profile_bin}/rustup" ]]
   [[ "$(command -v rustup)" == "${nix_profile_bin}/rustup" ]]
   rustup --version
 }
 
-assert_rustc_installation() {
+test_rustc_installation() {
   command -v rustc >/dev/null 2>&1
   rustc --version
 }
 
-assert_cargo_installation() {
+test_cargo_installation() {
   command -v cargo >/dev/null 2>&1
   cargo --version
 }
 
-assert_cargo_about_installation() {
+test_cargo_about_installation() {
   [[ -x "${nix_profile_bin}/cargo-about" ]]
   [[ "$(command -v cargo-about)" == "${nix_profile_bin}/cargo-about" ]]
   cargo about --version
 }
 
-assert_cargo_deny_installation() {
+test_cargo_deny_installation() {
   [[ -x "${nix_profile_bin}/cargo-deny" ]]
   [[ "$(command -v cargo-deny)" == "${nix_profile_bin}/cargo-deny" ]]
   cargo deny --version
 }
 
-assert_cargo_hack_installation() {
+test_cargo_hack_installation() {
   [[ -x "${nix_profile_bin}/cargo-hack" ]]
   [[ "$(command -v cargo-hack)" == "${nix_profile_bin}/cargo-hack" ]]
   cargo hack --version
 }
 
-assert_cargo_llvm_cov_installation() {
+test_cargo_llvm_cov_installation() {
   [[ -x "${nix_profile_bin}/cargo-llvm-cov" ]]
   [[ "$(command -v cargo-llvm-cov)" == "${nix_profile_bin}/cargo-llvm-cov" ]]
   cargo llvm-cov --version
 }
 
-assert_cargo_nextest_installation() {
+test_cargo_nextest_installation() {
   [[ -x "${nix_profile_bin}/cargo-nextest" ]]
   [[ "$(command -v cargo-nextest)" == "${nix_profile_bin}/cargo-nextest" ]]
   cargo nextest --version
 }
 
-assert_dist_installation() {
+test_dist_installation() {
   [[ -x "${nix_profile_bin}/dist" ]]
   [[ "$(command -v dist)" == "${nix_profile_bin}/dist" ]]
   dist --version
 }
 
-assert_default_toolchain_stable() {
+test_default_toolchain_stable() {
   rustup show active-toolchain | grep -Eq '^stable(-|$)'
 }
 
-assert_shared_rust_config_file() {
+test_shared_rust_config_file() {
   cmp "${common_dir}/home-modules/rust/config.toml" "${config_dir}/issl/rust/config.toml"
 }
 
-assert_cargo_config_include() {
+test_cargo_config_include() {
   local cargo_config_path="${home_dir}/.cargo/config.toml"
 
   [[ -f ${cargo_config_path} ]]
@@ -78,18 +78,18 @@ assert_cargo_config_include() {
 }
 
 main() {
-  run_assert assert_rustup_installation
-  run_assert assert_rustc_installation
-  run_assert assert_cargo_installation
-  run_assert assert_cargo_about_installation
-  run_assert assert_cargo_deny_installation
-  run_assert assert_cargo_hack_installation
-  run_assert assert_cargo_llvm_cov_installation
-  run_assert assert_cargo_nextest_installation
-  run_assert assert_dist_installation
-  run_assert assert_default_toolchain_stable
-  run_assert assert_shared_rust_config_file
-  run_assert assert_cargo_config_include
+  run_test test_rustup_installation
+  run_test test_rustc_installation
+  run_test test_cargo_installation
+  run_test test_cargo_about_installation
+  run_test test_cargo_deny_installation
+  run_test test_cargo_hack_installation
+  run_test test_cargo_llvm_cov_installation
+  run_test test_cargo_nextest_installation
+  run_test test_dist_installation
+  run_test test_default_toolchain_stable
+  run_test test_shared_rust_config_file
+  run_test test_cargo_config_include
 }
 
 main "$@"
