@@ -7,8 +7,8 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=scripts/bootstrap-host.sh
 . "${repo_root}/scripts/bootstrap-host.sh"
 
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}/.config}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-${HOME}/.local/state}"
 
 issl_config_home="${XDG_CONFIG_HOME}/issl"
 shared_nix_config_path="${issl_config_home}/nix/nix.conf"
@@ -44,7 +44,7 @@ resolves_into_nix_store() {
 guard_against_existing_home_manager_files() {
   local zsh_enabled="$1"
   local zdotdir_path="${XDG_CONFIG_HOME}/zsh"
-  local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
+  local cargo_home_path="${CARGO_HOME:-${HOME}/.cargo}"
   local zshenv_path="${HOME}/.zshenv"
   local resolved_zdotdir=""
   local candidate_path=""
@@ -497,7 +497,7 @@ cargo_config_include_block() {
 }
 
 ensure_cargo_config_include() {
-  local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
+  local cargo_home_path="${CARGO_HOME:-${HOME}/.cargo}"
   local cargo_config_path="${cargo_home_path}/config.toml"
 
   mkdir -p "${cargo_home_path}"

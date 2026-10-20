@@ -63,10 +63,10 @@ source_nix() {
     # Official multi-user installs expose Nix through this profile script.
     # shellcheck source=/dev/null
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-  elif [[ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
+  elif [[ -f "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]]; then
     # Fallback for single-user installs.
     # shellcheck source=/dev/null
-    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
   fi
 
   if ! command -v nix >/dev/null 2>&1; then
@@ -81,7 +81,7 @@ ensure_nix() {
   fi
 
   if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ||
-    -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
+    -f "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]]; then
     source_nix
     return
   fi
@@ -156,7 +156,7 @@ start_nix_daemon_without_systemd() {
 }
 
 issl_login_shell_link() {
-  printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/issl/login-shell"
+  printf '%s\n' "${XDG_STATE_HOME:-${HOME}/.local/state}/issl/login-shell"
 }
 
 is_executable_file() {
@@ -256,7 +256,7 @@ has_github_ssh_auth() {
   local ssh_output
   local ssh_status
 
-  ssh_output="$(nix_with_openssh ssh -o ConnectTimeout=10 -T git@github.com 2>&1)" || ssh_status=$?
+  ssh_output="$(nix_with_openssh ssh -o ConnectTimeout=10 -T git@github.com 2>&1)" || ssh_status="$?"
   ssh_status="${ssh_status:-0}"
 
   if [[ ${ssh_status} -eq 1 ]] &&
