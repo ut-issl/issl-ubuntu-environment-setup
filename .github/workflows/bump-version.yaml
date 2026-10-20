@@ -54,7 +54,7 @@ jobs:
           create-release: false
           github-token: ${{ steps.app-token.outputs.token }}
 
-      - name: Prepare release asset
+      - name: Prepare release assets
         if: steps.bump-version.outputs.version-bumped == 'true'
         run: |
           mkdir -p release-assets

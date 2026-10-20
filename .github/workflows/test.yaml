@@ -136,7 +136,7 @@ jobs:
             XDG_STATE_HOME="${STATE_DIR}" \
             REPO_URL="file://${GITHUB_WORKSPACE}/common" \
             REPO_REF='ci-setup-entry' \
-            ISSL_INSTALL_DOCKER=no \
+            ISSL_INSTALL_DOCKER='no' \
             ISSL_ENABLE_ZSH="${ENABLE_ZSH}" \
             GIT_USER_NAME='ISSL Test User' \
             GIT_USER_EMAIL='issl-test@example.com' \
@@ -158,7 +158,7 @@ jobs:
           ISSL_ENABLE_ZSH: ${{ matrix.enable-zsh }}
           EXPECTED_GIT_USER_NAME: ISSL Test User
           EXPECTED_GIT_USER_EMAIL: issl-test@example.com
-        run: ./common/tests/run.sh
+        run: bash ./common/tests/run.sh
 
   repository-based:
     name: Test config-repository-based setup
