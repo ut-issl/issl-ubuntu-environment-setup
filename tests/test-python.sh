@@ -64,7 +64,13 @@ test_python_startup_is_loaded() {
       TERM=dumb \
       uv run --no-project --python=3 python -i
 
-  [[ -f "${marker_dir}/history" || -f "${marker_dir}/history.editline" ]]
+  if _is_libedit; then
+    assert_file "${marker_dir}/history.editline"
+    assert_not_exists "${marker_dir}/history"
+  else
+    assert_file "${marker_dir}/history"
+    assert_not_exists "${marker_dir}/history.editline"
+  fi
 }
 
 test_python_startup_pyrepl_history() {
