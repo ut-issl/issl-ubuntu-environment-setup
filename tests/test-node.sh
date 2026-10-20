@@ -9,20 +9,20 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 assert_node_installation() {
-  test -x "${nix_profile_bin}/node"
-  test "$(command -v node)" = "${nix_profile_bin}/node"
+  [[ -x "${nix_profile_bin}/node" ]]
+  [[ "$(command -v node)" == "${nix_profile_bin}/node" ]]
   node --version
 }
 
 assert_npm_installation() {
-  test -x "${nix_profile_bin}/npm"
-  test "$(command -v npm)" = "${nix_profile_bin}/npm"
+  [[ -x "${nix_profile_bin}/npm" ]]
+  [[ "$(command -v npm)" == "${nix_profile_bin}/npm" ]]
   npm --version
 }
 
 assert_npx_installation() {
-  test -x "${nix_profile_bin}/npx"
-  test "$(command -v npx)" = "${nix_profile_bin}/npx"
+  [[ -x "${nix_profile_bin}/npx" ]]
+  [[ "$(command -v npx)" == "${nix_profile_bin}/npx" ]]
   npx --version
 }
 

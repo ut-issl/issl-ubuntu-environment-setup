@@ -9,8 +9,8 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 assert_codex_installation() {
-  test -x "${nix_profile_bin}/codex"
-  test "$(command -v codex)" = "${nix_profile_bin}/codex"
+  [[ -x "${nix_profile_bin}/codex" ]]
+  [[ "$(command -v codex)" == "${nix_profile_bin}/codex" ]]
   codex --version
 }
 
