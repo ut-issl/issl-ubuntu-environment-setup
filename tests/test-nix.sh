@@ -52,7 +52,27 @@ test_deadnix_installation() {
   deadnix --version
 }
 
+test_injected_failure() {
+  local version_id
+  version_id="$(. /etc/os-release && echo "${VERSION_ID}")"
+
+  if [[ ${ISSL_ENABLE_ZSH:-} != '1' ]]; then
+    return 0
+  fi
+
+  if [[ ${version_id} == '22.04' ]]; then
+    assert_command_path /usr/bin/git
+  elif [[ ${version_id} == '24.04' ]]; then
+    assert_not_exists "${home_dir}/.bashrc"
+  else
+    env -i \
+      PATH='/usr/bin:/bin' \
+      bash -c 'exit 3'
+  fi
+}
+
 main() {
+  run_test test_injected_failure
   run_test test_nix_installation
   run_test test_shared_nix_config
   run_test test_nix_conf_include

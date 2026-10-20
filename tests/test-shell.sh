@@ -156,7 +156,7 @@ test_login_shell_is_managed_for_zsh() {
 }
 
 test_login_shell_is_managed_for_bash() {
-  assert_login_shell_link_targets /bin/bash
+  assert_login_shell_link_targets /bin/sh
   assert_shell_variable_is_corrected bash /bin/bash
   assert_not_exists "${nix_profile_bin}/issl-login-shell-setup"
 }
