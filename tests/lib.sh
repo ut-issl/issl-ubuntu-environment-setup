@@ -39,16 +39,16 @@ assert_file() {
   }
 }
 
-assert_executable() {
-  [[ -x $1 ]] || {
-    printf '  not executable: %s\n' "$1" >&2
+assert_symlink() {
+  [[ -L $1 ]] || {
+    printf '  not a symlink: %s\n' "$1" >&2
     return 1
   }
 }
 
-assert_symlink() {
-  [[ -L $1 ]] || {
-    printf '  not a symlink: %s\n' "$1" >&2
+assert_executable() {
+  [[ -x $1 ]] || {
+    printf '  not executable: %s\n' "$1" >&2
     return 1
   }
 }
