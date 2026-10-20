@@ -33,8 +33,7 @@ This repository uses squash merge by default, and the pull request title is used
 Therefore, your pull request title must also follow Conventional Commits.
 
 You can maintain Conventional Commits manually, but automation tools such as Commitizen or cz-git can help.
-Any tool is fine, but this repository uses [commitizen-tools/commitizen](https://github.com/commitizen-tools/commitizen)
-for checks, so it is recommended.
+Any tool is fine, but this repository uses [commitizen-tools/commitizen](https://github.com/commitizen-tools/commitizen) for checks, so it is recommended.
 
 Install Commitizen:
 
@@ -52,8 +51,7 @@ For more details, see [Commitizen documentation](https://commitizen-tools.github
 
 ## Version Bumping by Labels
 
-This repository is configured to automatically bump versions when a pull request is merged with one of the
-following labels:
+This repository is configured to automatically bump versions when a pull request is merged with one of the following labels:
 
 - `update::major`
 - `update::minor`

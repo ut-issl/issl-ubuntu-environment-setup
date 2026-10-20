@@ -32,13 +32,11 @@ For more details, see the [User Guide](docs/10-user-guide.md).
 
 See [Developer Guide](docs/90-developer-guide.md).
 
-This repository ships a skill for coding agents that assists development;
-see [agent skill](docs/92-updating-or-adding-a-module.md#agent-skill).
+This repository ships a skill for coding agents that assists development; see [agent skill](docs/92-updating-or-adding-a-module.md#agent-skill).
 
 ## License
 
 Licensed under either of [MIT license](LICENSE-MIT) or [Apache License, Version 2.0](LICENSE-APACHE) at your option.
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in this software
-by you, as defined in the Apache-2.0 license, shall be dually licensed as above,
-without any additional terms or conditions.
+by you, as defined in the Apache-2.0 license, shall be dually licensed as above, without any additional terms or conditions.
