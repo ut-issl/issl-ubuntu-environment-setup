@@ -348,10 +348,41 @@ jobs:
           persist-credentials: false
 
       - name: Check links
+        id: links
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
           args: --no-progress .
+          fail: false
+          format: json
           lycheeVersion: 'v0.24.2'
+          output: lychee/out.json
+
+      - name: Annotate broken links
+        env:
+          LYCHEE_EXIT_CODE: ${{ steps.links.outputs.exit_code }}
+        run: |
+          if [[ ${LYCHEE_EXIT_CODE} != '0' && ${LYCHEE_EXIT_CODE} != '2' ]]; then
+            echo "::error title=lychee::lychee exited with code ${LYCHEE_EXIT_CODE}. See the Check links step."
+            exit "${LYCHEE_EXIT_CODE}"
+          fi
+          if [[ ! -s lychee/out.json ]]; then
+            echo '::error title=lychee::lychee wrote no report. See the Check links step.'
+            exit 1
+          fi
+          jq --raw-output --arg prefix "file://${GITHUB_WORKSPACE}/" '
+              def escape: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+              (.error_map, .timeout_map)
+              | to_entries[]
+              | (.key | ltrimstr("./")) as $file
+              | .value[]
+              | "::error file=\($file),line=\(.span.line),col=\(.span.column),"
+                + "title=lychee::\("\(.url | ltrimstr($prefix)): \(.status.text)" | escape)"
+            ' lychee/out.json
+          if ! jq --exit-status '.total > 0' lychee/out.json > /dev/null; then
+            echo '::error title=lychee::No links were found. This usually indicates a configuration error.'
+            exit 1
+          fi
+          exit "${LYCHEE_EXIT_CODE}"
 
   lint-markdown:
     name: Lint Markdown
