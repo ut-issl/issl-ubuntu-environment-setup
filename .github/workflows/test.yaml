@@ -158,7 +158,7 @@ jobs:
           ISSL_ENABLE_ZSH: ${{ matrix.enable-zsh }}
           EXPECTED_GIT_USER_NAME: ISSL Test User
           EXPECTED_GIT_USER_EMAIL: issl-test@example.com
-        run: ./common/tests/run.sh
+        run: bash ./common/tests/run.sh
 
   repository-based:
     name: Test config-repository-based setup

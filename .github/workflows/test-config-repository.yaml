@@ -138,4 +138,4 @@ jobs:
           CONFIG_DIR: ${{ steps.test-environment.outputs.config-dir }}
           STATE_DIR: ${{ steps.test-environment.outputs.state-dir }}
           ISSL_ENABLE_ZSH: ${{ case(inputs.zsh-enabled, '1', '0') }}
-        run: ./common/tests/run.sh
+        run: bash ./common/tests/run.sh
