@@ -9,17 +9,17 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_node_installation() {
-  assert_nix_profile_command node
+  assert_command_path "${nix_profile_bin}/node"
   node --version
 }
 
 test_npm_installation() {
-  assert_nix_profile_command npm
+  assert_command_path "${nix_profile_bin}/npm"
   npm --version
 }
 
 test_npx_installation() {
-  assert_nix_profile_command npx
+  assert_command_path "${nix_profile_bin}/npx"
   npx --version
 }
 

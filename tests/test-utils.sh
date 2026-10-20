@@ -9,32 +9,32 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_fd_installation() {
-  assert_nix_profile_command fd
+  assert_command_path "${nix_profile_bin}/fd"
   fd --version
 }
 
 test_jq_installation() {
-  assert_nix_profile_command jq
+  assert_command_path "${nix_profile_bin}/jq"
   jq --version
 }
 
 test_pdftotext_installation() {
-  assert_nix_profile_command pdftotext
+  assert_command_path "${nix_profile_bin}/pdftotext"
   pdftotext -v
 }
 
 test_pdfinfo_installation() {
-  assert_nix_profile_command pdfinfo
+  assert_command_path "${nix_profile_bin}/pdfinfo"
   pdfinfo -v
 }
 
 test_ripgrep_installation() {
-  assert_nix_profile_command rg
+  assert_command_path "${nix_profile_bin}/rg"
   rg --version
 }
 
 test_tree_installation() {
-  assert_nix_profile_command tree
+  assert_command_path "${nix_profile_bin}/tree"
   tree --version
 }
 

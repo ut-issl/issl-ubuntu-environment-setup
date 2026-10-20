@@ -40,7 +40,7 @@ _python_exe() {
 }
 
 test_uv_installation() {
-  assert_nix_profile_command uv
+  assert_command_path "${nix_profile_bin}/uv"
   uv --version
 }
 

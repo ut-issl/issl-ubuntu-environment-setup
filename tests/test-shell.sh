@@ -71,28 +71,28 @@ test_bash_startup_is_loaded() {
 test_shared_shell_tools() {
   assert_file "${nix_profile_share}/bash-completion/bash_completion"
 
-  assert_nix_profile_command colordiff
+  assert_command_path "${nix_profile_bin}/colordiff"
   colordiff --version
 
-  assert_nix_profile_command dircolors
+  assert_command_path "${nix_profile_bin}/dircolors"
   dircolors --version
 
-  assert_nix_profile_command ls
+  assert_command_path "${nix_profile_bin}/ls"
   ls --classify=auto -d . >/dev/null
 }
 
 test_shellcheck_installation() {
-  assert_nix_profile_command shellcheck
+  assert_command_path "${nix_profile_bin}/shellcheck"
   shellcheck --version
 }
 
 test_shfmt_installation() {
-  assert_nix_profile_command shfmt
+  assert_command_path "${nix_profile_bin}/shfmt"
   shfmt --version
 }
 
 test_zsh_enabled() {
-  assert_nix_profile_command zsh
+  assert_command_path "${nix_profile_bin}/zsh"
   zsh --version
 }
 

@@ -125,7 +125,8 @@ inside the relevant test script (see `ISSL_ENABLE_ZSH` in `test-shell.sh`) inste
 
 Common assertion patterns (helpers are defined in `tests/lib.sh`):
 
-- **Tool installation**: call `assert_nix_profile_command <binary>`, then run the tool once (e.g. `<binary> --version`).
+- **Tool installation**: call `assert_command_path "${nix_profile_bin}/<binary>"`,
+  then run the tool once (e.g. `<binary> --version`).
 - **Values and paths**: use `assert_equal`, `assert_file`, `assert_executable`, and `assert_symlink`
   instead of bare `[[ ]]` so a failure prints what was expected and what was found.
 - **File deployment**: use `cmp` to verify the deployed file matches the source in the module's directory.

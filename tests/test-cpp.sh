@@ -9,12 +9,12 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_gcc_installation() {
-  assert_nix_profile_command gcc
+  assert_command_path "${nix_profile_bin}/gcc"
   gcc --version
 }
 
 test_gxx_installation() {
-  assert_nix_profile_command g++
+  assert_command_path "${nix_profile_bin}/g++"
   g++ --version
 }
 
@@ -24,22 +24,22 @@ test_multilib_support() {
 }
 
 test_make_installation() {
-  assert_nix_profile_command make
+  assert_command_path "${nix_profile_bin}/make"
   make --version
 }
 
 test_cmake_installation() {
-  assert_nix_profile_command cmake
+  assert_command_path "${nix_profile_bin}/cmake"
   cmake --version
 }
 
 test_clang_format_installation() {
-  assert_nix_profile_command clang-format
+  assert_command_path "${nix_profile_bin}/clang-format"
   clang-format --version
 }
 
 test_pkg_config_installation() {
-  assert_nix_profile_command pkg-config
+  assert_command_path "${nix_profile_bin}/pkg-config"
   pkg-config --version
 }
 

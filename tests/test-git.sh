@@ -10,27 +10,27 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_git_installation() {
-  assert_nix_profile_command git
+  assert_command_path "${nix_profile_bin}/git"
   git --version
 }
 
 test_gh_installation() {
-  assert_nix_profile_command gh
+  assert_command_path "${nix_profile_bin}/gh"
   gh --version
 }
 
 test_act_installation() {
-  assert_nix_profile_command act
+  assert_command_path "${nix_profile_bin}/act"
   act --version
 }
 
 test_actionlint_installation() {
-  assert_nix_profile_command actionlint
+  assert_command_path "${nix_profile_bin}/actionlint"
   actionlint --version
 }
 
 test_zizmor_installation() {
-  assert_nix_profile_command zizmor
+  assert_command_path "${nix_profile_bin}/zizmor"
   zizmor --version
 }
 

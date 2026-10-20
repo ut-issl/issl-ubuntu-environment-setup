@@ -11,7 +11,7 @@ export RUSTUP_HOME="${home_dir}/.rustup"
 source "${common_dir}/tests/lib.sh"
 
 test_rustup_installation() {
-  assert_nix_profile_command rustup
+  assert_command_path "${nix_profile_bin}/rustup"
   rustup --version
 }
 
@@ -26,32 +26,32 @@ test_cargo_installation() {
 }
 
 test_cargo_about_installation() {
-  assert_nix_profile_command cargo-about
+  assert_command_path "${nix_profile_bin}/cargo-about"
   cargo about --version
 }
 
 test_cargo_deny_installation() {
-  assert_nix_profile_command cargo-deny
+  assert_command_path "${nix_profile_bin}/cargo-deny"
   cargo deny --version
 }
 
 test_cargo_hack_installation() {
-  assert_nix_profile_command cargo-hack
+  assert_command_path "${nix_profile_bin}/cargo-hack"
   cargo hack --version
 }
 
 test_cargo_llvm_cov_installation() {
-  assert_nix_profile_command cargo-llvm-cov
+  assert_command_path "${nix_profile_bin}/cargo-llvm-cov"
   cargo llvm-cov --version
 }
 
 test_cargo_nextest_installation() {
-  assert_nix_profile_command cargo-nextest
+  assert_command_path "${nix_profile_bin}/cargo-nextest"
   cargo nextest --version
 }
 
 test_dist_installation() {
-  assert_nix_profile_command dist
+  assert_command_path "${nix_profile_bin}/dist"
   dist --version
 }
 

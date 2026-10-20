@@ -33,22 +33,22 @@ test_nix_command_available_without_extra_flags() {
 }
 
 test_home_manager_installation() {
-  assert_nix_profile_command home-manager
+  assert_command_path "${nix_profile_bin}/home-manager"
   home-manager --version
 }
 
 test_nixfmt_installation() {
-  assert_nix_profile_command nixfmt
+  assert_command_path "${nix_profile_bin}/nixfmt"
   nixfmt --version
 }
 
 test_statix_installation() {
-  assert_nix_profile_command statix
+  assert_command_path "${nix_profile_bin}/statix"
   statix --help
 }
 
 test_deadnix_installation() {
-  assert_nix_profile_command deadnix
+  assert_command_path "${nix_profile_bin}/deadnix"
   deadnix --version
 }
 

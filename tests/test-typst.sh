@@ -9,12 +9,12 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_typst_installation() {
-  assert_nix_profile_command typst
+  assert_command_path "${nix_profile_bin}/typst"
   typst --version
 }
 
 test_typstyle_installation() {
-  assert_nix_profile_command typstyle
+  assert_command_path "${nix_profile_bin}/typstyle"
   typstyle --version
 }
 

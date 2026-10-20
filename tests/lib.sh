@@ -53,13 +53,10 @@ assert_symlink() {
   }
 }
 
-# Assert that a command is installed in the Nix profile of the sourcing script
-# (nix_profile_bin) and is the one found on PATH.
-# shellcheck disable=SC2154  # nix_profile_bin is set by the sourcing script.
-assert_nix_profile_command() {
-  local name="$1"
-  local path="${nix_profile_bin}/${name}"
+# Assert that the executable at a path is the command of the same name found on PATH.
+assert_command_path() {
+  local path="$1"
 
   assert_executable "${path}" || return 1
-  assert_equal "$(command -v "${name}")" "${path}" || return 1
+  assert_equal "$(command -v "${path##*/}")" "${path}" || return 1
 }

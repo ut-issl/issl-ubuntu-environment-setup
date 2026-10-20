@@ -9,7 +9,7 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_codex_installation() {
-  assert_nix_profile_command codex
+  assert_command_path "${nix_profile_bin}/codex"
   codex --version
 }
 
