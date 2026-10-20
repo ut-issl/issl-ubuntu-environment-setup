@@ -93,7 +93,7 @@ repos:
     rev: 2bba271688c1abb1503097a064e6c3bc1d1b6a9b  # frozen: lychee-v0.24.2
     hooks:
       - id: lychee
-        args: [--offline, --no-progress, .]
+        args: [--no-progress, --offline, .]
         pass_filenames: false
 
   - repo: local
