@@ -77,12 +77,12 @@
         '/^\\.github/workflows/test\\.ya?ml$/',
       ],
       matchStrings: [
-        'user-ref: (?<currentDigest>[a-f0-9]{40}) # (?<currentValue>\\S+)',
+        "user-ref: '(?<currentDigest>[a-f0-9]{40})' # (?<currentValue>\\S+)",
       ],
       depNameTemplate: 'ut-issl/personal-nix-config-template',
       datasourceTemplate: 'git-refs',
       packageNameTemplate: 'https://github.com/ut-issl/personal-nix-config-template',
-      autoReplaceStringTemplate: 'user-ref: {{{newDigest}}} # {{{currentValue}}}',
+      autoReplaceStringTemplate: "user-ref: '{{{newDigest}}}' # {{{currentValue}}}",
     },
     {
       customType: 'jsonata',
