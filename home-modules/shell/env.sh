@@ -47,7 +47,6 @@ if [ -n "${USER:-}" ]; then
 fi
 
 if [ -r "${ISSL_NIX_PROFILE_PATH}/etc/profile.d/hm-session-vars.sh" ]; then
-  # shellcheck source=/dev/null
   . "${ISSL_NIX_PROFILE_PATH}/etc/profile.d/hm-session-vars.sh"
 fi
 

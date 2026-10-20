@@ -87,6 +87,7 @@ jobs:
               - '**/*.sh'
               - '**/*.bash'
               - '.shellcheckrc'
+              - 'home-modules/.shellcheckrc'
               - '.github/problem-matchers/shellcheck.json'
             zsh:
               - '**/*.zsh'

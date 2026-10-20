@@ -1,0 +1,2 @@
+enable=require-double-brackets
+disable=SC1091
