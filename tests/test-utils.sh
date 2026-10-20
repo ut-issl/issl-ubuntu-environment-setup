@@ -9,38 +9,38 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 assert_fd_installation() {
-  test -x "${nix_profile_bin}/fd"
-  test "$(command -v fd)" = "${nix_profile_bin}/fd"
+  [[ -x "${nix_profile_bin}/fd" ]]
+  [[ "$(command -v fd)" == "${nix_profile_bin}/fd" ]]
   fd --version
 }
 
 assert_jq_installation() {
-  test -x "${nix_profile_bin}/jq"
-  test "$(command -v jq)" = "${nix_profile_bin}/jq"
+  [[ -x "${nix_profile_bin}/jq" ]]
+  [[ "$(command -v jq)" == "${nix_profile_bin}/jq" ]]
   jq --version
 }
 
 assert_pdftotext_installation() {
-  test -x "${nix_profile_bin}/pdftotext"
-  test "$(command -v pdftotext)" = "${nix_profile_bin}/pdftotext"
+  [[ -x "${nix_profile_bin}/pdftotext" ]]
+  [[ "$(command -v pdftotext)" == "${nix_profile_bin}/pdftotext" ]]
   pdftotext -v
 }
 
 assert_pdfinfo_installation() {
-  test -x "${nix_profile_bin}/pdfinfo"
-  test "$(command -v pdfinfo)" = "${nix_profile_bin}/pdfinfo"
+  [[ -x "${nix_profile_bin}/pdfinfo" ]]
+  [[ "$(command -v pdfinfo)" == "${nix_profile_bin}/pdfinfo" ]]
   pdfinfo -v
 }
 
 assert_ripgrep_installation() {
-  test -x "${nix_profile_bin}/rg"
-  test "$(command -v rg)" = "${nix_profile_bin}/rg"
+  [[ -x "${nix_profile_bin}/rg" ]]
+  [[ "$(command -v rg)" == "${nix_profile_bin}/rg" ]]
   rg --version
 }
 
 assert_tree_installation() {
-  test -x "${nix_profile_bin}/tree"
-  test "$(command -v tree)" = "${nix_profile_bin}/tree"
+  [[ -x "${nix_profile_bin}/tree" ]]
+  [[ "$(command -v tree)" == "${nix_profile_bin}/tree" ]]
   tree --version
 }
 

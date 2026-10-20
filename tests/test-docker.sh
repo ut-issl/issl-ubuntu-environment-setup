@@ -9,8 +9,8 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 assert_docker_client_installation() {
-  test -x "${nix_profile_bin}/docker"
-  test "$(command -v docker)" = "${nix_profile_bin}/docker"
+  [[ -x "${nix_profile_bin}/docker" ]]
+  [[ "$(command -v docker)" == "${nix_profile_bin}/docker" ]]
   docker --version
 }
 
@@ -20,8 +20,8 @@ assert_docker_client_plugin_dirs_wrapper() {
 }
 
 assert_docker_compose_installation() {
-  test -x "${nix_profile_bin}/docker-compose"
-  test "$(command -v docker-compose)" = "${nix_profile_bin}/docker-compose"
+  [[ -x "${nix_profile_bin}/docker-compose" ]]
+  [[ "$(command -v docker-compose)" == "${nix_profile_bin}/docker-compose" ]]
   docker-compose version
   docker compose version
 }
@@ -32,15 +32,15 @@ assert_docker_compose_plugin_dirs_wrapper() {
 }
 
 assert_docker_buildx_installation() {
-  test -x "${nix_profile_bin}/docker-buildx"
-  test "$(command -v docker-buildx)" = "${nix_profile_bin}/docker-buildx"
+  [[ -x "${nix_profile_bin}/docker-buildx" ]]
+  [[ "$(command -v docker-buildx)" == "${nix_profile_bin}/docker-buildx" ]]
   docker-buildx version
   docker buildx version
 }
 
 assert_hadolint_installation() {
-  test -x "${nix_profile_bin}/hadolint"
-  test "$(command -v hadolint)" = "${nix_profile_bin}/hadolint"
+  [[ -x "${nix_profile_bin}/hadolint" ]]
+  [[ "$(command -v hadolint)" == "${nix_profile_bin}/hadolint" ]]
   hadolint --version
 }
 

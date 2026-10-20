@@ -9,14 +9,14 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 assert_gcc_installation() {
-  test -x "${nix_profile_bin}/gcc"
-  test "$(command -v gcc)" = "${nix_profile_bin}/gcc"
+  [[ -x "${nix_profile_bin}/gcc" ]]
+  [[ "$(command -v gcc)" == "${nix_profile_bin}/gcc" ]]
   gcc --version
 }
 
 assert_gxx_installation() {
-  test -x "${nix_profile_bin}/g++"
-  test "$(command -v g++)" = "${nix_profile_bin}/g++"
+  [[ -x "${nix_profile_bin}/g++" ]]
+  [[ "$(command -v g++)" == "${nix_profile_bin}/g++" ]]
   g++ --version
 }
 
@@ -26,26 +26,26 @@ assert_multilib_support() {
 }
 
 assert_make_installation() {
-  test -x "${nix_profile_bin}/make"
-  test "$(command -v make)" = "${nix_profile_bin}/make"
+  [[ -x "${nix_profile_bin}/make" ]]
+  [[ "$(command -v make)" == "${nix_profile_bin}/make" ]]
   make --version
 }
 
 assert_cmake_installation() {
-  test -x "${nix_profile_bin}/cmake"
-  test "$(command -v cmake)" = "${nix_profile_bin}/cmake"
+  [[ -x "${nix_profile_bin}/cmake" ]]
+  [[ "$(command -v cmake)" == "${nix_profile_bin}/cmake" ]]
   cmake --version
 }
 
 assert_clang_format_installation() {
-  test -x "${nix_profile_bin}/clang-format"
-  test "$(command -v clang-format)" = "${nix_profile_bin}/clang-format"
+  [[ -x "${nix_profile_bin}/clang-format" ]]
+  [[ "$(command -v clang-format)" == "${nix_profile_bin}/clang-format" ]]
   clang-format --version
 }
 
 assert_pkg_config_installation() {
-  test -x "${nix_profile_bin}/pkg-config"
-  test "$(command -v pkg-config)" = "${nix_profile_bin}/pkg-config"
+  [[ -x "${nix_profile_bin}/pkg-config" ]]
+  [[ "$(command -v pkg-config)" == "${nix_profile_bin}/pkg-config" ]]
   pkg-config --version
 }
 

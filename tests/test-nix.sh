@@ -21,7 +21,7 @@ assert_shared_nix_config() {
 }
 
 assert_nix_conf_include() {
-  test -f "${nix_config_path}"
+  [[ -f ${nix_config_path} ]]
   grep -Fq "!include ${issl_nix_config_path}" "${nix_config_path}"
 }
 
@@ -33,26 +33,26 @@ assert_nix_command_available_without_extra_flags() {
 }
 
 assert_home_manager_installation() {
-  test -x "${nix_profile_bin}/home-manager"
-  test "$(command -v home-manager)" = "${nix_profile_bin}/home-manager"
+  [[ -x "${nix_profile_bin}/home-manager" ]]
+  [[ "$(command -v home-manager)" == "${nix_profile_bin}/home-manager" ]]
   home-manager --version
 }
 
 assert_nixfmt_installation() {
-  test -x "${nix_profile_bin}/nixfmt"
-  test "$(command -v nixfmt)" = "${nix_profile_bin}/nixfmt"
+  [[ -x "${nix_profile_bin}/nixfmt" ]]
+  [[ "$(command -v nixfmt)" == "${nix_profile_bin}/nixfmt" ]]
   nixfmt --version
 }
 
 assert_statix_installation() {
-  test -x "${nix_profile_bin}/statix"
-  test "$(command -v statix)" = "${nix_profile_bin}/statix"
+  [[ -x "${nix_profile_bin}/statix" ]]
+  [[ "$(command -v statix)" == "${nix_profile_bin}/statix" ]]
   statix --help
 }
 
 assert_deadnix_installation() {
-  test -x "${nix_profile_bin}/deadnix"
-  test "$(command -v deadnix)" = "${nix_profile_bin}/deadnix"
+  [[ -x "${nix_profile_bin}/deadnix" ]]
+  [[ "$(command -v deadnix)" == "${nix_profile_bin}/deadnix" ]]
   deadnix --version
 }
 

@@ -11,8 +11,8 @@ export RUSTUP_HOME="${home_dir}/.rustup"
 source "${common_dir}/tests/lib.sh"
 
 assert_rustup_installation() {
-  test -x "${nix_profile_bin}/rustup"
-  test "$(command -v rustup)" = "${nix_profile_bin}/rustup"
+  [[ -x "${nix_profile_bin}/rustup" ]]
+  [[ "$(command -v rustup)" == "${nix_profile_bin}/rustup" ]]
   rustup --version
 }
 
@@ -27,38 +27,38 @@ assert_cargo_installation() {
 }
 
 assert_cargo_about_installation() {
-  test -x "${nix_profile_bin}/cargo-about"
-  test "$(command -v cargo-about)" = "${nix_profile_bin}/cargo-about"
+  [[ -x "${nix_profile_bin}/cargo-about" ]]
+  [[ "$(command -v cargo-about)" == "${nix_profile_bin}/cargo-about" ]]
   cargo about --version
 }
 
 assert_cargo_deny_installation() {
-  test -x "${nix_profile_bin}/cargo-deny"
-  test "$(command -v cargo-deny)" = "${nix_profile_bin}/cargo-deny"
+  [[ -x "${nix_profile_bin}/cargo-deny" ]]
+  [[ "$(command -v cargo-deny)" == "${nix_profile_bin}/cargo-deny" ]]
   cargo deny --version
 }
 
 assert_cargo_hack_installation() {
-  test -x "${nix_profile_bin}/cargo-hack"
-  test "$(command -v cargo-hack)" = "${nix_profile_bin}/cargo-hack"
+  [[ -x "${nix_profile_bin}/cargo-hack" ]]
+  [[ "$(command -v cargo-hack)" == "${nix_profile_bin}/cargo-hack" ]]
   cargo hack --version
 }
 
 assert_cargo_llvm_cov_installation() {
-  test -x "${nix_profile_bin}/cargo-llvm-cov"
-  test "$(command -v cargo-llvm-cov)" = "${nix_profile_bin}/cargo-llvm-cov"
+  [[ -x "${nix_profile_bin}/cargo-llvm-cov" ]]
+  [[ "$(command -v cargo-llvm-cov)" == "${nix_profile_bin}/cargo-llvm-cov" ]]
   cargo llvm-cov --version
 }
 
 assert_cargo_nextest_installation() {
-  test -x "${nix_profile_bin}/cargo-nextest"
-  test "$(command -v cargo-nextest)" = "${nix_profile_bin}/cargo-nextest"
+  [[ -x "${nix_profile_bin}/cargo-nextest" ]]
+  [[ "$(command -v cargo-nextest)" == "${nix_profile_bin}/cargo-nextest" ]]
   cargo nextest --version
 }
 
 assert_dist_installation() {
-  test -x "${nix_profile_bin}/dist"
-  test "$(command -v dist)" = "${nix_profile_bin}/dist"
+  [[ -x "${nix_profile_bin}/dist" ]]
+  [[ "$(command -v dist)" == "${nix_profile_bin}/dist" ]]
   dist --version
 }
 
@@ -73,7 +73,7 @@ assert_shared_rust_config_file() {
 assert_cargo_config_include() {
   local cargo_config_path="${home_dir}/.cargo/config.toml"
 
-  test -f "${cargo_config_path}"
+  [[ -f ${cargo_config_path} ]]
   grep -Fq "${config_dir}/issl/rust/config.toml" "${cargo_config_path}"
 }
 

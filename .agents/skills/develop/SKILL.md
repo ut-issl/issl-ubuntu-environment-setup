@@ -129,7 +129,7 @@ instead of adding a separate unconditional script.
 
 Common assertion patterns:
 
-- **Tool installation**: check `test -x "${nix_profile_bin}/<binary>"`
+- **Tool installation**: check `[[ -x "${nix_profile_bin}/<binary>" ]]`
   and verify `command -v` resolves to the Nix profile path.
 - **File deployment**: use `cmp` to verify the deployed file matches the source in the module's directory.
 - **Config wiring**: use `grep -Fq` to check that include or source lines are present in user-managed files.
