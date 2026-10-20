@@ -63,7 +63,7 @@ assert_executable() {
 }
 
 assert_not_exists() {
-  [[ ! -e $1 ]] || {
+  [[ ! -e $1 && ! -L $1 ]] || {
     printf '  unexpectedly exists: %s\n' "$1" >&2
     return 1
   }
