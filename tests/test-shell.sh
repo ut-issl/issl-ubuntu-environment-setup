@@ -125,9 +125,13 @@ test_zsh_startup_is_loaded() {
 
 assert_login_shell_link_targets() {
   local expected="$1"
+  local actual_target
+  local expected_target
 
   assert_symlink "${login_shell_link}"
-  assert_equal "$(readlink -f "${login_shell_link}")" "$(readlink -f "${expected}")"
+  actual_target="$(readlink -f "${login_shell_link}")"
+  expected_target="$(readlink -f "${expected}")"
+  assert_equal "${actual_target}" "${expected_target}"
 }
 
 assert_shell_variable_is_corrected() {

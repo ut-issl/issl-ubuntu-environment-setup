@@ -205,6 +205,7 @@ nix_conf_include_block() {
 ensure_nix_conf_include() {
   local nix_config_dir="${XDG_CONFIG_HOME}/nix"
   local nix_config_path="${nix_config_dir}/nix.conf"
+  local block_content=''
 
   mkdir -p "${nix_config_dir}"
 
@@ -212,11 +213,12 @@ ensure_nix_conf_include() {
     return
   fi
 
+  block_content="$(nix_conf_include_block)"
   prepend_block_once \
     "${nix_config_path}" \
     '# >>> ISSL nix config >>>' \
     '# <<< ISSL nix config <<<' \
-    "$(nix_conf_include_block)"
+    "${block_content}"
 }
 
 # ===== Bash ===== #
@@ -251,21 +253,26 @@ bashrc_block() {
 }
 
 ensure_bash_startup_files() {
+  local block_content=''
+
+  block_content="$(profile_env_block)"
   replace_with_block_once \
     "${HOME}/.profile" \
     '# >>> ISSL shell env >>>' \
     '# <<< ISSL shell env <<<' \
-    "$(profile_env_block)"
+    "${block_content}"
+  block_content="$(bash_profile_block)"
   prepend_block_once \
     "${HOME}/.bash_profile" \
     '# >>> ISSL bash profile >>>' \
     '# <<< ISSL bash profile <<<' \
-    "$(bash_profile_block)"
+    "${block_content}"
+  block_content="$(bashrc_block)"
   replace_with_block_once \
     "${HOME}/.bashrc" \
     '# >>> ISSL bash rc >>>' \
     '# <<< ISSL bash rc <<<' \
-    "$(bashrc_block)"
+    "${block_content}"
 }
 
 # ===== Zsh ===== #
@@ -358,6 +365,7 @@ zshrc_block() {
 ensure_zsh_startup_files() {
   local zshenv_path="${HOME}/.zshenv"
   local zdotdir_path=''
+  local block_content=''
 
   if zshenv_defines_zdotdir "${zshenv_path}"; then
     if ! zdotdir_path="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
@@ -365,25 +373,28 @@ ensure_zsh_startup_files() {
       exit 1
     fi
   else
+    block_content="$(zshenv_default_block)"
     prepend_block_once \
       "${zshenv_path}" \
       '# >>> ISSL zsh env >>>' \
       '# <<< ISSL zsh env <<<' \
-      "$(zshenv_default_block)"
+      "${block_content}"
     zdotdir_path="${XDG_CONFIG_HOME}/zsh"
   fi
 
   mkdir -p "${zdotdir_path}"
+  block_content="$(zprofile_block)"
   prepend_block_once \
     "${zdotdir_path}/.zprofile" \
     '# >>> ISSL zsh profile >>>' \
     '# <<< ISSL zsh profile <<<' \
-    "$(zprofile_block)"
+    "${block_content}"
+  block_content="$(zshrc_block)"
   prepend_block_once \
     "${zdotdir_path}/.zshrc" \
     '# >>> ISSL zsh rc >>>' \
     '# <<< ISSL zsh rc <<<' \
-    "$(zshrc_block)"
+    "${block_content}"
 }
 
 resolve_zsh_bin() {
@@ -480,11 +491,14 @@ PYTHON_EOF
 }
 
 ensure_python_startup_file() {
+  local block_content=''
+
+  block_content="$(pythonrc_block)"
   prepend_block_once \
     "${XDG_CONFIG_HOME}/python/pythonrc.py" \
     '# >>> ISSL python startup >>>' \
     '# <<< ISSL python startup <<<' \
-    "$(pythonrc_block)"
+    "${block_content}"
 }
 
 # ===== Rust ===== #
@@ -499,6 +513,7 @@ cargo_config_include_block() {
 ensure_cargo_config_include() {
   local cargo_home_path="${CARGO_HOME:-${HOME}/.cargo}"
   local cargo_config_path="${cargo_home_path}/config.toml"
+  local block_content=''
 
   mkdir -p "${cargo_home_path}"
 
@@ -512,11 +527,12 @@ ensure_cargo_config_include() {
     return
   fi
 
+  block_content="$(cargo_config_include_block)"
   prepend_block_once \
     "${cargo_config_path}" \
     '# >>> ISSL cargo config >>>' \
     '# <<< ISSL cargo config <<<' \
-    "$(cargo_config_include_block)"
+    "${block_content}"
 }
 
 main() {

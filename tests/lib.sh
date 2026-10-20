@@ -74,5 +74,5 @@ assert_command_path() {
   local path="$1"
 
   assert_executable "${path}" || return 1
-  assert_equal "$(command -v "${path##*/}")" "${path}" || return 1
+  assert_equal "$(command -v "${path##*/}" || true)" "${path}" || return 1
 }

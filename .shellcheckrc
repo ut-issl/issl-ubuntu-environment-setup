@@ -1,3 +1,4 @@
 external-sources=true
 source-path=SCRIPTDIR/..
+enable=check-extra-masked-returns
 enable=require-double-brackets
