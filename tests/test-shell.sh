@@ -39,9 +39,9 @@ EOF
 }
 
 test_bash_startup_files() {
-  [[ -f "${home_dir}/.profile" ]]
-  [[ -f "${home_dir}/.bash_profile" ]]
-  [[ -f "${home_dir}/.bashrc" ]]
+  assert_file "${home_dir}/.profile"
+  assert_file "${home_dir}/.bash_profile"
+  assert_file "${home_dir}/.bashrc"
 }
 
 test_profile_not_shadowed_by_bash_profile() {
@@ -69,36 +69,30 @@ test_bash_startup_is_loaded() {
 }
 
 test_shared_shell_tools() {
-  [[ -f "${nix_profile_share}/bash-completion/bash_completion" ]]
+  assert_file "${nix_profile_share}/bash-completion/bash_completion"
 
-  [[ -x "${nix_profile_bin}/colordiff" ]]
-  [[ "$(command -v colordiff)" == "${nix_profile_bin}/colordiff" ]]
+  assert_nix_profile_command colordiff
   colordiff --version
 
-  [[ -x "${nix_profile_bin}/dircolors" ]]
-  [[ "$(command -v dircolors)" == "${nix_profile_bin}/dircolors" ]]
+  assert_nix_profile_command dircolors
   dircolors --version
 
-  [[ -x "${nix_profile_bin}/ls" ]]
-  [[ "$(command -v ls)" == "${nix_profile_bin}/ls" ]]
+  assert_nix_profile_command ls
   ls --classify=auto -d . >/dev/null
 }
 
 test_shellcheck_installation() {
-  [[ -x "${nix_profile_bin}/shellcheck" ]]
-  [[ "$(command -v shellcheck)" == "${nix_profile_bin}/shellcheck" ]]
+  assert_nix_profile_command shellcheck
   shellcheck --version
 }
 
 test_shfmt_installation() {
-  [[ -x "${nix_profile_bin}/shfmt" ]]
-  [[ "$(command -v shfmt)" == "${nix_profile_bin}/shfmt" ]]
+  assert_nix_profile_command shfmt
   shfmt --version
 }
 
 test_zsh_enabled() {
-  [[ -x "${nix_profile_bin}/zsh" ]]
-  [[ "$(command -v zsh)" == "${nix_profile_bin}/zsh" ]]
+  assert_nix_profile_command zsh
   zsh --version
 }
 
@@ -108,9 +102,9 @@ test_shared_zsh_files() {
 }
 
 test_zsh_startup_files() {
-  [[ -f "${home_dir}/.zshenv" ]]
-  [[ -f "${default_zdotdir}/.zprofile" ]]
-  [[ -f "${default_zdotdir}/.zshrc" ]]
+  assert_file "${home_dir}/.zshenv"
+  assert_file "${default_zdotdir}/.zprofile"
+  assert_file "${default_zdotdir}/.zshrc"
 }
 
 test_zsh_startup_is_loaded() {
@@ -132,8 +126,8 @@ test_zsh_startup_is_loaded() {
 assert_login_shell_link_targets() {
   local expected="$1"
 
-  [[ -L ${login_shell_link} ]]
-  [[ "$(readlink -f "${login_shell_link}")" == "$(readlink -f "${expected}")" ]]
+  assert_symlink "${login_shell_link}"
+  assert_equal "$(readlink -f "${login_shell_link}")" "$(readlink -f "${expected}")"
 }
 
 assert_shell_variable_is_corrected() {
@@ -158,7 +152,7 @@ test_login_shell_is_managed_for_zsh() {
   assert_login_shell_link_targets "${nix_profile_bin}/zsh"
   assert_shell_variable_is_corrected bash "${home_dir}/.nix-profile/bin/zsh"
   assert_shell_variable_is_corrected "${nix_profile_bin}/zsh" "${home_dir}/.nix-profile/bin/zsh"
-  [[ -x "${nix_profile_bin}/issl-login-shell-setup" ]]
+  assert_executable "${nix_profile_bin}/issl-login-shell-setup"
 }
 
 test_login_shell_is_managed_for_bash() {

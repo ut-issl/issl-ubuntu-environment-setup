@@ -9,8 +9,7 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_vim_installation() {
-  [[ -x "${nix_profile_bin}/vim" ]]
-  [[ "$(command -v vim)" == "${nix_profile_bin}/vim" ]]
+  assert_nix_profile_command vim
   vim --version
 }
 

@@ -11,8 +11,7 @@ export RUSTUP_HOME="${home_dir}/.rustup"
 source "${common_dir}/tests/lib.sh"
 
 test_rustup_installation() {
-  [[ -x "${nix_profile_bin}/rustup" ]]
-  [[ "$(command -v rustup)" == "${nix_profile_bin}/rustup" ]]
+  assert_nix_profile_command rustup
   rustup --version
 }
 
@@ -27,38 +26,32 @@ test_cargo_installation() {
 }
 
 test_cargo_about_installation() {
-  [[ -x "${nix_profile_bin}/cargo-about" ]]
-  [[ "$(command -v cargo-about)" == "${nix_profile_bin}/cargo-about" ]]
+  assert_nix_profile_command cargo-about
   cargo about --version
 }
 
 test_cargo_deny_installation() {
-  [[ -x "${nix_profile_bin}/cargo-deny" ]]
-  [[ "$(command -v cargo-deny)" == "${nix_profile_bin}/cargo-deny" ]]
+  assert_nix_profile_command cargo-deny
   cargo deny --version
 }
 
 test_cargo_hack_installation() {
-  [[ -x "${nix_profile_bin}/cargo-hack" ]]
-  [[ "$(command -v cargo-hack)" == "${nix_profile_bin}/cargo-hack" ]]
+  assert_nix_profile_command cargo-hack
   cargo hack --version
 }
 
 test_cargo_llvm_cov_installation() {
-  [[ -x "${nix_profile_bin}/cargo-llvm-cov" ]]
-  [[ "$(command -v cargo-llvm-cov)" == "${nix_profile_bin}/cargo-llvm-cov" ]]
+  assert_nix_profile_command cargo-llvm-cov
   cargo llvm-cov --version
 }
 
 test_cargo_nextest_installation() {
-  [[ -x "${nix_profile_bin}/cargo-nextest" ]]
-  [[ "$(command -v cargo-nextest)" == "${nix_profile_bin}/cargo-nextest" ]]
+  assert_nix_profile_command cargo-nextest
   cargo nextest --version
 }
 
 test_dist_installation() {
-  [[ -x "${nix_profile_bin}/dist" ]]
-  [[ "$(command -v dist)" == "${nix_profile_bin}/dist" ]]
+  assert_nix_profile_command dist
   dist --version
 }
 
@@ -73,7 +66,7 @@ test_shared_rust_config_file() {
 test_cargo_config_include() {
   local cargo_config_path="${home_dir}/.cargo/config.toml"
 
-  [[ -f ${cargo_config_path} ]]
+  assert_file "${cargo_config_path}"
   grep -Fq "${config_dir}/issl/rust/config.toml" "${cargo_config_path}"
 }
 

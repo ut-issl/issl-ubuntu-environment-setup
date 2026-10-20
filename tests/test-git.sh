@@ -10,32 +10,27 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_git_installation() {
-  [[ -x "${nix_profile_bin}/git" ]]
-  [[ "$(command -v git)" == "${nix_profile_bin}/git" ]]
+  assert_nix_profile_command git
   git --version
 }
 
 test_gh_installation() {
-  [[ -x "${nix_profile_bin}/gh" ]]
-  [[ "$(command -v gh)" == "${nix_profile_bin}/gh" ]]
+  assert_nix_profile_command gh
   gh --version
 }
 
 test_act_installation() {
-  [[ -x "${nix_profile_bin}/act" ]]
-  [[ "$(command -v act)" == "${nix_profile_bin}/act" ]]
+  assert_nix_profile_command act
   act --version
 }
 
 test_actionlint_installation() {
-  [[ -x "${nix_profile_bin}/actionlint" ]]
-  [[ "$(command -v actionlint)" == "${nix_profile_bin}/actionlint" ]]
+  assert_nix_profile_command actionlint
   actionlint --version
 }
 
 test_zizmor_installation() {
-  [[ -x "${nix_profile_bin}/zizmor" ]]
-  [[ "$(command -v zizmor)" == "${nix_profile_bin}/zizmor" ]]
+  assert_nix_profile_command zizmor
   zizmor --version
 }
 
@@ -58,7 +53,7 @@ test_git_identity() {
       HOME="${home_dir}" XDG_CONFIG_HOME="${config_dir}" \
         git config --global --get user.name
     )"
-    [[ ${user_name} == "${EXPECTED_GIT_USER_NAME}" ]]
+    assert_equal "${user_name}" "${EXPECTED_GIT_USER_NAME}"
   fi
 
   if [[ -n ${EXPECTED_GIT_USER_EMAIL:-} ]]; then
@@ -66,7 +61,7 @@ test_git_identity() {
       HOME="${home_dir}" XDG_CONFIG_HOME="${config_dir}" \
         git config --global --get user.email
     )"
-    [[ ${user_email} == "${EXPECTED_GIT_USER_EMAIL}" ]]
+    assert_equal "${user_email}" "${EXPECTED_GIT_USER_EMAIL}"
   fi
 }
 

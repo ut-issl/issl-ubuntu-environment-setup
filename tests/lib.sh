@@ -18,3 +18,48 @@ run_test() {
   printf -- '-- %s\n' "$1"
   "$@"
 }
+
+# Assertion helpers. On failure, each prints the details and returns 1 so the
+# ERR trap reports the line of the calling test.
+
+assert_equal() {
+  local actual="$1"
+  local expected="$2"
+
+  [[ ${actual} == "${expected}" ]] || {
+    printf '  expected: %s\n  actual:   %s\n' "${expected}" "${actual}" >&2
+    return 1
+  }
+}
+
+assert_file() {
+  [[ -f $1 ]] || {
+    printf '  not a regular file: %s\n' "$1" >&2
+    return 1
+  }
+}
+
+assert_executable() {
+  [[ -x $1 ]] || {
+    printf '  not executable: %s\n' "$1" >&2
+    return 1
+  }
+}
+
+assert_symlink() {
+  [[ -L $1 ]] || {
+    printf '  not a symlink: %s\n' "$1" >&2
+    return 1
+  }
+}
+
+# Assert that a command is installed in the Nix profile of the sourcing script
+# (nix_profile_bin) and is the one found on PATH.
+# shellcheck disable=SC2154  # nix_profile_bin is set by the sourcing script.
+assert_nix_profile_command() {
+  local name="$1"
+  local path="${nix_profile_bin}/${name}"
+
+  assert_executable "${path}" || return 1
+  assert_equal "$(command -v "${name}")" "${path}" || return 1
+}

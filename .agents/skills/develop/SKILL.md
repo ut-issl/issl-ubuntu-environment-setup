@@ -123,10 +123,11 @@ For a module that takes effect only in specific configurations (like `zsh/zsh.ni
 gate its assertions on the corresponding environment variable
 inside the relevant test script (see `ISSL_ENABLE_ZSH` in `test-shell.sh`) instead of adding a separate unconditional script.
 
-Common assertion patterns:
+Common assertion patterns (helpers are defined in `tests/lib.sh`):
 
-- **Tool installation**: check `[[ -x "${nix_profile_bin}/<binary>" ]]`
-  and verify `command -v` resolves to the Nix profile path.
+- **Tool installation**: call `assert_nix_profile_command <binary>`, then run the tool once (e.g. `<binary> --version`).
+- **Values and paths**: use `assert_equal`, `assert_file`, `assert_executable`, and `assert_symlink`
+  instead of bare `[[ ]]` so a failure prints what was expected and what was found.
 - **File deployment**: use `cmp` to verify the deployed file matches the source in the module's directory.
 - **Config wiring**: use `grep -Fq` to check that include or source lines are present in user-managed files.
 

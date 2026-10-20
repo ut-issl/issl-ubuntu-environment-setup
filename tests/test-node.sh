@@ -9,20 +9,17 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 source "${common_dir}/tests/lib.sh"
 
 test_node_installation() {
-  [[ -x "${nix_profile_bin}/node" ]]
-  [[ "$(command -v node)" == "${nix_profile_bin}/node" ]]
+  assert_nix_profile_command node
   node --version
 }
 
 test_npm_installation() {
-  [[ -x "${nix_profile_bin}/npm" ]]
-  [[ "$(command -v npm)" == "${nix_profile_bin}/npm" ]]
+  assert_nix_profile_command npm
   npm --version
 }
 
 test_npx_installation() {
-  [[ -x "${nix_profile_bin}/npx" ]]
-  [[ "$(command -v npx)" == "${nix_profile_bin}/npx" ]]
+  assert_nix_profile_command npx
   npx --version
 }
 
