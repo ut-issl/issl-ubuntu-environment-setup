@@ -8,8 +8,17 @@
 # shellcheck disable=SC2317  # invoked via the ERR trap, not directly.
 _issl_test_failed() {
   local status="$?"
+  local command="${BASH_COMMAND}"
+  local source_line
+
+  # Show the calling source line when the failure came from a return of a function.
+  if [[ ${command} == return || ${command} == 'return '* ]]; then
+    source_line="$(sed -n "${BASH_LINENO[0]}s/^[[:space:]]*//p" "${BASH_SOURCE[1]}" 2>/dev/null)" &&
+      [[ -n ${source_line} ]] &&
+      command="${source_line}"
+  fi
   printf 'FAILED: %s:%s: %s (exit %s)\n' \
-    "${BASH_SOURCE[1]##*/}" "${BASH_LINENO[0]}" "${BASH_COMMAND}" "${status}" >&2
+    "${BASH_SOURCE[1]##*/}" "${BASH_LINENO[0]}" "${command}" "${status}" >&2
 }
 trap _issl_test_failed ERR
 
