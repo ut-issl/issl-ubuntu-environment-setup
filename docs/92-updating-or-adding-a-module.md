@@ -4,12 +4,10 @@ This page explains the usual workflow for updating or adding a shared module in 
 
 ## Agent Skill
 
-This repository ships a `develop` skill for coding agents that support [Agent Skills](https://agentskills.io)
-(e.g. Codex or Claude Code).
+This repository ships a `develop` skill for coding agents that support [Agent Skills](https://agentskills.io) (e.g. Codex or Claude Code).
 Invoke it with `$develop` in Codex or `/develop` in Claude Code.
 
-It assists the workflow on this page interactively —
-from checking what already exists and researching nixpkgs
+It assists the workflow on this page interactively — from checking what already exists and researching nixpkgs
 to editing the modules, extending the tests, and validating the result.
 State what you want when invoking it (e.g. `$develop add lazygit`).
 
@@ -50,8 +48,7 @@ state in the pull request why the package is worth distributing to all users und
 
 ## Changing a Deployed File
 
-A module deploys configuration files from its own directory,
-so changing what one of them contains needs no change to Nix.
+A module deploys configuration files from its own directory, so changing what one of them contains needs no change to Nix.
 
 Typical examples are:
 
@@ -117,8 +114,7 @@ Use `lib.mkDefault` for an option a personal config repository should be able to
 and a plain definition for one that has to hold for everyone, as `programs.home-manager.enable` does in `nix/nix.nix`.
 Two plain definitions of an option carry equal priority; a boolean then conflicts instead of one overriding the other.
 A mergeable option such as `nixpkgs.config` combines them instead, so a personal definition can still merge into it.
-What a `lib.mkDefault` should default to follows the same rule as an option default,
-which [Adding a Module](#adding-a-module) describes.
+What a `lib.mkDefault` should default to follows the same rule as an option default, which [Adding a Module](#adding-a-module) describes.
 
 When changing a module's packages or settings:
 
@@ -127,8 +123,7 @@ When changing a module's packages or settings:
 
 ## Adding a Module
 
-A module is a directory under `home-modules/` holding `<name>/<name>.nix`
-together with the configuration files it deploys:
+A module is a directory under `home-modules/` holding `<name>/<name>.nix` together with the configuration files it deploys:
 
 ```nix
 { pkgs, ... }:
@@ -146,8 +141,7 @@ If there is already a related module, update that one rather than adding another
 It reports the offending path when a directory holds no `<name>.nix`,
 or when a `.nix` file sits directly under `home-modules/`, where nothing would load it.
 
-If a module should only take effect in specific situations,
-declare an option for it and gate its `config` with `lib.mkIf`:
+If a module should only take effect in specific situations, declare an option for it and gate its `config` with `lib.mkIf`:
 
 ```nix
 {
@@ -194,16 +188,14 @@ When adding a module:
 
 ## Connecting to User-Managed Files
 
-Since the shared environment does not own the files the user edits,
-what it deploys has to be imported or sourced from them.
+Since the shared environment does not own the files the user edits, what it deploys has to be imported or sourced from them.
 Prefer declarative integration inside `home-modules/` first,
 and connect the shared configuration to user-managed files only when that is not enough.
 
 Both setup paths need that wiring, and they carry the same set of shared paths:
 
 - the script-based setup does it imperatively in `scripts/apply.sh`
-- the setup with a personal config repository does it declaratively
-  in the user modules of the [template](11-setup-with-a-personal-config-repository.md)
+- the setup with a personal config repository does it declaratively in the user modules of the [template](11-setup-with-a-personal-config-repository.md)
 
 Keep the two in step whenever a shared path is added, renamed, or removed.
 The template is a separate repository, so that half of the change is a separate pull request.
@@ -225,8 +217,7 @@ Both helpers do nothing once their begin marker is present, so later runs never 
 
 ## Validating Changes
 
-Validate a change in three steps:
-first run the pre-commit hooks, then confirm that it evaluates and builds,
+Validate a change in three steps: first run the pre-commit hooks, then confirm that it evaluates and builds,
 and finally inspect what it actually produces.
 
 Nix reads this repository through Git, so stage a new file before you validate:

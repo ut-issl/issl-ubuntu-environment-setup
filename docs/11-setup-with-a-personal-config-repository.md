@@ -34,8 +34,7 @@ then follow the Getting Started section of its README.
 The section's first step runs `bootstrap-host.sh` from a release of this repository.
 The script installs Nix, starts `nix-daemon` on systems without systemd,
 and offers to set up GitHub SSH access and the host Docker Engine.
-It is the only part of the setup that needs privileges,
-and it is the same script the [script-based setup](12-script-based-setup.md) runs.
+It is the only part of the setup that needs privileges, and it is the same script the [script-based setup](12-script-based-setup.md) runs.
 
 ## What the Shared Configuration Provides
 

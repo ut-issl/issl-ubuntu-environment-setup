@@ -100,8 +100,7 @@ so say in the wrap-up whether a change there is needed.
 
 Every module should have corresponding test coverage under `tests/`.
 
-Tests run in CI against a freshly applied environment
-(the `script-based` job of `.github/workflows/test.yaml` and the reusable
+Tests run in CI against a freshly applied environment (the `script-based` job of `.github/workflows/test.yaml` and the reusable
 `.github/workflows/test-config-repository.yaml` both set `HOME_DIR`/`CONFIG_DIR`/`STATE_DIR` and run `tests/run.sh`).
 Do not try to run them locally unless this machine has the shared environment applied;
 local validation is prek plus the Nix validation in step 7,
@@ -110,11 +109,9 @@ which can confirm installed binaries and deployed files without applying anythin
 If a test file for this area already exists (e.g. `tests/test-<tool>.sh`), extend it.
 If not, create a new `tests/test-<tool>.sh` following the existing pattern:
 
-1. Copy the header from the closest existing test:
-   `set -Eeuo pipefail`, the required environment variable guards
+1. Copy the header from the closest existing test: `set -Eeuo pipefail`, the required environment variable guards
    (`HOME_DIR:?` always; `CONFIG_DIR:?` when inspecting deployed config or user-managed file wiring;
-   `STATE_DIR:?` when inspecting what a module deploys under `~/.local/state/issl/`),
-   the `COMMON_DIR` fallback, and `nix_profile_bin="${home_dir}/.nix-profile/bin"`.
+   `STATE_DIR:?` when inspecting what a module deploys under `~/.local/state/issl/`), the `COMMON_DIR` fallback, and `nix_profile_bin="${home_dir}/.nix-profile/bin"`.
    Then source `tests/lib.sh` for the `run_assert` helper
    and the failure-reporting ERR trap (which needs the `-E` in `set -Eeuo pipefail`).
 2. Define assertion functions (e.g. `assert_<tool>_installation`, `assert_<tool>_config`).
@@ -124,8 +121,7 @@ If not, create a new `tests/test-<tool>.sh` following the existing pattern:
 
 For a module that takes effect only in specific configurations (like `zsh/zsh.nix`),
 gate its assertions on the corresponding environment variable
-inside the relevant test script (see `ISSL_ENABLE_ZSH` in `test-shell.sh`)
-instead of adding a separate unconditional script.
+inside the relevant test script (see `ISSL_ENABLE_ZSH` in `test-shell.sh`) instead of adding a separate unconditional script.
 
 Common assertion patterns:
 
@@ -140,8 +136,7 @@ Run validation in this order:
 
 1. Run `prek run --files <changed files> --skip no-commit-to-branch` and fix what it reports.
    If `prek` is not on PATH, use `uvx prek` instead.
-2. Run the Nix validation of § "Validating Changes":
-   stage the new files, run the flake checks,
+2. Run the Nix validation of § "Validating Changes": stage the new files, run the flake checks,
    then build the activation packages and inspect the installed binaries and deployed files.
    Build for the system of this machine, not the one in the example command.
    Remove the `result-*` symlinks when done.
@@ -153,8 +148,6 @@ Summarize what was changed, what was validated, and what was skipped.
 If the change affects contributor workflow or user-visible setup behavior,
 update the relevant documentation under `docs/` as part of this task (see § "Documentation Updates").
 
-If the user later asks for a commit or PR,
-follow the Conventional Commits format described in `docs/93-contribution-guidelines.md`,
-and suggest an appropriate version bump label (`update::major`, `update::minor`, or `update::patch`)
-for the pull request.
+If the user later asks for a commit or PR, follow the Conventional Commits format described in `docs/93-contribution-guidelines.md`,
+and suggest an appropriate version bump label (`update::major`, `update::minor`, or `update::patch`) for the pull request.
 Leave all changes uncommitted until then.
