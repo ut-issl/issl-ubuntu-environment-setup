@@ -76,6 +76,8 @@ source_nix() {
 }
 
 ensure_nix() {
+  local installer_script=''
+
   if command -v nix >/dev/null 2>&1; then
     return
   fi
@@ -89,7 +91,8 @@ ensure_nix() {
   require_command curl
   require_command sh
 
-  sh <(curl --proto '=https' --tlsv1.2 -L https://nixos.org/nix/install) --daemon
+  installer_script="$(curl --proto '=https' --tlsv1.2 --fail -L https://nixos.org/nix/install)"
+  sh -c "${installer_script}" nix-install --daemon
   source_nix
 }
 
