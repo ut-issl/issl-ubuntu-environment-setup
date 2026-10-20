@@ -257,8 +257,8 @@ A directory whose `<name>.nix` alone is untracked is reported as missing that fi
 3. Build the activation packages to inspect the result:
 
    ```sh
-   nix build .#checks.x86_64-linux.home --out-link result-home
-   nix build .#checks.x86_64-linux.home-bash-only --out-link result-home-bash-only
+   nix build --out-link result-home .#checks.x86_64-linux.home
+   nix build --out-link result-home-bash-only .#checks.x86_64-linux.home-bash-only
    ```
 
    Replace `x86_64-linux` with `aarch64-linux` to inspect the result for that architecture.
