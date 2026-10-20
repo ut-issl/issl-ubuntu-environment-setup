@@ -4,148 +4,72 @@
     'config:best-practices',
   ],
   minimumReleaseAge: '3 days',
+  labels: [
+    'automated',
+    'dependencies',
+  ],
+  'git-submodules': {
+    enabled: true,
+  },
+  nix: {
+    enabled: true,
+  },
+  'pre-commit': {
+    enabled: true,
+  },
   customManagers: [
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
         '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
-      matchStringsStrategy: 'recursive',
+      fileFormat: 'yaml',
       matchStrings: [
-        "uses: commitizen-tools/setup-cz@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+version: '[^'\\s]+'",
-        "\\n\\s+version: '(?<currentValue>[^'\\s]+)'",
+        'jobs.*.steps[$exists(env.ACTIONLINT_VERSION)].{ "currentValue": env.ACTIONLINT_VERSION }',
       ],
-      datasourceTemplate: 'pypi',
+      depNameTemplate: 'rhysd/actionlint',
+      datasourceTemplate: 'go',
+      packageNameTemplate: 'github.com/rhysd/actionlint',
+      extractVersionTemplate: '^v(?<version>.+)$',
+    },
+    {
+      customType: 'jsonata',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        'jobs.*.steps[$substringBefore(uses, "@") = "commitizen-tools/setup-cz"].{ "currentValue": with.version }',
+      ],
       depNameTemplate: 'commitizen-tools/commitizen',
+      datasourceTemplate: 'pypi',
       packageNameTemplate: 'commitizen',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
+      fileFormat: 'yaml',
       matchStrings: [
-        'github\\.com/rhysd/actionlint/cmd/actionlint@(?<currentDigest>[a-f0-9]{40}) # (?<currentValue>v[^\\s]+)',
+        'jobs.*.steps[$exists(env.JSON5_VERSION)].{ "currentValue": env.JSON5_VERSION }',
       ],
-      autoReplaceStringTemplate: 'github.com/rhysd/actionlint/cmd/actionlint@{{{newDigest}}} # {{{newValue}}}',
-      datasourceTemplate: 'github-tags',
-      depNameTemplate: 'rhysd/actionlint',
-      versioningTemplate: 'semver',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
-      ],
-      matchStrings: [
-        'renovate@(?<currentValue>\\S+)',
-      ],
-      datasourceTemplate: 'npm',
-      depNameTemplate: 'renovatebot/renovate',
-      packageNameTemplate: 'renovate',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
-      ],
-      matchStrings: [
-        'shellcheck-py==(?<currentValue>[^"\\s]+)',
-      ],
-      datasourceTemplate: 'pypi',
-      depNameTemplate: 'shellcheck-py/shellcheck-py',
-      packageNameTemplate: 'shellcheck-py',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
-      ],
-      matchStrings: [
-        'mvdan\\.cc/sh/v3/cmd/shfmt@(?<currentDigest>[a-f0-9]{40}) # (?<currentValue>v[^\\s]+)',
-      ],
-      autoReplaceStringTemplate: 'mvdan.cc/sh/v3/cmd/shfmt@{{{newDigest}}} # {{{newValue}}}',
-      datasourceTemplate: 'github-tags',
-      depNameTemplate: 'mvdan/shfmt',
-      packageNameTemplate: 'mvdan/sh',
-      versioningTemplate: 'semver',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
-      ],
-      matchStringsStrategy: 'recursive',
-      matchStrings: [
-        "uses: rvben/rumdl@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+version: '[^'\\s]+'",
-        "\\n\\s+version: '(?<currentValue>[^'\\s]+)'",
-      ],
-      datasourceTemplate: 'pypi',
-      depNameTemplate: 'rvben/rumdl',
-      packageNameTemplate: 'rumdl',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
-      ],
-      matchStringsStrategy: 'recursive',
-      matchStrings: [
-        "uses: lycheeverse/lychee-action@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+lycheeVersion: '[^'\\s]+'",
-        "\\n\\s+lycheeVersion: '(?<currentValue>[^'\\s]+)'",
-      ],
-      datasourceTemplate: 'github-releases',
-      depNameTemplate: 'lycheeverse/lychee',
-      extractVersionTemplate: '^lychee-(?<version>v\\d+\\.\\d+\\.\\d+)$',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
-      ],
-      matchStrings: [
-        'json5@(?<currentValue>\\S+)',
-      ],
-      datasourceTemplate: 'npm',
       depNameTemplate: 'json5/json5',
+      datasourceTemplate: 'npm',
       packageNameTemplate: 'json5',
     },
     {
-      customType: 'regex',
+      customType: 'jsonata',
       managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
+        '/^\\.github/workflows/.*\\.ya?ml$/',
       ],
-      matchStringsStrategy: 'recursive',
+      fileFormat: 'yaml',
       matchStrings: [
-        "uses: tombi-toml/setup-tombi@[a-f0-9]{40}[^\\n]*\\n(?:\\s+with:\\n(?:\\s+[^\\n]+\\n)*?)\\s+version: '[^'\\s]+'",
-        "\\n\\s+version: '(?<currentValue>[^'\\s]+)'",
+        'jobs.*.steps[$substringBefore(uses, "@") = "lycheeverse/lychee-action"].{ "currentValue": with.lycheeVersion }',
       ],
+      depNameTemplate: 'lycheeverse/lychee',
       datasourceTemplate: 'github-releases',
-      depNameTemplate: 'tombi-toml/tombi',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
-      ],
-      matchStrings: [
-        'yamllint==(?<currentValue>[^"\\s]+)',
-      ],
-      datasourceTemplate: 'pypi',
-      depNameTemplate: 'adrienverge/yamllint',
-      packageNameTemplate: 'yamllint',
-    },
-    {
-      customType: 'regex',
-      managerFilePatterns: [
-        '/^\\.github/workflows/ci\\.ya?ml$/',
-      ],
-      matchStrings: [
-        'ruff==(?<currentValue>[^"\\s]+)',
-      ],
-      datasourceTemplate: 'pypi',
-      depNameTemplate: 'astral-sh/ruff',
-      packageNameTemplate: 'ruff',
+      extractVersionTemplate: '^lychee-(?<version>v\\d+\\.\\d+\\.\\d+)$',
     },
     {
       customType: 'regex',
@@ -155,14 +79,114 @@
       matchStrings: [
         'user-ref: (?<currentDigest>[a-f0-9]{40}) # (?<currentValue>\\S+)',
       ],
-      autoReplaceStringTemplate: 'user-ref: {{{newDigest}}} # {{{currentValue}}}',
-      datasourceTemplate: 'git-refs',
       depNameTemplate: 'ut-issl/personal-nix-config-template',
+      datasourceTemplate: 'git-refs',
       packageNameTemplate: 'https://github.com/ut-issl/personal-nix-config-template',
+      autoReplaceStringTemplate: 'user-ref: {{{newDigest}}} # {{{currentValue}}}',
+    },
+    {
+      customType: 'jsonata',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        'jobs.*.steps[$exists(env.RENOVATE_VERSION)].{ "currentValue": env.RENOVATE_VERSION }',
+      ],
+      depNameTemplate: 'renovatebot/renovate',
+      datasourceTemplate: 'npm',
+      packageNameTemplate: 'renovate',
+    },
+    {
+      customType: 'jsonata',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        'jobs.*.steps[$exists(env.RUFF_VERSION)].{ "currentValue": env.RUFF_VERSION }',
+      ],
+      depNameTemplate: 'astral-sh/ruff',
+      datasourceTemplate: 'pypi',
+      packageNameTemplate: 'ruff',
+    },
+    {
+      customType: 'jsonata',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        'jobs.*.steps[$substringBefore(uses, "@") = "rvben/rumdl"].{ "currentValue": with.version }',
+      ],
+      depNameTemplate: 'rvben/rumdl',
+      datasourceTemplate: 'pypi',
+      packageNameTemplate: 'rumdl',
+    },
+    {
+      customType: 'jsonata',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        'jobs.*.steps[$exists(env.SHELLCHECK_PY_VERSION)].{ "currentValue": env.SHELLCHECK_PY_VERSION }',
+      ],
+      depNameTemplate: 'shellcheck-py/shellcheck-py',
+      datasourceTemplate: 'pypi',
+      packageNameTemplate: 'shellcheck-py',
+    },
+    {
+      customType: 'jsonata',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        'jobs.*.steps[$exists(env.SHFMT_VERSION)].{ "currentValue": env.SHFMT_VERSION }',
+      ],
+      depNameTemplate: 'mvdan/sh',
+      datasourceTemplate: 'go',
+      packageNameTemplate: 'mvdan.cc/sh/v3',
+      extractVersionTemplate: '^v(?<version>.+)$',
+    },
+    {
+      customType: 'jsonata',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        'jobs.*.steps[$substringBefore(uses, "@") = "tombi-toml/setup-tombi"].{ "currentValue": with.version }',
+      ],
+      depNameTemplate: 'tombi-toml/tombi',
+      datasourceTemplate: 'github-releases',
+    },
+    {
+      customType: 'jsonata',
+      managerFilePatterns: [
+        '/^\\.github/workflows/.*\\.ya?ml$/',
+      ],
+      fileFormat: 'yaml',
+      matchStrings: [
+        'jobs.*.steps[$exists(env.YAMLLINT_VERSION)].{ "currentValue": env.YAMLLINT_VERSION }',
+      ],
+      depNameTemplate: 'adrienverge/yamllint',
+      datasourceTemplate: 'pypi',
+      packageNameTemplate: 'yamllint',
     },
   ],
+  lockFileMaintenance: {
+    description: 'Skip the release-age gate, as nix flake update looks up no releases, so its updates carry no release timestamp and would otherwise keep the stability check pending forever',
+    minimumReleaseAge: '0 days',
+    addLabels: [
+      'update::patch',
+    ],
+    automerge: true,
+  },
   packageRules: [
     {
+      description: 'Follow full semver release tags of GitHub Actions references, as a moving major tag such as v7 can be picked ahead of its release while minimumReleaseAge holds the release back, leaving a pin comment like # v7',
       matchManagers: [
         'github-actions',
       ],
@@ -172,6 +196,41 @@
       allowedVersions: '/^v?\\d+\\.\\d+\\.\\d+$/',
     },
     {
+      matchFileNames: [
+        '.github/workflows/**',
+        '.pre-commit-config.yaml',
+      ],
+      labels: [
+        'automated',
+        'dev-dependencies',
+      ],
+    },
+    {
+      matchManagers: [
+        'pre-commit',
+      ],
+      matchUpdateTypes: [
+        'patch',
+      ],
+      automerge: true,
+    },
+    {
+      matchFileNames: [
+        '.github/workflows/**',
+      ],
+      matchUpdateTypes: [
+        'patch',
+      ],
+      automerge: true,
+    },
+    {
+      matchDepNames: [
+        'commitizen-tools/commitizen',
+      ],
+      groupName: 'commitizen',
+    },
+    {
+      description: 'Compare lychee hook versions by their lychee-vX.Y.Z tags, as the default semver-coerced versioning takes them for unstable and never offers a version update',
       matchManagers: [
         'pre-commit',
       ],
@@ -182,22 +241,35 @@
     },
     {
       matchDepNames: [
-        'commitizen-tools/commitizen',
-      ],
-      groupName: 'commitizen',
-    },
-    {
-      matchDepNames: [
         'lycheeverse/lychee',
       ],
       groupName: 'lychee',
     },
     {
+      description: 'Skip the release-age gate for the configuration template commit that the tests check out, as it follows a moving branch whose new commits would otherwise wait behind a pending stability check',
       matchDepNames: [
-        'rvben/rumdl',
-        'rvben/rumdl-pre-commit',
+        'ut-issl/personal-nix-config-template',
       ],
-      groupName: 'rumdl',
+      minimumReleaseAge: '0 days',
+      automerge: true,
+    },
+    {
+      description: 'Update the Renovate that validates this config only weekly, as it releases several times a day',
+      extends: [
+        'schedule:weekly',
+      ],
+      matchDepNames: [
+        'renovatebot/renovate',
+      ],
+    },
+    {
+      matchDepNames: [
+        'renovatebot/renovate',
+      ],
+      matchUpdateTypes: [
+        'minor',
+      ],
+      automerge: true,
     },
     {
       matchDepNames: [
@@ -205,6 +277,13 @@
         'astral-sh/ruff-pre-commit',
       ],
       groupName: 'ruff',
+    },
+    {
+      matchDepNames: [
+        'rvben/rumdl',
+        'rvben/rumdl-pre-commit',
+      ],
+      groupName: 'rumdl',
     },
     {
       description: 'Compare ShellCheck versions as PEP 440, as Renovate would otherwise take its four-part hook tags such as v0.11.0.1-1 for prereleases and never offer them',
@@ -223,7 +302,7 @@
     },
     {
       matchDepNames: [
-        'mvdan/shfmt',
+        'mvdan/sh',
         'scop/pre-commit-shfmt',
       ],
       groupName: 'shfmt',
@@ -249,6 +328,7 @@
       groupName: 'yamllint',
     },
     {
+      description: 'Look up the zizmor image on GitHub Releases, as GHCR gives no release timestamps for minimumReleaseAge; hold it one day longer than zizmor-action, as the pinned action rejects zizmor versions released after it and an action release usually follows each zizmor release within a day; and skip the digest pinning from config:best-practices, which would put a commit SHA into the version input',
       matchDepNames: [
         'ghcr.io/zizmorcore/zizmor',
       ],
@@ -257,85 +337,5 @@
       minimumReleaseAge: '4 days',
       pinDigests: false,
     },
-    {
-      matchFileNames: [
-        '.github/workflows/**',
-        '.pre-commit-config.yaml',
-      ],
-      labels: [
-        'automated',
-        'dev-dependencies',
-      ],
-    },
-    {
-      matchFileNames: [
-        '.github/workflows/**',
-      ],
-      matchUpdateTypes: [
-        'patch',
-      ],
-      automerge: true,
-    },
-    {
-      matchDepNames: [
-        'renovatebot/renovate',
-      ],
-      matchFileNames: [
-        '.github/workflows/ci.yaml',
-        '.github/workflows/ci.yml',
-      ],
-      extends: [
-        'schedule:weekly',
-      ],
-    },
-    {
-      matchDepNames: [
-        'renovatebot/renovate',
-      ],
-      matchFileNames: [
-        '.github/workflows/ci.yaml',
-        '.github/workflows/ci.yml',
-      ],
-      matchUpdateTypes: [
-        'minor',
-      ],
-      automerge: true,
-    },
-    {
-      matchManagers: [
-        'pre-commit',
-      ],
-      matchUpdateTypes: [
-        'patch',
-      ],
-      automerge: true,
-    },
-    {
-      matchDepNames: [
-        'ut-issl/personal-nix-config-template',
-      ],
-      minimumReleaseAge: '0 days',
-      automerge: true,
-    },
-  ],
-  'git-submodules': {
-    enabled: true,
-  },
-  'pre-commit': {
-    enabled: true,
-  },
-  nix: {
-    enabled: true,
-  },
-  lockFileMaintenance: {
-    automerge: true,
-    minimumReleaseAge: '0 days',
-    addLabels: [
-      'update::patch',
-    ],
-  },
-  labels: [
-    'automated',
-    'dependencies',
   ],
 }
