@@ -543,7 +543,7 @@ main() {
 
   current_system="$(
     nix --accept-flake-config --extra-experimental-features 'nix-command flakes' \
-      eval --impure --raw --expr builtins.currentSystem
+      eval --raw --impure --expr builtins.currentSystem
   )"
 
   ensure_home_manager_profile_dir

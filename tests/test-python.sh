@@ -14,14 +14,14 @@ source "${common_dir}/tests/lib.sh"
 
 _is_python_ge_3_13() {
   local py_version major minor
-  py_version="$(uv run --no-project --python 3 python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+  py_version="$(uv run --no-project --python=3 python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
   IFS=. read -r major minor <<<"${py_version}"
   [[ ${major} -gt 3 || (${major} -eq 3 && ${minor} -ge 13) ]]
 }
 
 _is_libedit() {
   local result
-  result="$(uv run --no-project --python 3 python -c '
+  result="$(uv run --no-project --python=3 python -c '
 import sys
 try:
     import readline
@@ -36,7 +36,7 @@ else:
 }
 
 _python_exe() {
-  uv run --no-project --python 3 python -c 'import sys; print(sys.executable)'
+  uv run --no-project --python=3 python -c 'import sys; print(sys.executable)'
 }
 
 assert_uv_installation() {
@@ -63,7 +63,7 @@ assert_python_startup_is_loaded() {
       PYTHONSTARTUP="${pythonrc_path}" \
       PYTHON_HISTORY="${marker_dir}/history" \
       TERM=dumb \
-      uv run --no-project --python 3 python -i
+      uv run --no-project --python=3 python -i
 
   [[ -f "${marker_dir}/history" || -f "${marker_dir}/history.editline" ]]
 }
@@ -82,7 +82,7 @@ assert_python_startup_pyrepl_history() {
     PYTHONSTARTUP="${pythonrc_path}" \
     PYTHON_HISTORY="${hist_base}/history" \
     TERM=xterm \
-    uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
+    uv run --no-project --python=3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
   [[ -f "${hist_base}/history" ]]
   grep -q 'exit()' "${hist_base}/history"
@@ -111,7 +111,7 @@ assert_python_startup_basic_repl_libedit_history() {
     PYTHON_HISTORY="${hist_base}/history" \
     PYTHON_BASIC_REPL=1 \
     TERM=xterm \
-    uv run --no-project --python 3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
+    uv run --no-project --python=3 python "${common_dir}/tests/pty-driver.py" "${python_exe}"
 
   [[ -f "${hist_base}/history.editline" ]]
   grep -q 'exit()' "${hist_base}/history.editline"

@@ -134,7 +134,7 @@ load_bootstrap_host() {
   while IFS= read -r bootstrap_url; do
     [[ -n ${bootstrap_url} ]] || continue
 
-    if curl -fsSL "${bootstrap_url}" -o "${temporary_bootstrap}"; then
+    if curl --fail --location --output "${temporary_bootstrap}" --show-error --silent "${bootstrap_url}"; then
       # shellcheck source=/dev/null
       . "${temporary_bootstrap}"
       rm -f "${temporary_bootstrap}"
@@ -212,7 +212,7 @@ clone_repo() {
     exit 1
   fi
 
-  nix_git clone --branch "${repo_ref}" --single-branch "${repo_url}" "${install_dir}"
+  nix_git clone --branch="${repo_ref}" --single-branch "${repo_url}" "${install_dir}"
 }
 
 run_install() {

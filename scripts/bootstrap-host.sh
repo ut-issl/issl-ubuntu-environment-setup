@@ -118,7 +118,7 @@ start_nix_daemon_without_systemd() {
     return
   fi
 
-  if pgrep -x nix-daemon >/dev/null 2>&1; then
+  if pgrep --exact nix-daemon >/dev/null 2>&1; then
     return
   fi
 
@@ -131,15 +131,15 @@ start_nix_daemon_without_systemd() {
     setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   elif command -v sudo >/dev/null 2>&1; then
     if [[ -t 0 ]]; then
-      if ! sudo -v; then
+      if ! sudo --validate; then
         echo 'warning: failed to authenticate via sudo. Nix commands may fail.' >&2
         return
       fi
-    elif ! sudo -n true >/dev/null 2>&1; then
+    elif ! sudo --non-interactive true >/dev/null 2>&1; then
       echo 'warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode).' >&2
       return
     fi
-    sudo -n setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+    sudo --non-interactive setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   else
     echo 'warning: cannot start nix-daemon automatically (sudo is unavailable in a no-systemd environment).' >&2
     return
@@ -241,7 +241,7 @@ maybe_register_login_shell() {
     return
   fi
 
-  if sudo chsh -s "${link}" "$(id -un)"; then
+  if sudo chsh --shell="${link}" "$(id -un)"; then
     echo "Login shell set to ${link}. This will apply to new login sessions."
   else
     echo "warning: failed to run chsh. You can retry manually with: sudo chsh -s ${link} $(id -un)" >&2
@@ -429,12 +429,12 @@ install_docker_engine() {
   fi
 
   sudo apt-get update
-  sudo apt-get install -y ca-certificates curl gnupg
+  sudo apt-get --yes install ca-certificates curl gnupg
   require_command curl
   require_command gpg
   sudo install -m 0755 -d "${apt_keyrings_dir}"
 
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
+  curl --fail --location --show-error --silent https://download.docker.com/linux/ubuntu/gpg |
     gpg --dearmor |
     sudo tee "${apt_keyrings_dir}/docker.gpg" >/dev/null
   sudo chmod a+r "${apt_keyrings_dir}/docker.gpg"
@@ -444,11 +444,11 @@ install_docker_engine() {
     sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   sudo apt-get update
-  sudo apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io pigz
+  sudo apt-get --no-install-recommends --yes install docker-ce docker-ce-cli containerd.io pigz
 
   if should_add_user_to_docker_group; then
     docker_user="$(target_docker_user)"
-    sudo usermod -aG docker "${docker_user}"
+    sudo usermod --append --groups=docker "${docker_user}"
     echo "Added ${docker_user} to the docker group."
     echo "Log out and back in, or run 'newgrp docker', before using Docker without sudo."
   fi
