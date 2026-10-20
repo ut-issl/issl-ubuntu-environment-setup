@@ -112,10 +112,10 @@ If not, create a new `tests/test-<tool>.sh` following the existing pattern:
 1. Copy the header from the closest existing test: `set -Eeuo pipefail`, the required environment variable guards
    (`HOME_DIR:?` always; `CONFIG_DIR:?` when inspecting deployed config or user-managed file wiring;
    `STATE_DIR:?` when inspecting what a module deploys under `~/.local/state/issl/`), the `COMMON_DIR` fallback, and `nix_profile_bin="${home_dir}/.nix-profile/bin"`.
-   Then source `tests/lib.sh` for the `run_assert` helper
+   Then source `tests/lib.sh` for the `run_test` helper
    and the failure-reporting ERR trap (which needs the `-E` in `set -Eeuo pipefail`).
-2. Define assertion functions (e.g. `assert_<tool>_installation`, `assert_<tool>_config`).
-3. Call them via `run_assert` in a `main` function.
+2. Define test functions (e.g. `test_<tool>_installation`, `test_<tool>_config`).
+3. Call them via `run_test` in a `main` function.
 4. Make the script executable.
 5. Register the new test script in `tests/run.sh` by adding its name to the loop list.
 

@@ -13,8 +13,8 @@ _issl_test_failed() {
 }
 trap _issl_test_failed ERR
 
-# Run a named assertion, logging it so progress is visible in the test output.
-run_assert() {
+# Run a named test, logging it so progress is visible in the test output.
+run_test() {
   printf -- '-- %s\n' "$1"
   "$@"
 }

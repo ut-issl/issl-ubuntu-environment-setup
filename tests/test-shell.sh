@@ -14,14 +14,14 @@ issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_shared_shell_files() {
+test_shared_shell_files() {
   cmp "${common_dir}/home-modules/shell/env.sh" "${config_dir}/issl/shell/env.sh"
   cmp "${common_dir}/home-modules/shell/rc.sh" "${config_dir}/issl/shell/rc.sh"
   cmp "${common_dir}/home-modules/shell/dircolors" "${config_dir}/issl/shell/.dircolors"
   cmp "${common_dir}/home-modules/bash/bashrc.bash" "${config_dir}/issl/bash/.bashrc"
 }
 
-assert_shell_env_can_be_sourced() {
+test_shell_env_can_be_sourced() {
   env -i \
     HOME="${home_dir}" \
     SHELL_ENV_PATH="${config_dir}/issl/shell/env.sh" \
@@ -38,19 +38,19 @@ test "${PYTHON_HISTORY}" = "${XDG_STATE_HOME:-$HOME/.local/state}/python/python_
 EOF
 }
 
-assert_bash_startup_files() {
+test_bash_startup_files() {
   [[ -f "${home_dir}/.profile" ]]
   [[ -f "${home_dir}/.bash_profile" ]]
   [[ -f "${home_dir}/.bashrc" ]]
 }
 
-assert_profile_not_shadowed_by_bash_profile() {
+test_profile_not_shadowed_by_bash_profile() {
   # Regression guard: ~/.bash_profile must source ~/.profile so it does not hide it.
   # shellcheck disable=SC2016  # $HOME is matched literally in the file content, not expanded.
   grep -Eq '(^|[[:space:]])(\.|source)[[:space:]]+"?(\$HOME|~)/\.profile"?' "${home_dir}/.bash_profile"
 }
 
-assert_bash_startup_is_loaded() {
+test_bash_startup_is_loaded() {
   # Drive a login + interactive bash and confirm the shared startup files ran (observed through their load guards)
   # and that env.sh put the Nix profile bin on PATH by itself, without the Nix installer's system-wide shell hooks.
   # shellcheck disable=SC2016  # ${...} inside the single-quoted -c argument expand in the subshell.
@@ -68,7 +68,7 @@ assert_bash_startup_is_loaded() {
     '
 }
 
-assert_shared_shell_tools() {
+test_shared_shell_tools() {
   [[ -f "${nix_profile_share}/bash-completion/bash_completion" ]]
 
   [[ -x "${nix_profile_bin}/colordiff" ]]
@@ -84,36 +84,36 @@ assert_shared_shell_tools() {
   ls --classify=auto -d . >/dev/null
 }
 
-assert_shellcheck_installation() {
+test_shellcheck_installation() {
   [[ -x "${nix_profile_bin}/shellcheck" ]]
   [[ "$(command -v shellcheck)" == "${nix_profile_bin}/shellcheck" ]]
   shellcheck --version
 }
 
-assert_shfmt_installation() {
+test_shfmt_installation() {
   [[ -x "${nix_profile_bin}/shfmt" ]]
   [[ "$(command -v shfmt)" == "${nix_profile_bin}/shfmt" ]]
   shfmt --version
 }
 
-assert_zsh_enabled() {
+test_zsh_enabled() {
   [[ -x "${nix_profile_bin}/zsh" ]]
   [[ "$(command -v zsh)" == "${nix_profile_bin}/zsh" ]]
   zsh --version
 }
 
-assert_shared_zsh_files() {
+test_shared_zsh_files() {
   cmp "${common_dir}/home-modules/zsh/zprofile.zsh" "${config_dir}/issl/zsh/.zprofile"
   cmp "${common_dir}/home-modules/zsh/zshrc.zsh" "${config_dir}/issl/zsh/.zshrc"
 }
 
-assert_zsh_startup_files() {
+test_zsh_startup_files() {
   [[ -f "${home_dir}/.zshenv" ]]
   [[ -f "${default_zdotdir}/.zprofile" ]]
   [[ -f "${default_zdotdir}/.zshrc" ]]
 }
 
-assert_zsh_startup_is_loaded() {
+test_zsh_startup_is_loaded() {
   # shellcheck disable=SC2016  # ${...} inside the single-quoted -c argument expand in the subshell.
   env -i \
     HOME="${home_dir}" \
@@ -154,20 +154,20 @@ test "${SHELL}" = "${EXPECTED_SHELL}"
 EOF
 }
 
-assert_login_shell_is_managed_for_zsh() {
+test_login_shell_is_managed_for_zsh() {
   assert_login_shell_link_targets "${nix_profile_bin}/zsh"
   assert_shell_variable_is_corrected bash "${home_dir}/.nix-profile/bin/zsh"
   assert_shell_variable_is_corrected "${nix_profile_bin}/zsh" "${home_dir}/.nix-profile/bin/zsh"
   [[ -x "${nix_profile_bin}/issl-login-shell-setup" ]]
 }
 
-assert_login_shell_is_managed_for_bash() {
+test_login_shell_is_managed_for_bash() {
   assert_login_shell_link_targets /bin/bash
   assert_shell_variable_is_corrected bash /bin/bash
   [[ ! -e "${nix_profile_bin}/issl-login-shell-setup" ]]
 }
 
-assert_zsh_disabled() {
+test_zsh_disabled() {
   [[ ! -x "${nix_profile_bin}/zsh" ]]
   [[ ! -e "${home_dir}/.zshenv" ]]
   [[ ! -e "${default_zdotdir}/.zprofile" ]]
@@ -175,24 +175,24 @@ assert_zsh_disabled() {
 }
 
 main() {
-  run_assert assert_shared_shell_files
-  run_assert assert_shell_env_can_be_sourced
-  run_assert assert_bash_startup_files
-  run_assert assert_bash_startup_is_loaded
-  run_assert assert_profile_not_shadowed_by_bash_profile
-  run_assert assert_shared_shell_tools
-  run_assert assert_shellcheck_installation
-  run_assert assert_shfmt_installation
+  run_test test_shared_shell_files
+  run_test test_shell_env_can_be_sourced
+  run_test test_bash_startup_files
+  run_test test_bash_startup_is_loaded
+  run_test test_profile_not_shadowed_by_bash_profile
+  run_test test_shared_shell_tools
+  run_test test_shellcheck_installation
+  run_test test_shfmt_installation
 
   if [[ ${issl_enable_zsh} == '1' ]]; then
-    run_assert assert_zsh_enabled
-    run_assert assert_shared_zsh_files
-    run_assert assert_zsh_startup_files
-    run_assert assert_zsh_startup_is_loaded
-    run_assert assert_login_shell_is_managed_for_zsh
+    run_test test_zsh_enabled
+    run_test test_shared_zsh_files
+    run_test test_zsh_startup_files
+    run_test test_zsh_startup_is_loaded
+    run_test test_login_shell_is_managed_for_zsh
   else
-    run_assert assert_zsh_disabled
-    run_assert assert_login_shell_is_managed_for_bash
+    run_test test_zsh_disabled
+    run_test test_login_shell_is_managed_for_bash
   fi
 }
 

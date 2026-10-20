@@ -11,60 +11,60 @@ issl_nix_config_path="${config_dir}/issl/nix/nix.conf"
 # shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
-assert_nix_installation() {
+test_nix_installation() {
   command -v nix >/dev/null
   nix --version
 }
 
-assert_shared_nix_config() {
+test_shared_nix_config() {
   cmp "${common_dir}/home-modules/nix/nix.conf" "${issl_nix_config_path}"
 }
 
-assert_nix_conf_include() {
+test_nix_conf_include() {
   [[ -f ${nix_config_path} ]]
   grep -Fq "!include ${issl_nix_config_path}" "${nix_config_path}"
 }
 
-assert_nix_command_available_without_extra_flags() {
+test_nix_command_available_without_extra_flags() {
   env \
     HOME="${home_dir}" \
     XDG_CONFIG_HOME="${config_dir}" \
     nix profile list >/dev/null
 }
 
-assert_home_manager_installation() {
+test_home_manager_installation() {
   [[ -x "${nix_profile_bin}/home-manager" ]]
   [[ "$(command -v home-manager)" == "${nix_profile_bin}/home-manager" ]]
   home-manager --version
 }
 
-assert_nixfmt_installation() {
+test_nixfmt_installation() {
   [[ -x "${nix_profile_bin}/nixfmt" ]]
   [[ "$(command -v nixfmt)" == "${nix_profile_bin}/nixfmt" ]]
   nixfmt --version
 }
 
-assert_statix_installation() {
+test_statix_installation() {
   [[ -x "${nix_profile_bin}/statix" ]]
   [[ "$(command -v statix)" == "${nix_profile_bin}/statix" ]]
   statix --help
 }
 
-assert_deadnix_installation() {
+test_deadnix_installation() {
   [[ -x "${nix_profile_bin}/deadnix" ]]
   [[ "$(command -v deadnix)" == "${nix_profile_bin}/deadnix" ]]
   deadnix --version
 }
 
 main() {
-  run_assert assert_nix_installation
-  run_assert assert_shared_nix_config
-  run_assert assert_nix_conf_include
-  run_assert assert_nix_command_available_without_extra_flags
-  run_assert assert_home_manager_installation
-  run_assert assert_nixfmt_installation
-  run_assert assert_statix_installation
-  run_assert assert_deadnix_installation
+  run_test test_nix_installation
+  run_test test_shared_nix_config
+  run_test test_nix_conf_include
+  run_test test_nix_command_available_without_extra_flags
+  run_test test_home_manager_installation
+  run_test test_nixfmt_installation
+  run_test test_statix_installation
+  run_test test_deadnix_installation
 }
 
 main "$@"
