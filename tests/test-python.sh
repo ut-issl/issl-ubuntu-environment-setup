@@ -16,7 +16,7 @@ _is_python_ge_3_13() {
   local py_version major minor
   py_version="$(uv run --no-project --python 3 python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
   IFS=. read -r major minor <<<"${py_version}"
-  [ "${major}" -gt 3 ] || { [ "${major}" -eq 3 ] && [ "${minor}" -ge 13 ]; }
+  [[ ${major} -gt 3 || (${major} -eq 3 && ${minor} -ge 13) ]]
 }
 
 _is_libedit() {
@@ -32,7 +32,7 @@ if sys.version_info >= (3, 13):
 else:
     print("yes" if "libedit" in getattr(readline, "__doc__", "") else "no")
 ')"
-  [ "${result}" = "yes" ]
+  [[ ${result} == "yes" ]]
 }
 
 _python_exe() {

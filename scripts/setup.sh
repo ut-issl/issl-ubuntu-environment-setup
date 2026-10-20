@@ -31,7 +31,7 @@ github_repository_path() {
   esac
 
   path="${path%.git}"
-  if [ "${path}" = "${path#*/}" ]; then
+  if [[ ${path} == "${path#*/}" ]]; then
     echo "unsupported GitHub repository URL for bootstrap download: ${repo_url}" >&2
     exit 1
   fi
@@ -40,7 +40,7 @@ github_repository_path() {
   repo="${path#*/}"
   repo="${repo%%/*}"
 
-  if [ -z "${owner}" ] || [ -z "${repo}" ]; then
+  if [[ -z ${owner} || -z ${repo} ]]; then
     echo "unsupported GitHub repository URL for bootstrap download: ${repo_url}" >&2
     exit 1
   fi
@@ -60,7 +60,7 @@ bootstrap_repository_path() {
 }
 
 bootstrap_ref() {
-  if [ -n "${BOOTSTRAP_REF-}" ]; then
+  if [[ -n ${BOOTSTRAP_REF-} ]]; then
     printf '%s\n' "${BOOTSTRAP_REF}"
     return
   fi
@@ -115,7 +115,7 @@ load_bootstrap_host() {
 
   script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-  if [ -f "${script_dir}/bootstrap-host.sh" ]; then
+  if [[ -f "${script_dir}/bootstrap-host.sh" ]]; then
     # shellcheck source=scripts/bootstrap-host.sh
     . "${script_dir}/bootstrap-host.sh"
     return
@@ -132,7 +132,7 @@ load_bootstrap_host() {
   # shellcheck disable=SC2064
   trap "rm -f '${temporary_bootstrap}'" EXIT
   while IFS= read -r bootstrap_url; do
-    [ -n "${bootstrap_url}" ] || continue
+    [[ -n ${bootstrap_url} ]] || continue
 
     if curl -fsSL "${bootstrap_url}" -o "${temporary_bootstrap}"; then
       # shellcheck source=/dev/null
@@ -207,7 +207,7 @@ ensure_repo_access() {
 }
 
 clone_repo() {
-  if [ -e "${install_dir}" ]; then
+  if [[ -e ${install_dir} ]]; then
     echo "install destination already exists: ${install_dir}" >&2
     exit 1
   fi
