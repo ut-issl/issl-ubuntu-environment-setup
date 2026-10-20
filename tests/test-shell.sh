@@ -158,14 +158,14 @@ test_login_shell_is_managed_for_zsh() {
 test_login_shell_is_managed_for_bash() {
   assert_login_shell_link_targets /bin/bash
   assert_shell_variable_is_corrected bash /bin/bash
-  [[ ! -e "${nix_profile_bin}/issl-login-shell-setup" ]]
+  assert_not_exists "${nix_profile_bin}/issl-login-shell-setup"
 }
 
 test_zsh_disabled() {
-  [[ ! -x "${nix_profile_bin}/zsh" ]]
-  [[ ! -e "${home_dir}/.zshenv" ]]
-  [[ ! -e "${default_zdotdir}/.zprofile" ]]
-  [[ ! -e "${default_zdotdir}/.zshrc" ]]
+  assert_not_exists "${nix_profile_bin}/zsh"
+  assert_not_exists "${home_dir}/.zshenv"
+  assert_not_exists "${default_zdotdir}/.zprofile"
+  assert_not_exists "${default_zdotdir}/.zshrc"
 }
 
 main() {

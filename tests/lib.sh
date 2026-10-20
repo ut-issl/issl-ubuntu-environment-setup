@@ -53,6 +53,13 @@ assert_symlink() {
   }
 }
 
+assert_not_exists() {
+  [[ ! -e $1 ]] || {
+    printf '  unexpectedly exists: %s\n' "$1" >&2
+    return 1
+  }
+}
+
 # Assert that the executable at a path is the command of the same name found on PATH.
 assert_command_path() {
   local path="$1"

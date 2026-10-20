@@ -87,7 +87,7 @@ test_python_startup_pyrepl_history() {
   grep -q 'exit()' "${hist_base}/history"
 
   if _is_libedit; then
-    [[ ! -f "${hist_base}/history.editline" ]]
+    assert_not_exists "${hist_base}/history.editline"
   fi
 }
 
@@ -114,7 +114,7 @@ test_python_startup_basic_repl_libedit_history() {
 
   assert_file "${hist_base}/history.editline"
   grep -q 'exit()' "${hist_base}/history.editline"
-  [[ ! -f "${hist_base}/history" ]]
+  assert_not_exists "${hist_base}/history"
 }
 
 main() {
