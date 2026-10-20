@@ -13,7 +13,7 @@ assert_xdg_data_dirs_are_exported() {
     HOME="${home_dir}" \
     SHELL_ENV_PATH="${config_dir}/issl/shell/env.sh" \
     XDG_CONFIG_HOME="${config_dir}" \
-    PATH="/usr/bin:/bin" \
+    PATH='/usr/bin:/bin' \
     bash <<'EOF'
 . "${SHELL_ENV_PATH}"
 case ":${XDG_DATA_DIRS}:" in

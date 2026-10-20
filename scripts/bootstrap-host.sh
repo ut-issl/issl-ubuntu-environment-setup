@@ -63,14 +63,14 @@ source_nix() {
     # Official multi-user installs expose Nix through this profile script.
     # shellcheck source=/dev/null
     . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-  elif [[ -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
+  elif [[ -f "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]]; then
     # Fallback for single-user installs.
     # shellcheck source=/dev/null
-    . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+    . "${HOME}/.nix-profile/etc/profile.d/nix.sh"
   fi
 
   if ! command -v nix >/dev/null 2>&1; then
-    echo "nix is installed but was not added to PATH in the current shell." >&2
+    echo 'nix is installed but was not added to PATH in the current shell.' >&2
     exit 1
   fi
 }
@@ -81,7 +81,7 @@ ensure_nix() {
   fi
 
   if [[ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ||
-    -f "$HOME/.nix-profile/etc/profile.d/nix.sh" ]]; then
+    -f "${HOME}/.nix-profile/etc/profile.d/nix.sh" ]]; then
     source_nix
     return
   fi
@@ -104,7 +104,7 @@ resolve_nix_daemon_path() {
   fi
 
   if [[ -x /nix/var/nix/profiles/default/bin/nix-daemon ]]; then
-    printf '%s\n' "/nix/var/nix/profiles/default/bin/nix-daemon"
+    printf '%s\n' '/nix/var/nix/profiles/default/bin/nix-daemon'
     return 0
   fi
 
@@ -112,51 +112,51 @@ resolve_nix_daemon_path() {
 }
 
 start_nix_daemon_without_systemd() {
-  local nix_daemon_path=""
+  local nix_daemon_path=''
 
   if is_systemd_available; then
     return
   fi
 
-  if pgrep -x nix-daemon >/dev/null 2>&1; then
+  if pgrep --exact nix-daemon >/dev/null 2>&1; then
     return
   fi
 
   if ! nix_daemon_path="$(resolve_nix_daemon_path)"; then
-    echo "warning: nix-daemon binary was not found. Nix commands may fail in no-systemd environments." >&2
+    echo 'warning: nix-daemon binary was not found. Nix commands may fail in no-systemd environments.' >&2
     return
   fi
 
-  if [[ "$(id -u)" == "0" ]]; then
+  if [[ "$(id -u)" == '0' ]]; then
     setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   elif command -v sudo >/dev/null 2>&1; then
     if [[ -t 0 ]]; then
-      if ! sudo -v; then
-        echo "warning: failed to authenticate via sudo. Nix commands may fail." >&2
+      if ! sudo --validate; then
+        echo 'warning: failed to authenticate via sudo. Nix commands may fail.' >&2
         return
       fi
-    elif ! sudo -n true >/dev/null 2>&1; then
-      echo "warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode)." >&2
+    elif ! sudo --non-interactive true >/dev/null 2>&1; then
+      echo 'warning: cannot start nix-daemon automatically (sudo requires a password in non-interactive mode).' >&2
       return
     fi
-    sudo -n setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
+    sudo --non-interactive setsid "${nix_daemon_path}" --daemon >/dev/null 2>&1 &
   else
-    echo "warning: cannot start nix-daemon automatically (sudo is unavailable in a no-systemd environment)." >&2
+    echo 'warning: cannot start nix-daemon automatically (sudo is unavailable in a no-systemd environment).' >&2
     return
   fi
 
   for _ in {1..10}; do
-    if nix --extra-experimental-features "nix-command flakes" store info >/dev/null 2>&1; then
+    if nix --extra-experimental-features 'nix-command flakes' store info >/dev/null 2>&1; then
       return
     fi
     sleep 1
   done
 
-  echo "warning: attempted to start nix-daemon, but it is not responding yet. Nix commands may fail." >&2
+  echo 'warning: attempted to start nix-daemon, but it is not responding yet. Nix commands may fail.' >&2
 }
 
 issl_login_shell_link() {
-  printf '%s\n' "${XDG_STATE_HOME:-$HOME/.local/state}/issl/login-shell"
+  printf '%s\n' "${XDG_STATE_HOME:-${HOME}/.local/state}/issl/login-shell"
 }
 
 is_executable_file() {
@@ -209,13 +209,13 @@ ensure_shell_listed_in_etc_shells() {
     return 1
   fi
 
-  echo "warning: /etc/shells is not writable and sudo is unavailable. Skipping login shell registration." >&2
+  echo 'warning: /etc/shells is not writable and sudo is unavailable. Skipping login shell registration.' >&2
   return 1
 }
 
 maybe_register_login_shell() {
-  local link=""
-  local active_login_shell=""
+  local link=''
+  local active_login_shell=''
 
   link="$(issl_login_shell_link)"
   active_login_shell="$(current_login_shell || true)"
@@ -241,7 +241,7 @@ maybe_register_login_shell() {
     return
   fi
 
-  if sudo chsh -s "${link}" "$(id -un)"; then
+  if sudo chsh --shell="${link}" "$(id -un)"; then
     echo "Login shell set to ${link}. This will apply to new login sessions."
   else
     echo "warning: failed to run chsh. You can retry manually with: sudo chsh -s ${link} $(id -un)" >&2
@@ -249,18 +249,18 @@ maybe_register_login_shell() {
 }
 
 nix_with_openssh() {
-  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#openssh_gssapi --command "$@"
+  nix --extra-experimental-features 'nix-command flakes' shell nixpkgs#openssh_gssapi --command "$@"
 }
 
 has_github_ssh_auth() {
   local ssh_output
   local ssh_status
 
-  ssh_output="$(nix_with_openssh ssh -o ConnectTimeout=10 -T git@github.com 2>&1)" || ssh_status=$?
+  ssh_output="$(nix_with_openssh ssh -o ConnectTimeout=10 -T git@github.com 2>&1)" || ssh_status="$?"
   ssh_status="${ssh_status:-0}"
 
   if [[ ${ssh_status} -eq 1 ]] &&
-    printf '%s\n' "${ssh_output}" | grep -Fq "successfully authenticated"; then
+    printf '%s\n' "${ssh_output}" | grep -Fq 'successfully authenticated'; then
     return 0
   fi
 
@@ -277,11 +277,11 @@ github_ssh_key_exists() {
 }
 
 create_github_ssh_key() {
-  local key_comment=""
+  local key_comment=''
 
   ensure_ssh_directory
 
-  if ! read -r -p "Enter an email/comment for the GitHub SSH key (optional): " key_comment; then
+  if ! read -r -p 'Enter an email/comment for the GitHub SSH key (optional): ' key_comment; then
     echo
   fi
 
@@ -301,36 +301,36 @@ ensure_github_ssh_config() {
   fi
 
   {
-    echo "Host github.com"
-    echo "  HostName github.com"
-    echo "  User git"
-    echo "  IdentityFile ~/.ssh/github_ed25519"
+    echo 'Host github.com'
+    echo '  HostName github.com'
+    echo '  User git'
+    echo '  IdentityFile ~/.ssh/github_ed25519'
   } >>"${ssh_config_path}"
   chmod 600 "${ssh_config_path}"
 }
 
 prompt_github_ssh_registration() {
-  echo "Register the following public key in GitHub:"
-  echo "https://github.com/settings/keys"
+  echo 'Register the following public key in GitHub:'
+  echo 'https://github.com/settings/keys'
   echo
   cat "${github_key_path}.pub"
   echo
 
   for _ in {1..3}; do
-    if ! prompt_yes_no "Have you registered the key in GitHub? Answer n to skip. [Y/n]" yes; then
-      echo "Skipping GitHub SSH setup. Re-run this script to set it up later."
+    if ! prompt_yes_no 'Have you registered the key in GitHub? Answer n to skip. [Y/n]' yes; then
+      echo 'Skipping GitHub SSH setup. Re-run this script to set it up later.'
       return 0
     fi
 
     if has_github_ssh_auth; then
-      echo "GitHub SSH authentication succeeded."
+      echo 'GitHub SSH authentication succeeded.'
       return 0
     fi
 
-    echo "Could not authenticate to GitHub with this key yet." >&2
+    echo 'Could not authenticate to GitHub with this key yet.' >&2
   done
 
-  echo "GitHub SSH access is not available. Re-run this script after registering the key or resolving the SSH connection." >&2
+  echo 'GitHub SSH access is not available. Re-run this script after registering the key or resolving the SSH connection.' >&2
   return 0
 }
 
@@ -346,7 +346,7 @@ prompt_github_ssh_setup() {
   ensure_github_ssh_config
 
   if ! is_interactive; then
-    echo "Register the following public key in GitHub and re-run:" >&2
+    echo 'Register the following public key in GitHub and re-run:' >&2
     echo "  ${github_key_path}.pub" >&2
     return
   fi
@@ -363,7 +363,7 @@ maybe_offer_github_ssh_setup() {
     return
   fi
 
-  if ! prompt_yes_no "Set up GitHub SSH access now for future private repository use? [Y/n]" yes; then
+  if ! prompt_yes_no 'Set up GitHub SSH access now for future private repository use? [Y/n]' yes; then
     return
   fi
 
@@ -383,7 +383,7 @@ should_install_docker() {
     return 1
   fi
 
-  prompt_yes_no "Install Docker Engine for local container execution? [Y/n]" yes
+  prompt_yes_no 'Install Docker Engine for local container execution? [Y/n]' yes
 }
 
 should_add_user_to_docker_group() {
@@ -399,7 +399,7 @@ should_add_user_to_docker_group() {
 }
 
 target_docker_user() {
-  if [[ -n ${SUDO_USER-} && ${SUDO_USER} != "root" ]]; then
+  if [[ -n ${SUDO_USER-} && ${SUDO_USER} != 'root' ]]; then
     printf '%s\n' "${SUDO_USER}"
   elif [[ -n ${USER-} ]]; then
     printf '%s\n' "${USER}"
@@ -409,9 +409,9 @@ target_docker_user() {
 }
 
 install_docker_engine() {
-  local apt_keyrings_dir="/etc/apt/keyrings"
-  local docker_user=""
-  local ubuntu_codename=""
+  local apt_keyrings_dir='/etc/apt/keyrings'
+  local docker_user=''
+  local ubuntu_codename=''
 
   require_command sudo
   require_command apt-get
@@ -424,17 +424,17 @@ install_docker_engine() {
 
   ubuntu_codename="${UBUNTU_CODENAME:-${VERSION_CODENAME:-}}"
   if [[ -z ${ubuntu_codename} ]]; then
-    echo "could not determine the Ubuntu codename for Docker repository setup." >&2
+    echo 'could not determine the Ubuntu codename for Docker repository setup.' >&2
     exit 1
   fi
 
   sudo apt-get update
-  sudo apt-get install -y ca-certificates curl gnupg
+  sudo apt-get --yes install ca-certificates curl gnupg
   require_command curl
   require_command gpg
   sudo install -m 0755 -d "${apt_keyrings_dir}"
 
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
+  curl --fail --location --show-error --silent https://download.docker.com/linux/ubuntu/gpg |
     gpg --dearmor |
     sudo tee "${apt_keyrings_dir}/docker.gpg" >/dev/null
   sudo chmod a+r "${apt_keyrings_dir}/docker.gpg"
@@ -444,11 +444,11 @@ install_docker_engine() {
     sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
   sudo apt-get update
-  sudo apt-get install -y --no-install-recommends docker-ce docker-ce-cli containerd.io pigz
+  sudo apt-get --no-install-recommends --yes install docker-ce docker-ce-cli containerd.io pigz
 
   if should_add_user_to_docker_group; then
     docker_user="$(target_docker_user)"
-    sudo usermod -aG docker "${docker_user}"
+    sudo usermod --append --groups=docker "${docker_user}"
     echo "Added ${docker_user} to the docker group."
     echo "Log out and back in, or run 'newgrp docker', before using Docker without sudo."
   fi

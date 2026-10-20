@@ -2,17 +2,17 @@
 
 set -euo pipefail
 
-default_repo_ref="v0.8.10"
-default_bootstrap_repository_path="ut-issl/issl-ubuntu-environment-setup"
+default_repo_ref='v0.8.10'
+default_bootstrap_repository_path='ut-issl/issl-ubuntu-environment-setup'
 repo_url="${REPO_URL:-https://github.com/ut-issl/issl-ubuntu-environment-setup.git}"
 repo_ref="${REPO_REF:-${default_repo_ref}}"
-data_root="${XDG_DATA_HOME:-$HOME/.local/share}"
-install_dir="${INSTALL_DIR:-$data_root/issl/ubuntu-environment-setup}"
+data_root="${XDG_DATA_HOME:-${HOME}/.local/share}"
+install_dir="${INSTALL_DIR:-${data_root}/issl/ubuntu-environment-setup}"
 
 github_repository_path() {
-  local path=""
-  local owner=""
-  local repo=""
+  local path=''
+  local owner=''
+  local repo=''
 
   case "${repo_url}" in
   https://github.com/*)
@@ -108,10 +108,10 @@ default_bootstrap_urls() {
 }
 
 load_bootstrap_host() {
-  local bootstrap_url=""
-  local bootstrap_urls=""
-  local script_dir=""
-  local temporary_bootstrap=""
+  local bootstrap_url=''
+  local bootstrap_urls=''
+  local script_dir=''
+  local temporary_bootstrap=''
 
   script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -124,7 +124,7 @@ load_bootstrap_host() {
   bootstrap_urls="${BOOTSTRAP_URL:-$(default_bootstrap_urls)}"
 
   if ! command -v curl >/dev/null 2>&1; then
-    echo "required command not found: curl" >&2
+    echo 'required command not found: curl' >&2
     exit 1
   fi
 
@@ -134,7 +134,7 @@ load_bootstrap_host() {
   while IFS= read -r bootstrap_url; do
     [[ -n ${bootstrap_url} ]] || continue
 
-    if curl -fsSL "${bootstrap_url}" -o "${temporary_bootstrap}"; then
+    if curl --fail --location --output "${temporary_bootstrap}" --show-error --silent "${bootstrap_url}"; then
       # shellcheck source=/dev/null
       . "${temporary_bootstrap}"
       rm -f "${temporary_bootstrap}"
@@ -142,12 +142,12 @@ load_bootstrap_host() {
     fi
   done <<<"${bootstrap_urls}"
 
-  echo "failed to download bootstrap-host.sh." >&2
+  echo 'failed to download bootstrap-host.sh.' >&2
   exit 1
 }
 
 nix_with_git() {
-  nix --extra-experimental-features "nix-command flakes" shell nixpkgs#git nixpkgs#openssh_gssapi --command "$@"
+  nix --extra-experimental-features 'nix-command flakes' shell nixpkgs#git nixpkgs#openssh_gssapi --command "$@"
 }
 
 nix_git() {
@@ -212,7 +212,7 @@ clone_repo() {
     exit 1
   fi
 
-  nix_git clone --branch "${repo_ref}" --single-branch "${repo_url}" "${install_dir}"
+  nix_git clone --branch="${repo_ref}" --single-branch "${repo_url}" "${install_dir}"
 }
 
 run_install() {
@@ -226,7 +226,7 @@ main() {
   clone_repo
   run_install
 
-  echo "ISSL environment setup completed."
+  echo 'ISSL environment setup completed.'
   echo "Repository clone: ${install_dir}"
 }
 

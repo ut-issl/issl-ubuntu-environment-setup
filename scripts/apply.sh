@@ -7,8 +7,8 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # shellcheck source=scripts/bootstrap-host.sh
 . "${repo_root}/scripts/bootstrap-host.sh"
 
-export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
-export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}/.config}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-${HOME}/.local/state}"
 
 issl_config_home="${XDG_CONFIG_HOME}/issl"
 shared_nix_config_path="${issl_config_home}/nix/nix.conf"
@@ -21,7 +21,7 @@ shared_rust_config_path="${issl_config_home}/rust/config.toml"
 git_user_name="${GIT_USER_NAME-}"
 git_user_email="${GIT_USER_EMAIL-}"
 issl_enable_zsh="${ISSL_ENABLE_ZSH-}"
-nix_feature_config="experimental-features = nix-command flakes"
+nix_feature_config='experimental-features = nix-command flakes'
 hm_profile_dir="${XDG_STATE_HOME}/nix/profiles"
 
 # ===== Common ===== #
@@ -32,7 +32,7 @@ ensure_home_manager_profile_dir() {
 
 resolves_into_nix_store() {
   local path="$1"
-  local resolved_path=""
+  local resolved_path=''
 
   resolved_path="$(readlink -m "${path}")" || return 1
   case "${resolved_path}" in
@@ -44,16 +44,16 @@ resolves_into_nix_store() {
 guard_against_existing_home_manager_files() {
   local zsh_enabled="$1"
   local zdotdir_path="${XDG_CONFIG_HOME}/zsh"
-  local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
+  local cargo_home_path="${CARGO_HOME:-${HOME}/.cargo}"
   local zshenv_path="${HOME}/.zshenv"
-  local resolved_zdotdir=""
-  local candidate_path=""
+  local resolved_zdotdir=''
+  local candidate_path=''
   local managed_paths=()
 
   if zshenv_defines_zdotdir "${zshenv_path}"; then
     if resolved_zdotdir="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
       zdotdir_path="${resolved_zdotdir}"
-    elif [[ ${zsh_enabled} == "1" ]] && resolve_zsh_bin >/dev/null; then
+    elif [[ ${zsh_enabled} == '1' ]] && resolve_zsh_bin >/dev/null; then
       echo "error: ${zshenv_path} defines ZDOTDIR, but it could not be resolved before the Home Manager switch." >&2
       echo "Fix ${zshenv_path} so that zsh can evaluate it, or re-run with ISSL_ENABLE_ZSH=no to skip the zsh setup." >&2
       exit 1
@@ -85,11 +85,11 @@ guard_against_existing_home_manager_files() {
   fi
 
   {
-    echo "error: the following files resolve into the Nix store, so this machine already appears to be managed by an existing Home Manager configuration:"
+    echo 'error: the following files resolve into the Nix store, so this machine already appears to be managed by an existing Home Manager configuration:'
     printf '  %s\n' "${managed_paths[@]}"
     echo "Running the script-based setup here would replace that configuration's Home Manager profile and detach these files from its control."
-    echo "Keep managing this machine with your existing Home Manager configuration (e.g. your personal config repository) instead."
-    echo "If you really want to switch to the script-based setup, remove the existing Home Manager configuration first and re-run this script."
+    echo 'Keep managing this machine with your existing Home Manager configuration (e.g. your personal config repository) instead.'
+    echo 'If you really want to switch to the script-based setup, remove the existing Home Manager configuration first and re-run this script.'
   } >&2
   exit 1
 }
@@ -117,13 +117,13 @@ prepend_block_once() {
   local begin_marker="$2"
   local end_marker="$3"
   local block_content="$4"
-  local temp_file=""
+  local temp_file=''
 
   prepare_block_file "${file_path}" "${begin_marker}" || return 0
 
   touch "${file_path}"
 
-  local original_mode=""
+  local original_mode=''
   original_mode="$(stat -L -c %a "${file_path}")"
 
   temp_file="$(mktemp)"
@@ -146,14 +146,14 @@ replace_with_block_once() {
   local begin_marker="$2"
   local end_marker="$3"
   local block_content="$4"
-  local backup_path=""
-  local temp_file=""
+  local backup_path=''
+  local temp_file=''
 
   prepare_block_file "${file_path}" "${begin_marker}" || return 0
 
   touch "${file_path}"
 
-  local original_mode=""
+  local original_mode=''
   original_mode="$(stat -L -c %a "${file_path}")"
 
   if [[ -s ${file_path} ]]; then
@@ -214,8 +214,8 @@ ensure_nix_conf_include() {
 
   prepend_block_once \
     "${nix_config_path}" \
-    "# >>> ISSL nix config >>>" \
-    "# <<< ISSL nix config <<<" \
+    '# >>> ISSL nix config >>>' \
+    '# <<< ISSL nix config <<<' \
     "$(nix_conf_include_block)"
 }
 
@@ -225,7 +225,7 @@ profile_env_block() {
   printf '%s\n' \
     "if [ -f \"${shared_shell_env_path}\" ]; then" \
     "  . \"${shared_shell_env_path}\"" \
-    "fi"
+    'fi'
 }
 
 bash_profile_block() {
@@ -233,45 +233,45 @@ bash_profile_block() {
   printf '%s\n' \
     'if [ -f "$HOME/.profile" ]; then' \
     '  . "$HOME/.profile"' \
-    "fi" \
+    'fi' \
     'case $- in' \
-    "*i*)" \
+    '*i*)' \
     '  if [ "${ISSL_BASHRC_LOADED:-0}" != "1" ] && [ -f "$HOME/.bashrc" ]; then' \
     '    . "$HOME/.bashrc"' \
-    "  fi" \
-    "  ;;" \
-    "esac"
+    '  fi' \
+    '  ;;' \
+    'esac'
 }
 
 bashrc_block() {
   printf '%s\n' \
     "if [ -f \"${shared_bashrc_path}\" ]; then" \
     "  . \"${shared_bashrc_path}\"" \
-    "fi"
+    'fi'
 }
 
 ensure_bash_startup_files() {
   replace_with_block_once \
     "${HOME}/.profile" \
-    "# >>> ISSL shell env >>>" \
-    "# <<< ISSL shell env <<<" \
+    '# >>> ISSL shell env >>>' \
+    '# <<< ISSL shell env <<<' \
     "$(profile_env_block)"
   prepend_block_once \
     "${HOME}/.bash_profile" \
-    "# >>> ISSL bash profile >>>" \
-    "# <<< ISSL bash profile <<<" \
+    '# >>> ISSL bash profile >>>' \
+    '# <<< ISSL bash profile <<<' \
     "$(bash_profile_block)"
   replace_with_block_once \
     "${HOME}/.bashrc" \
-    "# >>> ISSL bash rc >>>" \
-    "# <<< ISSL bash rc <<<" \
+    '# >>> ISSL bash rc >>>' \
+    '# <<< ISSL bash rc <<<' \
     "$(bashrc_block)"
 }
 
 # ===== Zsh ===== #
 
 should_enable_zsh() {
-  local current_shell_name=""
+  local current_shell_name=''
 
   if [[ -n ${issl_enable_zsh} ]]; then
     if is_yes "${issl_enable_zsh}"; then
@@ -280,12 +280,12 @@ should_enable_zsh() {
     if is_no "${issl_enable_zsh}"; then
       return 1
     fi
-    echo "ISSL_ENABLE_ZSH must be a yes/no style value." >&2
+    echo 'ISSL_ENABLE_ZSH must be a yes/no style value.' >&2
     exit 1
   fi
 
   current_shell_name="$(basename "${SHELL-}")"
-  if [[ ${current_shell_name} == "zsh" ]]; then
+  if [[ ${current_shell_name} == 'zsh' ]]; then
     return 0
   fi
 
@@ -293,7 +293,7 @@ should_enable_zsh() {
     return 1
   fi
 
-  prompt_yes_no "Enable shared zsh configuration as well? [Y/n]" yes
+  prompt_yes_no 'Enable shared zsh configuration as well? [Y/n]' yes
 }
 
 zshenv_defines_zdotdir() {
@@ -304,8 +304,8 @@ zshenv_defines_zdotdir() {
 
 resolve_zdotdir_from_zshenv() {
   local zshenv_path="$1"
-  local zsh_bin=""
-  local resolved_value=""
+  local zsh_bin=''
+  local resolved_value=''
 
   if [[ -x "${HOME}/.nix-profile/bin/zsh" ]]; then
     zsh_bin="${HOME}/.nix-profile/bin/zsh"
@@ -320,7 +320,7 @@ resolve_zdotdir_from_zshenv() {
     env -i \
       HOME="${HOME}" \
       XDG_CONFIG_HOME="${XDG_CONFIG_HOME}" \
-      ZDOTDIR="" \
+      ZDOTDIR='' \
       PATH=/usr/bin:/bin \
       "${zsh_bin}" -c '
         . "$1"
@@ -345,19 +345,19 @@ zprofile_block() {
   printf '%s\n' \
     "if [ -f \"${shared_zprofile_path}\" ]; then" \
     "  . \"${shared_zprofile_path}\"" \
-    "fi"
+    'fi'
 }
 
 zshrc_block() {
   printf '%s\n' \
     "if [ -f \"${shared_zshrc_path}\" ]; then" \
     "  . \"${shared_zshrc_path}\"" \
-    "fi"
+    'fi'
 }
 
 ensure_zsh_startup_files() {
   local zshenv_path="${HOME}/.zshenv"
-  local zdotdir_path=""
+  local zdotdir_path=''
 
   if zshenv_defines_zdotdir "${zshenv_path}"; then
     if ! zdotdir_path="$(resolve_zdotdir_from_zshenv "${zshenv_path}")"; then
@@ -367,8 +367,8 @@ ensure_zsh_startup_files() {
   else
     prepend_block_once \
       "${zshenv_path}" \
-      "# >>> ISSL zsh env >>>" \
-      "# <<< ISSL zsh env <<<" \
+      '# >>> ISSL zsh env >>>' \
+      '# <<< ISSL zsh env <<<' \
       "$(zshenv_default_block)"
     zdotdir_path="${XDG_CONFIG_HOME}/zsh"
   fi
@@ -376,13 +376,13 @@ ensure_zsh_startup_files() {
   mkdir -p "${zdotdir_path}"
   prepend_block_once \
     "${zdotdir_path}/.zprofile" \
-    "# >>> ISSL zsh profile >>>" \
-    "# <<< ISSL zsh profile <<<" \
+    '# >>> ISSL zsh profile >>>' \
+    '# <<< ISSL zsh profile <<<' \
     "$(zprofile_block)"
   prepend_block_once \
     "${zdotdir_path}/.zshrc" \
-    "# >>> ISSL zsh rc >>>" \
-    "# <<< ISSL zsh rc <<<" \
+    '# >>> ISSL zsh rc >>>' \
+    '# <<< ISSL zsh rc <<<' \
     "$(zshrc_block)"
 }
 
@@ -423,15 +423,15 @@ ensure_git_include() {
 }
 
 prompt_for_git_identity() {
-  local git_name=""
-  local git_email=""
+  local git_name=''
+  local git_email=''
   local missing_identity=0
 
   if ! git_name="$("${git_bin}" config --global --get user.name 2>/dev/null)" || [[ -z ${git_name} ]]; then
     if [[ -n ${git_user_name} ]]; then
       git_name="${git_user_name}"
     elif [[ -t 0 ]]; then
-      read -r -p "Enter your full name for Git commits: " git_name
+      read -r -p 'Enter your full name for Git commits: ' git_name
     else
       echo 'warning: Git user.name setup was skipped. Run with GIT_USER_NAME, or set it later with: git config --global user.name "Your Name"' >&2
       missing_identity=1
@@ -445,7 +445,7 @@ prompt_for_git_identity() {
     if [[ -n ${git_user_email} ]]; then
       git_email="${git_user_email}"
     elif [[ -t 0 ]]; then
-      read -r -p "Enter your email address for Git commits: " git_email
+      read -r -p 'Enter your email address for Git commits: ' git_email
     else
       echo 'warning: Git user.email setup was skipped. Run with GIT_USER_EMAIL, or set it later with: git config --global user.email "you@example.com"' >&2
       missing_identity=1
@@ -455,8 +455,8 @@ prompt_for_git_identity() {
     fi
   fi
 
-  if [[ ${missing_identity} == "1" ]]; then
-    echo "warning: Git identity was not configured. Environment variables were not provided, and this run is non-interactive so prompts could not be used. Pass the env vars, run interactively, or set it later." >&2
+  if [[ ${missing_identity} == '1' ]]; then
+    echo 'warning: Git identity was not configured. Environment variables were not provided, and this run is non-interactive so prompts could not be used. Pass the env vars, run interactively, or set it later.' >&2
   fi
 }
 
@@ -482,8 +482,8 @@ PYTHON_EOF
 ensure_python_startup_file() {
   prepend_block_once \
     "${XDG_CONFIG_HOME}/python/pythonrc.py" \
-    "# >>> ISSL python startup >>>" \
-    "# <<< ISSL python startup <<<" \
+    '# >>> ISSL python startup >>>' \
+    '# <<< ISSL python startup <<<' \
     "$(pythonrc_block)"
 }
 
@@ -491,13 +491,13 @@ ensure_python_startup_file() {
 
 cargo_config_include_block() {
   printf '%s\n' \
-    "include = [" \
+    'include = [' \
     "  { path = \"${shared_rust_config_path}\", optional = true }," \
-    "]"
+    ']'
 }
 
 ensure_cargo_config_include() {
-  local cargo_home_path="${CARGO_HOME:-$HOME/.cargo}"
+  local cargo_home_path="${CARGO_HOME:-${HOME}/.cargo}"
   local cargo_config_path="${cargo_home_path}/config.toml"
 
   mkdir -p "${cargo_home_path}"
@@ -514,14 +514,14 @@ ensure_cargo_config_include() {
 
   prepend_block_once \
     "${cargo_config_path}" \
-    "# >>> ISSL cargo config >>>" \
-    "# <<< ISSL cargo config <<<" \
+    '# >>> ISSL cargo config >>>' \
+    '# <<< ISSL cargo config <<<' \
     "$(cargo_config_include_block)"
 }
 
 main() {
   if ! command -v nix >/dev/null 2>&1; then
-    echo "nix is required before running scripts/apply.sh." >&2
+    echo 'nix is required before running scripts/apply.sh.' >&2
     exit 1
   fi
 
@@ -542,28 +542,28 @@ main() {
   start_nix_daemon_without_systemd
 
   current_system="$(
-    nix --accept-flake-config --extra-experimental-features "nix-command flakes" \
-      eval --impure --raw --expr builtins.currentSystem
+    nix --accept-flake-config --extra-experimental-features 'nix-command flakes' \
+      eval --raw --impure --expr builtins.currentSystem
   )"
 
   ensure_home_manager_profile_dir
-  if [[ ${zsh_enabled} == "1" ]]; then
+  if [[ ${zsh_enabled} == '1' ]]; then
     home_configuration_name="issl-common-${current_system}"
   else
     home_configuration_name="issl-common-bash-only-${current_system}"
   fi
 
-  nix --accept-flake-config --extra-experimental-features "nix-command flakes" run "${repo_root}#home-manager" -- \
+  nix --accept-flake-config --extra-experimental-features 'nix-command flakes' run "${repo_root}#home-manager" -- \
     switch --flake "${repo_root}#${home_configuration_name}" --impure
 
   ensure_nix_conf_include
   ensure_bash_startup_files
-  if [[ ${zsh_enabled} == "1" ]]; then
+  if [[ ${zsh_enabled} == '1' ]]; then
     ensure_zsh_startup_files
     maybe_register_login_shell
   fi
   if ! git_bin="$(resolve_git_bin)"; then
-    echo "git was not found after the Home Manager switch; cannot wire the shared Git configuration." >&2
+    echo 'git was not found after the Home Manager switch; cannot wire the shared Git configuration.' >&2
     exit 1
   fi
   ensure_git_include
@@ -571,7 +571,7 @@ main() {
   ensure_python_startup_file
   ensure_cargo_config_include
 
-  echo "Applied the shared Home Manager configuration."
+  echo 'Applied the shared Home Manager configuration.'
 }
 
 main "$@"
