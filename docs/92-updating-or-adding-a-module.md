@@ -7,7 +7,7 @@ This page explains the usual workflow for updating or adding a shared module in 
 This repository ships a `develop` skill for coding agents that support [Agent Skills](https://agentskills.io) (e.g. Codex or Claude Code).
 Invoke it with `$develop` in Codex or `/develop` in Claude Code.
 
-It assists the workflow on this page interactively — from checking what already exists and researching nixpkgs
+It assists the workflow on this page interactively — from checking what already exists and researching Nixpkgs
 to editing the modules, extending the tests, and validating the result.
 State what you want when invoking it (e.g. `$develop add lazygit`).
 
@@ -176,7 +176,7 @@ Introducing one therefore reaches beyond the module.
 Choose a default that asks nothing of the user:
 `targets.genericLinux.gpu.enable` is off because enabling it asks every machine for a privileged one-time setup.
 Within that constraint, follow what most users want:
-`issl.zsh.enable` is on because most users here use zsh, and turning it off costs a single option.
+`issl.zsh.enable` is on because most users here use Zsh, and turning it off costs a single option.
 
 When adding a module:
 

@@ -60,13 +60,13 @@ For a new tool:
   Point the user to `docs/13-package-management-practices.md` rather than to a particular alternative:
   whether such an application can live in a personal config repository
   or has to stay with the distribution depends on the host integration it needs.
-- Look the package up in nixpkgs at the pinned revision:
+- Look the package up in Nixpkgs at the pinned revision:
   read the `nixpkgs` entry's `locked.rev` from `flake.lock` and run `nix search github:NixOS/nixpkgs/<rev> <name>`.
 - Work out whether the package is meaningful on every system that `flake.nix` declares,
   and guard it on the platform if it is not, as § "Changing a Module's Packages or Settings" describes.
 - An unfree package needs an explicit yes from the user before you add it,
   on top of the justification that § "What Belongs in the Shared Environment" asks for in the pull request.
-- If the package is not in nixpkgs, report honestly and let the user decide.
+- If the package is not in Nixpkgs, report honestly and let the user decide.
   Never add flake inputs or overlays without an explicit yes.
 
 ## 4. Decide where the change goes
