@@ -119,13 +119,13 @@ If you just want to try additional tools without moving to a personal config rep
 Install a package:
 
 ```sh
-nix profile install nixpkgs#pandoc
+nix profile add nixpkgs#pandoc
 ```
 
 Install multiple packages:
 
 ```sh
-nix profile install nixpkgs#elan nixpkgs#quint nixpkgs#z3
+nix profile add nixpkgs#elan nixpkgs#quint nixpkgs#z3
 ```
 
 List installed profile packages:
@@ -150,7 +150,7 @@ nix profile upgrade --all
 Allow it for every invocation that evaluates such a package, including a later `nix profile upgrade`:
 
 ```sh
-NIXPKGS_ALLOW_UNFREE=1 nix profile install --impure nixpkgs#claude-code
+NIXPKGS_ALLOW_UNFREE=1 nix profile add --impure nixpkgs#claude-code
 ```
 
 See [package management practices](13-package-management-practices.md#unfree-packages).
