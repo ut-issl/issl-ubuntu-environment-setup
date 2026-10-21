@@ -4,7 +4,6 @@ set -euo pipefail
 
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-# shellcheck source=scripts/bootstrap-host.sh
 . "${repo_root}/scripts/bootstrap-host.sh"
 
 export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-${HOME}/.config}"

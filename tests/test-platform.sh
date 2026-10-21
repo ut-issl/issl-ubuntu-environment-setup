@@ -5,7 +5,6 @@ home_dir="${HOME_DIR:?HOME_DIR is required}"
 config_dir="${CONFIG_DIR:?CONFIG_DIR is required}"
 common_dir="${COMMON_DIR:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)}"
 
-# shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
 test_xdg_data_dirs_are_exported() {

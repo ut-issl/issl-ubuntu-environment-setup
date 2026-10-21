@@ -8,7 +8,6 @@ nix_profile_bin="${home_dir}/.nix-profile/bin"
 nix_config_path="${config_dir}/nix/nix.conf"
 issl_nix_config_path="${config_dir}/issl/nix/nix.conf"
 
-# shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
 test_nix_installation() {
