@@ -1,3 +1,6 @@
+[global]
+extend-enable = ["MD060", "MD070", "MD080", "MD084"]
+
 [MD013]
 code-blocks = false
 line-length = 120
@@ -34,3 +37,6 @@ names = [
   "Zsh",
 ]
 whole-words = true
+
+[MD060]
+style = "aligned"
