@@ -1,3 +1,36 @@
 [MD013]
 code-blocks = false
 line-length = 120
+
+[MD044]
+names = [
+  "Bash",
+  "Cargo",
+  "Clang",
+  "Claude Code",
+  "CMake",
+  "Codex",
+  "Commitizen",
+  "Conventional Commits",
+  "Docker",
+  "GCC",
+  "Git",
+  "GitHub",
+  "GitHub Actions",
+  "Home Manager",
+  "ISSL",
+  "JavaScript",
+  "Linux",
+  "Nix",
+  "Nixpkgs",
+  "Node.js",
+  "OpenGL",
+  "Python",
+  "Renovate",
+  "Rust",
+  "Typst",
+  "Ubuntu",
+  "Vim",
+  "Zsh",
+]
+whole-words = true

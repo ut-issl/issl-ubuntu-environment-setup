@@ -7,7 +7,7 @@ This page explains the usual workflow for updating or adding a shared module in 
 This repository ships a `develop` skill for coding agents that support [Agent Skills](https://agentskills.io) (e.g. Codex or Claude Code).
 Invoke it with `$develop` in Codex or `/develop` in Claude Code.
 
-It assists the workflow on this page interactively — from checking what already exists and researching nixpkgs
+It assists the workflow on this page interactively — from checking what already exists and researching Nixpkgs
 to editing the modules, extending the tests, and validating the result.
 State what you want when invoking it (e.g. `$develop add lazygit`).
 
@@ -37,7 +37,7 @@ A Nix build often loses host integration that the package of the distribution ke
 An AppArmor profile attaches to an executable path.
 A Chromium- or Electron-based application built by Nix never matches the profile that grants it a user namespace,
 so it fails to start on Ubuntu 24.04 and later, where unprivileged user namespaces are restricted by default.
-The ibus input methods do not reach a Nix-built GTK3 application,
+The IBus input methods do not reach a Nix-built GTK3 application,
 and OpenGL rendering needs `targets.genericLinux.gpu.enable`, which is off here.
 Where such an application belongs instead depends on the host integration it needs.
 
@@ -176,7 +176,7 @@ Introducing one therefore reaches beyond the module.
 Choose a default that asks nothing of the user:
 `targets.genericLinux.gpu.enable` is off because enabling it asks every machine for a privileged one-time setup.
 Within that constraint, follow what most users want:
-`issl.zsh.enable` is on because most users here use zsh, and turning it off costs a single option.
+`issl.zsh.enable` is on because most users here use Zsh, and turning it off costs a single option.
 
 When adding a module:
 
