@@ -9,7 +9,6 @@ pythonrc_path="${config_dir}/python/pythonrc.py"
 issl_python_home="${config_dir}/issl/python"
 issl_pythonrc_path="${issl_python_home}/pythonrc.py"
 
-# shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
 _is_python_ge_3_13() {

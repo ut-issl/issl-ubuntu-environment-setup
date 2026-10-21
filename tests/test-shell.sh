@@ -11,7 +11,6 @@ default_zdotdir="${config_dir}/zsh"
 login_shell_link="${state_dir}/issl/login-shell"
 issl_enable_zsh="${ISSL_ENABLE_ZSH:?ISSL_ENABLE_ZSH is required}"
 
-# shellcheck source=tests/lib.sh
 source "${common_dir}/tests/lib.sh"
 
 test_shared_shell_files() {
