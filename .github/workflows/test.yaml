@@ -181,5 +181,5 @@ jobs:
       common-repository: ${{ github.repository }}
       common-ref: ${{ github.sha }}
       user-repository: ut-issl/personal-nix-config-template
-      user-ref: 'e0e4b5a7f825d91ded276722d4f01186c2dbd484' # main
+      user-ref: '189c76c58a1c5bb74395bdff0a1e21a5f1a83b80' # main
       override-issl-input: true
